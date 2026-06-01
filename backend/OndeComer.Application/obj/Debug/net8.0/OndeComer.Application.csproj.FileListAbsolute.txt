@@ -1,0 +1,15 @@
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeComer.Application.csproj.AssemblyReference.cache
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeComer.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeComer.Application.AssemblyInfoInputs.cache
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeComer.Application.AssemblyInfo.cs
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeComer.Application.csproj.CoreCompileInputs.cache
+C:\OndeComerEmSalvador\backend\OndeComer.Application\bin\Debug\net8.0\OndeComer.Application.deps.json
+C:\OndeComerEmSalvador\backend\OndeComer.Application\bin\Debug\net8.0\OndeComer.Application.dll
+C:\OndeComerEmSalvador\backend\OndeComer.Application\bin\Debug\net8.0\OndeComer.Application.pdb
+C:\OndeComerEmSalvador\backend\OndeComer.Application\bin\Debug\net8.0\OndeComer.Domain.dll
+C:\OndeComerEmSalvador\backend\OndeComer.Application\bin\Debug\net8.0\OndeComer.Domain.pdb
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeCome.A2CD40DD.Up2Date
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeComer.Application.dll
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\refint\OndeComer.Application.dll
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeComer.Application.pdb
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\ref\OndeComer.Application.dll

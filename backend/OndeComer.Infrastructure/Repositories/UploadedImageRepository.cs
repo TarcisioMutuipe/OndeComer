@@ -1,0 +1,22 @@
+using Microsoft.EntityFrameworkCore;
+using OndeComer.Domain.Entities;
+using OndeComer.Domain.Interfaces;
+using OndeComer.Infrastructure.Data;
+
+namespace OndeComer.Infrastructure.Repositories;
+
+public class UploadedImageRepository : IUploadedImageRepository
+{
+    private readonly AppDbContext _context;
+
+    public UploadedImageRepository(AppDbContext context) => _context = context;
+
+    public async Task AddAsync(UploadedImage image, CancellationToken ct = default)
+        => await _context.UploadedImages.AddAsync(image, ct);
+
+    public async Task<IEnumerable<UploadedImage>> GetByEntityAsync(string entityType, Guid entityId, CancellationToken ct = default)
+        => await _context.UploadedImages
+            .Where(i => i.EntityType == entityType && i.EntityId == entityId)
+            .OrderByDescending(i => i.CreatedAt)
+            .ToListAsync(ct);
+}

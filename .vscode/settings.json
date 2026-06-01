@@ -1,0 +1,22 @@
+{
+	"chat.tools.terminal.autoApprove": {
+		"dotnet ef": true,
+		"dotnet tool": true,
+		"flutter": true,
+		"dotnet build": true,
+		"&": true,
+		"dart": true,
+		"/^powershell -NoProfile -Command \"Set-Location 'C:\\\\OndeComerEmSalvador\\\\backend'; dotnet build OndeComer\\.sln 2>&1 \\| Select-Object -Last 8\"$/": {
+			"approve": true,
+			"matchCommandLine": true
+		},
+		"/^powershell -NoProfile -Command \"Set-Location 'C:\\\\OndeComerEmSalvador\\\\backend'; dotnet build OndeComer\\.sln\"$/": {
+			"approve": true,
+			"matchCommandLine": true
+		},
+		"/^powershell -NoProfile -Command \"Set-Location 'C:\\\\OndeComerEmSalvador\\\\mobile'; flutter run -d chrome --web-port=53136\"$/": {
+			"approve": true,
+			"matchCommandLine": true
+		}
+	}
+}

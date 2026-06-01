@@ -1,0 +1,63 @@
+name: onde_comer_em_salvador
+description: Encontre os melhores restaurantes em Salvador, Bahia.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: ">=3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Navigation
+  go_router: ^14.2.7
+
+  # Network
+  dio: ^5.7.0
+  connectivity_plus: ^6.0.5
+
+  # Local Storage & Cache
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  flutter_cache_manager: ^3.3.1
+  flutter_secure_storage: ^9.2.2
+
+  # Google Sign-In
+  google_sign_in: ^6.2.1
+
+  # UI
+  flutter_svg: ^2.0.10+1
+  cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
+
+  # Utilities
+  intl: ^0.19.0
+  google_fonts: ^6.2.1
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  equatable: ^2.0.5
+  image_picker: ^1.1.2
+  geolocator: ^13.0.1
+  qr_flutter: ^4.1.0
+  youtube_player_flutter: ^9.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.12
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  riverpod_generator: ^2.4.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/

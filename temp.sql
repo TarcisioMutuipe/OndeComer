@@ -1,0 +1,1 @@
+UPDATE "Users" SET "ProfileType" = 'Admin', "PasswordHash" = '$2a$11$K8xGkE5Q5h.kQ6D.M1EqUOqjPHJT.vIYzXdRfAyXq6pYcBq5V0kGy', "EmailConfirmed" = true WHERE "Email" = 'tarcisiusantos@gmail.com'; SELECT "Id", "Name", "Email", "ProfileType" FROM "Users" WHERE "Email" = 'tarcisiusantos@gmail.com';

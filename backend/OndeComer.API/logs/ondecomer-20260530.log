@@ -1,0 +1,7 @@
+2026-05-30 10:30:30.969 -03:00 [INF] User profile is available. Using 'C:\Users\jai_m\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-05-30 10:30:31.378 -03:00 [INF] Creating key {7d8eba45-924b-4380-abe3-04d8d95bbf55} with creation date 2026-05-30 13:30:31Z, activation date 2026-05-30 13:30:31Z, and expiration date 2026-08-28 13:30:31Z.
+2026-05-30 10:30:31.440 -03:00 [INF] Writing data to file 'C:\Users\jai_m\AppData\Local\ASP.NET\DataProtection-Keys\key-7d8eba45-924b-4380-abe3-04d8d95bbf55.xml'.
+2026-05-30 10:30:32.045 -03:00 [INF] Now listening on: http://localhost:5000
+2026-05-30 10:30:32.182 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-30 10:30:32.231 -03:00 [INF] Hosting environment: Production
+2026-05-30 10:30:32.306 -03:00 [INF] Content root path: C:\OndeComerEmSalvador\backend\OndeComer.API

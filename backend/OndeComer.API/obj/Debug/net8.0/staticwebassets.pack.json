@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\OndeComerEmSalvador\\backend\\OndeComer.API\\wwwroot\\uploads\\2026\\05\\357b69fc-71be-4ad0-86cc-08b108a47017.jpg",
+      "PackagePath": "staticwebassets\\uploads\\2026\\05\\357b69fc-71be-4ad0-86cc-08b108a47017.jpg"
+    },
+    {
+      "Id": "C:\\OndeComerEmSalvador\\backend\\OndeComer.API\\wwwroot\\uploads\\2026\\05\\878bddd4-6a99-4e17-bfff-37f66c625341.jpg",
+      "PackagePath": "staticwebassets\\uploads\\2026\\05\\878bddd4-6a99-4e17-bfff-37f66c625341.jpg"
+    },
+    {
+      "Id": "C:\\OndeComerEmSalvador\\backend\\OndeComer.API\\wwwroot\\uploads\\2026\\05\\95862be1-ae68-430e-aec7-b5dd0e622da6.jpg",
+      "PackagePath": "staticwebassets\\uploads\\2026\\05\\95862be1-ae68-430e-aec7-b5dd0e622da6.jpg"
+    },
+    {
+      "Id": "C:\\OndeComerEmSalvador\\backend\\OndeComer.API\\wwwroot\\uploads\\2026\\05\\ac9f9350-78b1-4a7f-97be-4a5162ce8368.jpg",
+      "PackagePath": "staticwebassets\\uploads\\2026\\05\\ac9f9350-78b1-4a7f-97be-4a5162ce8368.jpg"
+    },
+    {
+      "Id": "C:\\OndeComerEmSalvador\\backend\\OndeComer.API\\wwwroot\\uploads\\2026\\05\\c1f3a091-95df-4d3d-89dc-a8df68030d51.jpg",
+      "PackagePath": "staticwebassets\\uploads\\2026\\05\\c1f3a091-95df-4d3d-89dc-a8df68030d51.jpg"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.OndeComer.API.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.OndeComer.API.props",
+      "PackagePath": "build\\OndeComer.API.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.OndeComer.API.props",
+      "PackagePath": "buildMultiTargeting\\OndeComer.API.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.OndeComer.API.props",
+      "PackagePath": "buildTransitive\\OndeComer.API.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
