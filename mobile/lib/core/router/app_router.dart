@@ -28,6 +28,8 @@ import '../../features/checkin/presentation/screens/qr_code_screen.dart';
 import '../../features/checkin/presentation/screens/checkin_history_screen.dart';
 import '../../features/loyalty/presentation/screens/loyalty_screen.dart';
 import '../../features/admin/presentation/screens/admin_dashboard_screen.dart';
+import '../../features/admin/presentation/screens/admin_restaurant_list_screen.dart';
+import '../../features/admin/presentation/screens/admin_dish_list_screen.dart';
 import '../../features/legal/presentation/screens/terms_of_use_screen.dart';
 import '../../features/legal/presentation/screens/privacy_policy_screen.dart';
 import '../../features/rankings/presentation/screens/rankings_screen.dart';
@@ -195,6 +197,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.admin,
         builder: (context, state) => const AdminDashboardScreen(),
+        routes: [
+          GoRoute(
+            path: 'restaurants',
+            builder: (context, state) => const AdminRestaurantListScreen(),
+          ),
+          GoRoute(
+            path: 'restaurant/:restaurantId/dishes',
+            builder: (context, state) => AdminDishListScreen(
+              restaurantId: state.pathParameters['restaurantId']!,
+            ),
+          ),
+        ],
       ),
       // Legal
       GoRoute(
@@ -233,6 +247,7 @@ abstract class AppRoutes {
   static const checkInHistory = '/checkins/history';
   static const loyalty = '/loyalty';
   static const admin = '/admin';
+  static const adminRestaurants = '/admin/restaurants';
   static const termsOfUse = '/terms';
   static const privacyPolicy = '/privacy';
   static const rankings = '/rankings';

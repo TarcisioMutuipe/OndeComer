@@ -17,6 +17,10 @@
 		"/^powershell -NoProfile -Command \"Set-Location 'C:\\\\OndeComerEmSalvador\\\\mobile'; flutter run -d chrome --web-port=53136\"$/": {
 			"approve": true,
 			"matchCommandLine": true
-		}
+		},
+		"git push": true,
+		"git remote": true,
+		"git add": true,
+		"git commit": true
 	}
 }

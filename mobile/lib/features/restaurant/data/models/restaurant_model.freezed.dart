@@ -32,6 +32,7 @@ mixin _$RestaurantModel {
   String? get logoUrl => throw _privateConstructorUsedError;
   String? get coverUrl => throw _privateConstructorUsedError;
   String? get instagramUrl => throw _privateConstructorUsedError;
+  String? get youTubeVideoUrl => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
   String get openingHours => throw _privateConstructorUsedError;
   int get dishCount => throw _privateConstructorUsedError;
@@ -66,6 +67,7 @@ abstract class $RestaurantModelCopyWith<$Res> {
       String? logoUrl,
       String? coverUrl,
       String? instagramUrl,
+      String? youTubeVideoUrl,
       bool isActive,
       String openingHours,
       int dishCount,
@@ -99,6 +101,7 @@ class _$RestaurantModelCopyWithImpl<$Res, $Val extends RestaurantModel>
     Object? logoUrl = freezed,
     Object? coverUrl = freezed,
     Object? instagramUrl = freezed,
+    Object? youTubeVideoUrl = freezed,
     Object? isActive = null,
     Object? openingHours = null,
     Object? dishCount = null,
@@ -153,6 +156,10 @@ class _$RestaurantModelCopyWithImpl<$Res, $Val extends RestaurantModel>
           ? _value.instagramUrl
           : instagramUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      youTubeVideoUrl: freezed == youTubeVideoUrl
+          ? _value.youTubeVideoUrl
+          : youTubeVideoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -194,6 +201,7 @@ abstract class _$$RestaurantModelImplCopyWith<$Res>
       String? logoUrl,
       String? coverUrl,
       String? instagramUrl,
+      String? youTubeVideoUrl,
       bool isActive,
       String openingHours,
       int dishCount,
@@ -225,6 +233,7 @@ class __$$RestaurantModelImplCopyWithImpl<$Res>
     Object? logoUrl = freezed,
     Object? coverUrl = freezed,
     Object? instagramUrl = freezed,
+    Object? youTubeVideoUrl = freezed,
     Object? isActive = null,
     Object? openingHours = null,
     Object? dishCount = null,
@@ -279,6 +288,10 @@ class __$$RestaurantModelImplCopyWithImpl<$Res>
           ? _value.instagramUrl
           : instagramUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      youTubeVideoUrl: freezed == youTubeVideoUrl
+          ? _value.youTubeVideoUrl
+          : youTubeVideoUrl // ignore: cast_nullable_to_non_nullable
+              as String?,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -315,6 +328,7 @@ class _$RestaurantModelImpl implements _RestaurantModel {
       this.logoUrl,
       this.coverUrl,
       this.instagramUrl,
+      this.youTubeVideoUrl,
       required this.isActive,
       required this.openingHours,
       this.dishCount = 0,
@@ -349,6 +363,8 @@ class _$RestaurantModelImpl implements _RestaurantModel {
   @override
   final String? instagramUrl;
   @override
+  final String? youTubeVideoUrl;
+  @override
   final bool isActive;
   @override
   final String openingHours;
@@ -360,7 +376,7 @@ class _$RestaurantModelImpl implements _RestaurantModel {
 
   @override
   String toString() {
-    return 'RestaurantModel(id: $id, ownerUserId: $ownerUserId, name: $name, description: $description, address: $address, city: $city, latitude: $latitude, longitude: $longitude, category: $category, logoUrl: $logoUrl, coverUrl: $coverUrl, instagramUrl: $instagramUrl, isActive: $isActive, openingHours: $openingHours, dishCount: $dishCount, createdAt: $createdAt)';
+    return 'RestaurantModel(id: $id, ownerUserId: $ownerUserId, name: $name, description: $description, address: $address, city: $city, latitude: $latitude, longitude: $longitude, category: $category, logoUrl: $logoUrl, coverUrl: $coverUrl, instagramUrl: $instagramUrl, youTubeVideoUrl: $youTubeVideoUrl, isActive: $isActive, openingHours: $openingHours, dishCount: $dishCount, createdAt: $createdAt)';
   }
 
   @override
@@ -387,6 +403,8 @@ class _$RestaurantModelImpl implements _RestaurantModel {
                 other.coverUrl == coverUrl) &&
             (identical(other.instagramUrl, instagramUrl) ||
                 other.instagramUrl == instagramUrl) &&
+            (identical(other.youTubeVideoUrl, youTubeVideoUrl) ||
+                other.youTubeVideoUrl == youTubeVideoUrl) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.openingHours, openingHours) ||
@@ -413,6 +431,7 @@ class _$RestaurantModelImpl implements _RestaurantModel {
       logoUrl,
       coverUrl,
       instagramUrl,
+      youTubeVideoUrl,
       isActive,
       openingHours,
       dishCount,
@@ -449,6 +468,7 @@ abstract class _RestaurantModel implements RestaurantModel {
       final String? logoUrl,
       final String? coverUrl,
       final String? instagramUrl,
+      final String? youTubeVideoUrl,
       required final bool isActive,
       required final String openingHours,
       final int dishCount,
@@ -481,6 +501,8 @@ abstract class _RestaurantModel implements RestaurantModel {
   String? get coverUrl;
   @override
   String? get instagramUrl;
+  @override
+  String? get youTubeVideoUrl;
   @override
   bool get isActive;
   @override

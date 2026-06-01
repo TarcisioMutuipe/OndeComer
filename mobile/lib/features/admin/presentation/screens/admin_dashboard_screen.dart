@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../viewmodels/admin_viewmodel.dart';
 import '../../data/models/admin_models.dart';
 
@@ -9,13 +10,14 @@ class AdminDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Painel Admin'),
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Dashboard', icon: Icon(Icons.dashboard)),
+              Tab(text: 'Restaurantes', icon: Icon(Icons.restaurant)),
               Tab(text: 'Usuários', icon: Icon(Icons.people)),
               Tab(text: 'Moderação', icon: Icon(Icons.shield)),
             ],
@@ -24,6 +26,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         body: const TabBarView(
           children: [
             _DashboardTab(),
+            _RestaurantsTab(),
             _UsersTab(),
             _ModerationTab(),
           ],
@@ -134,6 +137,30 @@ class _MetricItem {
   final IconData icon;
   final Color color;
   _MetricItem(this.label, this.value, this.icon, this.color);
+}
+
+class _RestaurantsTab extends ConsumerWidget {
+  const _RestaurantsTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.restaurant, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          const Text('Gerenciar Restaurantes'),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () => context.push('/admin/restaurants'),
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Acessar'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _UsersTab extends ConsumerStatefulWidget {
