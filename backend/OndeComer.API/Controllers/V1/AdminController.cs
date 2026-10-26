@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using OndeComer.Application.DTOs.Admin;
 using OndeComer.Application.DTOs.Dish;
 using OndeComer.Application.DTOs.Moderation;
+using OndeComer.Application.DTOs.Promotion;
 using OndeComer.Application.DTOs.Restaurant;
+using OndeComer.Application.Common;
 using OndeComer.Application.Interfaces;
+using OndeComer.Domain.Enums;
 using System.Security.Claims;
 
 namespace OndeComer.API.Controllers.V1;
@@ -19,19 +22,22 @@ public class AdminController : ControllerBase
     private readonly IDishService _dishService;
     private readonly IRestaurantService _restaurantService;
     private readonly ICommentService _commentService;
+    private readonly IPromotionService _promotionService;
 
     public AdminController(
         IAdminService adminService,
         IModerationService moderationService,
         IDishService dishService,
         IRestaurantService restaurantService,
-        ICommentService commentService)
+        ICommentService commentService,
+        IPromotionService promotionService)
     {
         _adminService = adminService;
         _moderationService = moderationService;
         _dishService = dishService;
         _restaurantService = restaurantService;
         _commentService = commentService;
+        _promotionService = promotionService;
     }
 
     private Guid GetCurrentUserId()
@@ -42,30 +48,19 @@ public class AdminController : ControllerBase
         return Guid.Parse(sub);
     }
 
-    // --- Dashboard ---
     [HttpGet("dashboard")]
     public async Task<ActionResult<AdminDashboardDto>> GetDashboard()
-    {
-        var result = await _adminService.GetDashboardAsync();
-        return Ok(result);
-    }
+        => Ok(await _adminService.GetDashboardAsync());
 
-    // --- Users ---
     [HttpGet("users")]
     public async Task<ActionResult<IEnumerable<AdminUserDto>>> GetUsers(
         [FromQuery] string? search, [FromQuery] string? profileType,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
-    {
-        var result = await _adminService.GetUsersAsync(search, profileType, page, pageSize);
-        return Ok(result);
-    }
+        => Ok(await _adminService.GetUsersAsync(search, profileType, page, pageSize));
 
     [HttpPut("users/{userId:guid}")]
     public async Task<ActionResult<AdminUserDto>> UpdateUser(Guid userId, [FromBody] AdminUpdateUserRequest request)
-    {
-        var result = await _adminService.UpdateUserAsync(userId, request);
-        return Ok(result);
-    }
+        => Ok(await _adminService.UpdateUserAsync(userId, request));
 
     [HttpDelete("users/{userId:guid}")]
     public async Task<IActionResult> DeleteUser(Guid userId)
@@ -74,22 +69,15 @@ public class AdminController : ControllerBase
         return NoContent();
     }
 
-    // --- Restaurants ---
     [HttpGet("restaurants")]
     public async Task<ActionResult<IEnumerable<AdminRestaurantDto>>> GetRestaurants(
         [FromQuery] string? search, [FromQuery] string? category,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
-    {
-        var result = await _adminService.GetRestaurantsAsync(search, category, page, pageSize);
-        return Ok(result);
-    }
+        => Ok(await _adminService.GetRestaurantsAsync(search, category, page, pageSize));
 
     [HttpPut("restaurants/{restaurantId:guid}")]
     public async Task<ActionResult<AdminRestaurantDto>> UpdateRestaurant(Guid restaurantId, [FromBody] AdminUpdateRestaurantRequest request)
-    {
-        var result = await _adminService.UpdateRestaurantAsync(restaurantId, request);
-        return Ok(result);
-    }
+        => Ok(await _adminService.UpdateRestaurantAsync(restaurantId, request));
 
     [HttpDelete("restaurants/{restaurantId:guid}")]
     public async Task<IActionResult> DeleteRestaurant(Guid restaurantId)
@@ -98,36 +86,25 @@ public class AdminController : ControllerBase
         return NoContent();
     }
 
-    // --- Moderation Override ---
     [HttpGet("moderation/logs")]
     public async Task<ActionResult<IEnumerable<ModerationLogDto>>> GetModerationLogs(
         [FromQuery] string? result, [FromQuery] string? entityType,
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
-    {
-        var logs = await _moderationService.GetLogsAsync(result, entityType, page, pageSize);
-        return Ok(logs);
-    }
+        => Ok(await _moderationService.GetLogsAsync(result, entityType, page, pageSize));
 
     [HttpPost("moderation/logs/{logId:guid}/review")]
     public async Task<ActionResult<ModerationLogDto>> ReviewModeration(Guid logId, [FromBody] ReviewModerationRequest request)
-    {
-        var userId = GetCurrentUserId();
-        var log = await _moderationService.ReviewLogAsync(logId, userId, request.Decision);
-        return Ok(log);
-    }
+        => Ok(await _moderationService.ReviewLogAsync(logId, GetCurrentUserId(), request.Decision));
 
-    // --- LGPD Export ---
     [HttpGet("users/{userId:guid}/export")]
     public async Task<IActionResult> ExportUserData(Guid userId, [FromQuery] string format = "json")
     {
         var data = await _adminService.ExportUserDataAsync(userId, format);
-        var contentType = format.Equals("csv", StringComparison.OrdinalIgnoreCase)
-            ? "text/csv" : "application/json";
+        var contentType = format.Equals("csv", StringComparison.OrdinalIgnoreCase) ? "text/csv" : "application/json";
         var ext = format.Equals("csv", StringComparison.OrdinalIgnoreCase) ? "csv" : "json";
         return File(data, contentType, $"user_{userId}_export.{ext}");
     }
 
-    // --- Dishes (Admin full access) ---
     [HttpPost("restaurants/{restaurantId:guid}/dishes")]
     public async Task<IActionResult> CreateDish(Guid restaurantId, [FromBody] CreateDishRequest request, CancellationToken ct)
     {
@@ -138,34 +115,65 @@ public class AdminController : ControllerBase
 
     [HttpPut("dishes/{dishId:guid}")]
     public async Task<IActionResult> UpdateDish(Guid dishId, [FromBody] UpdateDishRequest request, CancellationToken ct)
-    {
-        var userId = GetCurrentUserId();
-        var dish = await _dishService.UpdateAsync(dishId, userId, request, ct);
-        return Ok(dish);
-    }
+        => Ok(await _dishService.UpdateAsync(dishId, GetCurrentUserId(), request, ct));
 
     [HttpDelete("dishes/{dishId:guid}")]
     public async Task<IActionResult> DeleteDish(Guid dishId, CancellationToken ct)
     {
-        var userId = GetCurrentUserId();
-        await _dishService.DeleteAsync(dishId, userId, ct);
+        await _dishService.DeleteAsync(dishId, GetCurrentUserId(), ct);
         return NoContent();
     }
 
-    // --- Restaurant full update (Admin can set YouTubeVideoUrl and all fields) ---
     [HttpPut("restaurants/{restaurantId:guid}/full")]
     public async Task<IActionResult> FullUpdateRestaurant(Guid restaurantId, [FromBody] UpdateRestaurantRequest request, CancellationToken ct)
-    {
-        var userId = GetCurrentUserId();
-        var restaurant = await _restaurantService.UpdateAsync(restaurantId, userId, request, ct);
-        return Ok(restaurant);
-    }
+        => Ok(await _restaurantService.UpdateAsync(restaurantId, GetCurrentUserId(), request, ct));
 
-    // --- Comments (Admin can delete any comment) ---
     [HttpDelete("comments/{commentId:guid}")]
     public async Task<IActionResult> DeleteComment(Guid commentId, CancellationToken ct)
     {
         await _commentService.DeleteAsync(commentId, ct);
         return NoContent();
+    }
+
+    [HttpGet("promotions/settings")]
+    public async Task<ActionResult<PromotionSettingsDto>> GetPromotionSettings(CancellationToken ct)
+        => Ok(await _promotionService.GetSettingsAsync(ct));
+
+    [HttpPut("promotions/settings")]
+    public async Task<ActionResult<PromotionSettingsDto>> UpdatePromotionSettings([FromBody] UpdatePromotionSettingsRequest request, CancellationToken ct)
+        => Ok(await _promotionService.UpdateSettingsAsync(request, ct));
+
+    [HttpGet("promotions/summary")]
+    public async Task<ActionResult<PromotionSummaryDto>> GetPromotionSummary(CancellationToken ct)
+        => Ok(await _promotionService.GetSummaryAsync(ct));
+
+    [HttpGet("promotions/tickets")]
+    public async Task<ActionResult<PagedResult<PromotionTicketAdminDto>>> GetPromotionTickets(
+        [FromQuery] Guid? restaurantId,
+        [FromQuery] string? status,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        PromotionTicketStatus? parsedStatus = Enum.TryParse<PromotionTicketStatus>(status, true, out var parsed)
+            ? parsed
+            : null;
+        return Ok(await _promotionService.GetAdminTicketsAsync(restaurantId, parsedStatus, from, to, page, pageSize, ct));
+    }
+
+    [HttpGet("promotions/tickets/summary")]
+    public async Task<ActionResult<PromotionTicketsAdminSummaryDto>> GetPromotionTicketsSummary(
+        [FromQuery] Guid? restaurantId,
+        [FromQuery] string? status,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken ct = default)
+    {
+        PromotionTicketStatus? parsedStatus = Enum.TryParse<PromotionTicketStatus>(status, true, out var parsed)
+            ? parsed
+            : null;
+        return Ok(await _promotionService.GetAdminTicketsSummaryAsync(restaurantId, parsedStatus, from, to, ct));
     }
 }

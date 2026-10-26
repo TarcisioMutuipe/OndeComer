@@ -5,6 +5,7 @@ import '../../data/models/dish_model.dart';
 import '../viewmodels/restaurant_viewmodel.dart';
 import '../viewmodels/dish_viewmodel.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/main_scaffold.dart';
 
 class RestaurantDashboardScreen extends ConsumerStatefulWidget {
@@ -60,20 +61,81 @@ class _RestaurantDashboardScreenState
     if (restaurant == null) {
       return MainScaffold(
         child: Scaffold(
-          appBar: AppBar(title: const Text('Meu Restaurante')),
-          body: Center(
+          appBar: AppBar(title: const Text('Área do Estabelecimento')),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Icon(Icons.restaurant, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                const Text('Nenhum restaurante cadastrado'),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () => context.push('/restaurant/form'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Cadastrar Restaurante'),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryYellow.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.storefront_outlined,
+                      size: 64, color: AppTheme.primaryYellowDark),
                 ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Faça Parte do Guia Gastronômico de Salvador',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Aumente o movimento do seu salão físico sem pagar comissões abusivas por pedido.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+                ),
+                const SizedBox(height: 24),
+
+                // Vantagens B2B
+                _b2bBenefitItem(
+                  icon: Icons.money_off_outlined,
+                  title: 'Taxa Zero no Salão',
+                  subtitle: 'Não cobramos porcentagem sobre o consumo dos seus clientes no restaurante.',
+                ),
+                const SizedBox(height: 12),
+                _b2bBenefitItem(
+                  icon: Icons.qr_code_2_outlined,
+                  title: 'Cardápio Digital & QR Code de Mesa',
+                  subtitle: 'Gere QR Codes prontos para imprimir e colocar nas mesas do seu estabelecimento.',
+                ),
+                const SizedBox(height: 12),
+                _b2bBenefitItem(
+                  icon: Icons.flash_on_outlined,
+                  title: 'Promoções para Dias Fracos',
+                  subtitle: 'Lance ofertas pontuais de terça a quinta para atrair novos clientes aos horários ociosos.',
+                ),
+                const SizedBox(height: 12),
+                _b2bBenefitItem(
+                  icon: Icons.loyalty_outlined,
+                  title: 'Fidelização & Check-in Oficial',
+                  subtitle: 'Recompense clientes fiéis e receba avaliações autênticas da gastronomia da casa.',
+                ),
+
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    onPressed: () => context.push('/restaurant/form'),
+                    icon: const Icon(Icons.add_business_outlined),
+                    label: const Text(
+                      'Cadastrar Meu Restaurante Grátis',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryYellow,
+                      foregroundColor: AppTheme.textPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -175,6 +237,15 @@ class _RestaurantDashboardScreenState
                   context.push(AppRoutes.ownerPromotions, extra: restaurant.id),
               icon: const Icon(Icons.local_offer_outlined),
               label: const Text('Gerenciar Promoções'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => context.push(AppRoutes.finalizePromotionTicket),
+              icon: const Icon(Icons.qr_code_scanner_outlined),
+              label: const Text('Finalizar ticket de promoção'),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
               ),
@@ -454,6 +525,49 @@ class _RestaurantDashboardScreenState
                   .deleteDish(dishId);
             },
             child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _b2bBenefitItem({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.divider),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryYellow.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: AppTheme.primaryYellowDark, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 2),
+                Text(subtitle,
+                    style: const TextStyle(
+                        fontSize: 12, color: AppTheme.textSecondary)),
+              ],
+            ),
           ),
         ],
       ),

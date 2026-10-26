@@ -9,3 +9,4 @@ C:\OndeComerEmSalvador\backend\OndeComer.Domain\obj\Debug\net8.0\OndeComer.Domai
 C:\OndeComerEmSalvador\backend\OndeComer.Domain\obj\Debug\net8.0\refint\OndeComer.Domain.dll
 C:\OndeComerEmSalvador\backend\OndeComer.Domain\obj\Debug\net8.0\OndeComer.Domain.pdb
 C:\OndeComerEmSalvador\backend\OndeComer.Domain\obj\Debug\net8.0\ref\OndeComer.Domain.dll
+C:\OndeComerEmSalvador\backend\OndeComer.Domain\obj\Debug\net8.0\OndeComer.Domain.sourcelink.json

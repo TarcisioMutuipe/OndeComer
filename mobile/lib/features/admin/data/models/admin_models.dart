@@ -108,3 +108,44 @@ class ModerationLogModel {
     );
   }
 }
+
+class PromotionSettingsModel {
+  final double batchPrice;
+  final int ticketsPerBatch;
+  final int ticketValidityDays;
+  final int claimWindowDays;
+  final String? pixKey;
+  final String? receiptPhoneNumber;
+  final DateTime updatedAt;
+
+  PromotionSettingsModel({
+    required this.batchPrice,
+    required this.ticketsPerBatch,
+    required this.ticketValidityDays,
+    required this.claimWindowDays,
+    required this.updatedAt,
+    this.pixKey,
+    this.receiptPhoneNumber,
+  });
+
+  factory PromotionSettingsModel.fromJson(Map<String, dynamic> json) {
+    return PromotionSettingsModel(
+      batchPrice: (json['batchPrice'] as num).toDouble(),
+      ticketsPerBatch: json['ticketsPerBatch'] as int,
+      ticketValidityDays: json['ticketValidityDays'] as int,
+      claimWindowDays: json['claimWindowDays'] as int,
+      pixKey: json['pixKey'] as String?,
+      receiptPhoneNumber: json['receiptPhoneNumber'] as String?,
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'batchPrice': batchPrice,
+        'ticketsPerBatch': ticketsPerBatch,
+        'ticketValidityDays': ticketValidityDays,
+        'claimWindowDays': claimWindowDays,
+        'pixKey': pixKey,
+        'receiptPhoneNumber': receiptPhoneNumber,
+      };
+}

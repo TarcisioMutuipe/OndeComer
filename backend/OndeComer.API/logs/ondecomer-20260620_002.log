@@ -1,0 +1,666 @@
+2026-06-20 20:57:33.386 -03:00 [INF] Executed DbCommand (323ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 20:57:34.423 -03:00 [INF] Executed DbCommand (39ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-20 20:57:38.827 -03:00 [INF] Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 20:57:43.337 -03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 20:57:47.917 -03:00 [INF] Executed DbCommand (58ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-20 20:57:49.966 -03:00 [INF] No migrations were applied. The database is already up to date.
+2026-06-20 20:57:50.902 -03:00 [INF] User profile is available. Using 'C:\Users\jai_m\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-06-20 20:57:53.485 -03:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address http://127.0.0.1:5000: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Normalmente é permitida apenas uma utilização de cada endereço de soquete (protocolo/endereço de rede/porta).
+ ---> System.Net.Sockets.SocketException (10048): Normalmente é permitida apenas uma utilização de cada endereço de soquete (protocolo/endereço de rede/porta).
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.DefaultAddressStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindAsync(ListenOptions[] listenOptions, AddressBindContext context, Func`2 useHttps, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__15_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2026-06-20 20:57:53.780 -03:00 [FTL] A aplicação falhou ao iniciar.
+System.IO.IOException: Failed to bind to address http://127.0.0.1:5000: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Normalmente é permitida apenas uma utilização de cada endereço de soquete (protocolo/endereço de rede/porta).
+ ---> System.Net.Sockets.SocketException (10048): Normalmente é permitida apenas uma utilização de cada endereço de soquete (protocolo/endereço de rede/porta).
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.DefaultAddressStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindAsync(ListenOptions[] listenOptions, AddressBindContext context, Func`2 useHttps, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__15_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+   at Microsoft.Extensions.Hosting.Internal.Host.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.RunAsync(IHost host, CancellationToken token)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.RunAsync(IHost host, CancellationToken token)
+   at Program.<Main>$(String[] args) in C:\OndeComerEmSalvador\backend\OndeComer.API\Program.cs:line 117
+2026-06-20 21:00:09.478 -03:00 [INF] Executed DbCommand (283ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 21:00:10.755 -03:00 [INF] Executed DbCommand (26ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-20 21:00:15.239 -03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 21:00:17.153 -03:00 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 21:00:19.189 -03:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-20 21:00:20.330 -03:00 [INF] No migrations were applied. The database is already up to date.
+2026-06-20 21:00:20.999 -03:00 [INF] User profile is available. Using 'C:\Users\jai_m\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-06-20 21:00:22.146 -03:00 [INF] Now listening on: http://localhost:5000
+2026-06-20 21:00:23.137 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-06-20 21:00:24.648 -03:00 [INF] Hosting environment: Production
+2026-06-20 21:00:25.460 -03:00 [INF] Content root path: C:\OndeComerEmSalvador\backend\OndeComer.API
+2026-06-20 21:22:32.720 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/v1/swagger.json - null null
+2026-06-20 21:22:33.688 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 981.0856ms
+2026-06-20 23:42:37.457 -03:00 [INF] Executed DbCommand (87ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 23:42:37.631 -03:00 [INF] Executed DbCommand (22ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-20 23:42:37.786 -03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 23:42:37.885 -03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 23:42:37.891 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-20 23:42:38.887 -03:00 [INF] No migrations were applied. The database is already up to date.
+2026-06-20 23:42:38.926 -03:00 [INF] User profile is available. Using 'C:\Users\jai_m\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-06-20 23:42:39.216 -03:00 [INF] Now listening on: http://localhost:5000
+2026-06-20 23:42:39.222 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-06-20 23:42:39.224 -03:00 [INF] Hosting environment: Production
+2026-06-20 23:42:39.226 -03:00 [INF] Content root path: C:\OndeComerEmSalvador\backend\OndeComer.API
+2026-06-20 23:42:54.588 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/ - null null
+2026-06-20 23:42:54.808 -03:00 [INF] HTTP GET / responded 404 in 56.6702 ms
+2026-06-20 23:42:54.822 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/ - 404 0 null 239.4849ms
+2026-06-20 23:42:54.903 -03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5000/, Response status code: 404
+2026-06-20 23:42:57.866 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/ - null null
+2026-06-20 23:42:57.943 -03:00 [INF] HTTP GET / responded 404 in 1.9845 ms
+2026-06-20 23:42:57.978 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/ - 404 0 null 111.6925ms
+2026-06-20 23:42:58.046 -03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5000/, Response status code: 404
+2026-06-20 23:43:02.281 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/ - null null
+2026-06-20 23:43:02.432 -03:00 [INF] HTTP GET / responded 404 in 13.1753 ms
+2026-06-20 23:43:02.459 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/ - 404 0 null 178.2269ms
+2026-06-20 23:43:02.659 -03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5000/, Response status code: 404
+2026-06-20 23:45:20.219 -03:00 [INF] Application is shutting down...
+2026-06-20 23:45:30.513 -03:00 [INF] Executed DbCommand (113ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 23:45:30.719 -03:00 [INF] Executed DbCommand (13ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-20 23:45:30.905 -03:00 [INF] Executed DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 23:45:31.027 -03:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_class c
+    JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE n.nspname='public' AND
+          c.relname='__EFMigrationsHistory'
+)
+2026-06-20 23:45:31.040 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-06-20 23:45:31.134 -03:00 [INF] No migrations were applied. The database is already up to date.
+2026-06-20 23:45:31.182 -03:00 [INF] User profile is available. Using 'C:\Users\jai_m\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-06-20 23:45:31.324 -03:00 [INF] Now listening on: http://localhost:5000
+2026-06-20 23:45:31.328 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-06-20 23:45:31.331 -03:00 [INF] Hosting environment: Production
+2026-06-20 23:45:31.333 -03:00 [INF] Content root path: C:\OndeComerEmSalvador\backend\OndeComer.API
+2026-06-20 23:45:56.838 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/ - null null
+2026-06-20 23:45:57.083 -03:00 [INF] Executing endpoint 'HTTP: GET /'
+2026-06-20 23:45:57.141 -03:00 [INF] Executing RedirectResult, redirecting to /swagger.
+2026-06-20 23:45:57.144 -03:00 [INF] Executed endpoint 'HTTP: GET /'
+2026-06-20 23:45:57.150 -03:00 [INF] HTTP GET / responded 302 in 114.1583 ms
+2026-06-20 23:45:57.175 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/ - 302 0 null 343.5353ms
+2026-06-20 23:45:57.221 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger - null null
+2026-06-20 23:45:57.243 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger - 301 0 null 23.5482ms
+2026-06-20 23:45:57.270 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/index.html - null null
+2026-06-20 23:45:57.452 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/index.html - 200 null text/html;charset=utf-8 182.3397ms
+2026-06-20 23:45:57.565 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/index.css - null null
+2026-06-20 23:45:57.599 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/swagger-ui-bundle.js - null null
+2026-06-20 23:45:57.601 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/swagger-ui-standalone-preset.js - null null
+2026-06-20 23:45:57.617 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/swagger-ui.css - null null
+2026-06-20 23:45:57.662 -03:00 [INF] Sending file. Request path: '/index.css'. Physical path: 'N/A'
+2026-06-20 23:45:57.691 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/index.js - null null
+2026-06-20 23:45:57.719 -03:00 [INF] Sending file. Request path: '/swagger-ui-standalone-preset.js'. Physical path: 'N/A'
+2026-06-20 23:45:57.725 -03:00 [INF] Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+2026-06-20 23:45:57.734 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/index.css - 200 202 text/css 169.0861ms
+2026-06-20 23:45:57.808 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/index.js - 200 null application/javascript;charset=utf-8 115.9232ms
+2026-06-20 23:45:57.831 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/swagger-ui-standalone-preset.js - 200 230293 text/javascript 229.9331ms
+2026-06-20 23:45:57.854 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/swagger-ui.css - 200 152034 text/css 237.2711ms
+2026-06-20 23:45:57.925 -03:00 [INF] Sending file. Request path: '/swagger-ui-bundle.js'. Physical path: 'N/A'
+2026-06-20 23:45:58.042 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/swagger-ui-bundle.js - 200 1452753 text/javascript 443.0669ms
+2026-06-20 23:45:58.440 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/v1/swagger.json - null null
+2026-06-20 23:45:58.613 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/favicon-32x32.png - null null
+2026-06-20 23:45:58.733 -03:00 [INF] Sending file. Request path: '/favicon-32x32.png'. Physical path: 'N/A'
+2026-06-20 23:45:58.747 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/favicon-32x32.png - 200 628 image/png 133.9658ms
+2026-06-20 23:45:59.168 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 728.1738ms
+2026-06-20 23:46:12.658 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/auth/login - null null
+2026-06-20 23:46:12.784 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:12.799 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/auth/login - 204 null null 140.6105ms
+2026-06-20 23:46:12.880 -03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/v1/auth/login - application/json 45
+2026-06-20 23:46:12.945 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:12.969 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.AuthController.Login (OndeComer.API)'
+2026-06-20 23:46:13.103 -03:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(OndeComer.Application.DTOs.Auth.LoginRequest, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.AuthController (OndeComer.API).
+2026-06-20 23:46:15.356 -03:00 [INF] Executed DbCommand (64ms) [Parameters=[@__email_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."Address", u."CreatedAt", u."Email", u."EmailConfirmed", u."GoogleSub", u."IsActive", u."LastLogin", u."Name", u."PasswordHash", u."PreferredLanguage", u."ProfileType", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @__email_0
+LIMIT 1
+2026-06-20 23:46:17.636 -03:00 [INF] Executed DbCommand (28ms) [Parameters=[@p12='?' (DbType = Guid), @p0='?', @p1='?' (DbType = DateTime), @p2='?', @p3='?' (DbType = Boolean), @p4='?', @p5='?' (DbType = Boolean), @p6='?' (DbType = DateTime), @p7='?', @p8='?', @p9='?', @p10='?', @p11='?'], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Users" SET "Address" = @p0, "CreatedAt" = @p1, "Email" = @p2, "EmailConfirmed" = @p3, "GoogleSub" = @p4, "IsActive" = @p5, "LastLogin" = @p6, "Name" = @p7, "PasswordHash" = @p8, "PreferredLanguage" = @p9, "ProfileType" = @p10, "Username" = @p11
+WHERE "Id" = @p12;
+2026-06-20 23:46:17.947 -03:00 [INF] Executed DbCommand (14ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (DbType = DateTime), @p2='?', @p3='?' (DbType = DateTime), @p4='?' (DbType = Boolean), @p5='?', @p6='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RefreshTokens" ("Id", "CreatedAt", "CreatedByIp", "ExpiresAt", "IsRevoked", "Token", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6);
+2026-06-20 23:46:17.991 -03:00 [INF] Executing OkObjectResult, writing value of type 'OndeComer.Application.DTOs.Auth.AuthResponse'.
+2026-06-20 23:46:18.122 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.AuthController.Login (OndeComer.API) in 4991.1178ms
+2026-06-20 23:46:18.127 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.AuthController.Login (OndeComer.API)'
+2026-06-20 23:46:18.134 -03:00 [INF] HTTP POST /api/v1/auth/login responded 200 in 5168.4804 ms
+2026-06-20 23:46:18.170 -03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/v1/auth/login - 200 null application/json; charset=utf-8 5289.6057ms
+2026-06-20 23:46:19.600 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants?city=Salvador&page=1&pageSize=20 - null null
+2026-06-20 23:46:19.611 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:19.618 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants?city=Salvador&page=1&pageSize=20 - 204 null null 17.677ms
+2026-06-20 23:46:19.660 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/restaurants?city=Salvador&page=1&pageSize=20 - application/json null
+2026-06-20 23:46:19.688 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:19.902 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.RestaurantsController.GetAll (OndeComer.API)'
+2026-06-20 23:46:19.938 -03:00 [INF] Route matched with {action = "GetAll", controller = "Restaurants"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetAll(System.String, System.String, System.String, Int32, Int32, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.RestaurantsController (OndeComer.API).
+2026-06-20 23:46:20.470 -03:00 [INF] Executed DbCommand (26ms) [Parameters=[@__ToLower_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Restaurants" AS r
+WHERE r."IsActive" AND lower(r."City") = @__ToLower_0
+2026-06-20 23:46:20.682 -03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__ToLower_0='?', @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+FROM "Restaurants" AS r
+WHERE r."IsActive" AND lower(r."City") = @__ToLower_0
+ORDER BY r."Name"
+LIMIT @__p_2 OFFSET @__p_1
+2026-06-20 23:46:20.807 -03:00 [INF] Executing OkObjectResult, writing value of type 'OndeComer.Application.Common.PagedResult`1[[OndeComer.Application.DTOs.Restaurant.RestaurantDto, OndeComer.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-06-20 23:46:20.864 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.RestaurantsController.GetAll (OndeComer.API) in 870.8506ms
+2026-06-20 23:46:20.870 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.RestaurantsController.GetAll (OndeComer.API)'
+2026-06-20 23:46:20.881 -03:00 [INF] HTTP GET /api/v1/restaurants responded 200 in 1188.8725 ms
+2026-06-20 23:46:20.890 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/restaurants?city=Salvador&page=1&pageSize=20 - 200 null application/json; charset=utf-8 1230.6357ms
+2026-06-20 23:46:30.005 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - null null
+2026-06-20 23:46:30.015 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:30.023 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - 204 null null 17.6188ms
+2026-06-20 23:46:30.090 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - application/json null
+2026-06-20 23:46:30.125 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:30.142 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.PromotionsController.GetAll (OndeComer.API)'
+2026-06-20 23:46:30.161 -03:00 [INF] Route matched with {action = "GetAll", controller = "Promotions"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetAll(Int32, Int32, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.PromotionsController (OndeComer.API).
+2026-06-20 23:46:30.381 -03:00 [INF] Executed DbCommand (12ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."CreatedAt", t."Description", t."DiscountPercent", t."ExpiresAt", t."ImageUrl", t."IsActive", t."RestaurantId", t."Title", r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+FROM (
+    SELECT p."Id", p."CreatedAt", p."Description", p."DiscountPercent", p."ExpiresAt", p."ImageUrl", p."IsActive", p."RestaurantId", p."Title"
+    FROM "Promotions" AS p
+    WHERE p."IsActive" AND (p."ExpiresAt" IS NULL OR p."ExpiresAt" > now())
+    ORDER BY p."CreatedAt" DESC
+    LIMIT @__p_1 OFFSET @__p_0
+) AS t
+INNER JOIN "Restaurants" AS r ON t."RestaurantId" = r."Id"
+ORDER BY t."CreatedAt" DESC
+2026-06-20 23:46:30.469 -03:00 [INF] Executing OkObjectResult, writing value of type '<>f__AnonymousType7`3[[System.Collections.Generic.IEnumerable`1[[OndeComer.Application.DTOs.Promotion.PromotionDto, OndeComer.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2026-06-20 23:46:30.516 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.PromotionsController.GetAll (OndeComer.API) in 338.6492ms
+2026-06-20 23:46:30.525 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.PromotionsController.GetAll (OndeComer.API)'
+2026-06-20 23:46:30.526 -03:00 [INF] HTTP GET /api/v1/promotions responded 200 in 385.6274 ms
+2026-06-20 23:46:30.535 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - 200 null application/json; charset=utf-8 445.8243ms
+2026-06-20 23:46:38.029 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - null null
+2026-06-20 23:46:38.050 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:38.083 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - 204 null null 54.0033ms
+2026-06-20 23:46:38.119 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - application/json null
+2026-06-20 23:46:38.144 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:38.155 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.PromotionsController.GetAll (OndeComer.API)'
+2026-06-20 23:46:38.180 -03:00 [INF] Route matched with {action = "GetAll", controller = "Promotions"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetAll(Int32, Int32, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.PromotionsController (OndeComer.API).
+2026-06-20 23:46:38.224 -03:00 [INF] Executed DbCommand (9ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."CreatedAt", t."Description", t."DiscountPercent", t."ExpiresAt", t."ImageUrl", t."IsActive", t."RestaurantId", t."Title", r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+FROM (
+    SELECT p."Id", p."CreatedAt", p."Description", p."DiscountPercent", p."ExpiresAt", p."ImageUrl", p."IsActive", p."RestaurantId", p."Title"
+    FROM "Promotions" AS p
+    WHERE p."IsActive" AND (p."ExpiresAt" IS NULL OR p."ExpiresAt" > now())
+    ORDER BY p."CreatedAt" DESC
+    LIMIT @__p_1 OFFSET @__p_0
+) AS t
+INNER JOIN "Restaurants" AS r ON t."RestaurantId" = r."Id"
+ORDER BY t."CreatedAt" DESC
+2026-06-20 23:46:38.234 -03:00 [INF] Executing OkObjectResult, writing value of type '<>f__AnonymousType7`3[[System.Collections.Generic.IEnumerable`1[[OndeComer.Application.DTOs.Promotion.PromotionDto, OndeComer.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2026-06-20 23:46:38.244 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.PromotionsController.GetAll (OndeComer.API) in 37.6676ms
+2026-06-20 23:46:38.268 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.PromotionsController.GetAll (OndeComer.API)'
+2026-06-20 23:46:38.282 -03:00 [INF] HTTP GET /api/v1/promotions responded 200 in 131.0964 ms
+2026-06-20 23:46:38.297 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - 200 null application/json; charset=utf-8 177.2859ms
+2026-06-20 23:46:49.169 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants?city=Salvador&page=1&pageSize=20 - null null
+2026-06-20 23:46:49.220 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:49.245 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants?city=Salvador&page=1&pageSize=20 - 204 null null 76.2823ms
+2026-06-20 23:46:49.308 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/restaurants?city=Salvador&page=1&pageSize=20 - application/json null
+2026-06-20 23:46:49.373 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:49.399 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.RestaurantsController.GetAll (OndeComer.API)'
+2026-06-20 23:46:49.423 -03:00 [INF] Route matched with {action = "GetAll", controller = "Restaurants"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetAll(System.String, System.String, System.String, Int32, Int32, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.RestaurantsController (OndeComer.API).
+2026-06-20 23:46:49.448 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__ToLower_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Restaurants" AS r
+WHERE r."IsActive" AND lower(r."City") = @__ToLower_0
+2026-06-20 23:46:49.482 -03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__ToLower_0='?', @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+FROM "Restaurants" AS r
+WHERE r."IsActive" AND lower(r."City") = @__ToLower_0
+ORDER BY r."Name"
+LIMIT @__p_2 OFFSET @__p_1
+2026-06-20 23:46:49.502 -03:00 [INF] Executing OkObjectResult, writing value of type 'OndeComer.Application.Common.PagedResult`1[[OndeComer.Application.DTOs.Restaurant.RestaurantDto, OndeComer.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-06-20 23:46:49.531 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.RestaurantsController.GetAll (OndeComer.API) in 87.7064ms
+2026-06-20 23:46:49.754 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.RestaurantsController.GetAll (OndeComer.API)'
+2026-06-20 23:46:49.916 -03:00 [INF] HTTP GET /api/v1/restaurants responded 200 in 518.6638 ms
+2026-06-20 23:46:50.080 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/restaurants?city=Salvador&page=1&pageSize=20 - 200 null application/json; charset=utf-8 771.7378ms
+2026-06-20 23:46:57.434 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/auth/logout - null null
+2026-06-20 23:46:57.497 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:57.503 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/auth/logout - 204 null null 69.0636ms
+2026-06-20 23:46:57.584 -03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/v1/auth/logout - application/json 0
+2026-06-20 23:46:57.615 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:46:57.651 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.AuthController.Logout (OndeComer.API)'
+2026-06-20 23:46:57.683 -03:00 [INF] Route matched with {action = "Logout", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Logout(OndeComer.Application.DTOs.Auth.RefreshTokenRequest, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.AuthController (OndeComer.API).
+2026-06-20 23:46:57.719 -03:00 [INF] Executing BadRequestObjectResult, writing value of type 'Microsoft.AspNetCore.Mvc.ValidationProblemDetails'.
+2026-06-20 23:46:57.792 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.AuthController.Logout (OndeComer.API) in 90.3643ms
+2026-06-20 23:46:57.805 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.AuthController.Logout (OndeComer.API)'
+2026-06-20 23:46:57.822 -03:00 [INF] HTTP POST /api/v1/auth/logout responded 400 in 201.5516 ms
+2026-06-20 23:46:57.840 -03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/v1/auth/logout - 400 null application/problem+json; charset=utf-8 255.8061ms
+2026-06-20 23:47:07.019 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/auth/login - null null
+2026-06-20 23:47:07.079 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:07.107 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/auth/login - 204 null null 88.0115ms
+2026-06-20 23:47:07.200 -03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/v1/auth/login - application/json 45
+2026-06-20 23:47:07.243 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:07.262 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.AuthController.Login (OndeComer.API)'
+2026-06-20 23:47:07.269 -03:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(OndeComer.Application.DTOs.Auth.LoginRequest, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.AuthController (OndeComer.API).
+2026-06-20 23:47:07.395 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__email_0='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT u."Id", u."Address", u."CreatedAt", u."Email", u."EmailConfirmed", u."GoogleSub", u."IsActive", u."LastLogin", u."Name", u."PasswordHash", u."PreferredLanguage", u."ProfileType", u."Username"
+FROM "Users" AS u
+WHERE u."Email" = @__email_0
+LIMIT 1
+2026-06-20 23:47:07.913 -03:00 [INF] Executed DbCommand (2ms) [Parameters=[@p12='?' (DbType = Guid), @p0='?', @p1='?' (DbType = DateTime), @p2='?', @p3='?' (DbType = Boolean), @p4='?', @p5='?' (DbType = Boolean), @p6='?' (DbType = DateTime), @p7='?', @p8='?', @p9='?', @p10='?', @p11='?'], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Users" SET "Address" = @p0, "CreatedAt" = @p1, "Email" = @p2, "EmailConfirmed" = @p3, "GoogleSub" = @p4, "IsActive" = @p5, "LastLogin" = @p6, "Name" = @p7, "PasswordHash" = @p8, "PreferredLanguage" = @p9, "ProfileType" = @p10, "Username" = @p11
+WHERE "Id" = @p12;
+2026-06-20 23:47:08.012 -03:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (DbType = DateTime), @p2='?', @p3='?' (DbType = DateTime), @p4='?' (DbType = Boolean), @p5='?', @p6='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RefreshTokens" ("Id", "CreatedAt", "CreatedByIp", "ExpiresAt", "IsRevoked", "Token", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6);
+2026-06-20 23:47:08.179 -03:00 [INF] Executing OkObjectResult, writing value of type 'OndeComer.Application.DTOs.Auth.AuthResponse'.
+2026-06-20 23:47:08.225 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.AuthController.Login (OndeComer.API) in 914.931ms
+2026-06-20 23:47:08.286 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.AuthController.Login (OndeComer.API)'
+2026-06-20 23:47:08.320 -03:00 [INF] HTTP POST /api/v1/auth/login responded 200 in 1058.5928 ms
+2026-06-20 23:47:08.507 -03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/v1/auth/login - 200 null application/json; charset=utf-8 1307.0803ms
+2026-06-20 23:47:09.153 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/me - null null
+2026-06-20 23:47:09.230 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:09.244 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/me - 204 null null 91.1846ms
+2026-06-20 23:47:09.295 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/me - application/json null
+2026-06-20 23:47:09.324 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:09.339 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.RestaurantsController.GetMine (OndeComer.API)'
+2026-06-20 23:47:09.361 -03:00 [INF] Route matched with {action = "GetMine", controller = "Restaurants"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetMine(System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.RestaurantsController (OndeComer.API).
+2026-06-20 23:47:09.555 -03:00 [INF] Executed DbCommand (10ms) [Parameters=[@__ownerId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."Address", t."Category", t."City", t."CoverUrl", t."CreatedAt", t."Description", t."InstagramUrl", t."IsActive", t."Latitude", t."LogoUrl", t."Longitude", t."Name", t."OpeningHours", t."OwnerUserId", t."YouTubeVideoUrl", d."Id", d."AvailabilityEnd", d."AvailabilityStart", d."Category", d."CreatedAt", d."Description", d."ImageUrl", d."IsActive", d."Name", d."Price", d."RatingAverage", d."RatingCount", d."RestaurantId", d."UpdatedAt"
+FROM (
+    SELECT r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+    FROM "Restaurants" AS r
+    WHERE r."OwnerUserId" = @__ownerId_0
+    LIMIT 1
+) AS t
+LEFT JOIN "Dishes" AS d ON t."Id" = d."RestaurantId"
+ORDER BY t."Id"
+2026-06-20 23:47:09.653 -03:00 [INF] Executing OkObjectResult, writing value of type 'OndeComer.Application.DTOs.Restaurant.RestaurantDto'.
+2026-06-20 23:47:09.658 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.RestaurantsController.GetMine (OndeComer.API) in 282.9184ms
+2026-06-20 23:47:09.680 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.RestaurantsController.GetMine (OndeComer.API)'
+2026-06-20 23:47:09.686 -03:00 [INF] HTTP GET /api/v1/restaurants/me responded 200 in 358.3688 ms
+2026-06-20 23:47:09.709 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/me - 200 null application/json; charset=utf-8 413.3056ms
+2026-06-20 23:47:09.983 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/overview - null null
+2026-06-20 23:47:09.987 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/dishes - null null
+2026-06-20 23:47:09.996 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/hours - null null
+2026-06-20 23:47:10.000 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/comments - null null
+2026-06-20 23:47:10.036 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:10.080 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:10.107 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:10.130 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:10.139 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/overview - 204 null null 155.2351ms
+2026-06-20 23:47:10.154 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/dishes - 204 null null 167.2138ms
+2026-06-20 23:47:10.184 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/hours - 204 null null 185.4196ms
+2026-06-20 23:47:10.189 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/comments - 204 null null 188.6384ms
+2026-06-20 23:47:10.237 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/overview - application/json null
+2026-06-20 23:47:10.978 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:10.319 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/comments - application/json null
+2026-06-20 23:47:10.937 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/hours - application/json null
+2026-06-20 23:47:10.285 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/dishes - application/json null
+2026-06-20 23:47:11.115 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:11.057 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:11.089 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:10.986 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.DashboardController.GetOverview (OndeComer.API)'
+2026-06-20 23:47:11.122 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.DashboardController.GetDishMetrics (OndeComer.API)'
+2026-06-20 23:47:11.136 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.DashboardController.GetCommentMetrics (OndeComer.API)'
+2026-06-20 23:47:11.142 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.DashboardController.GetHourMetrics (OndeComer.API)'
+2026-06-20 23:47:11.169 -03:00 [INF] Route matched with {action = "GetOverview", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetOverview(System.Guid, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.DashboardController (OndeComer.API).
+2026-06-20 23:47:11.188 -03:00 [INF] Route matched with {action = "GetDishMetrics", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetDishMetrics(System.Guid, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.DashboardController (OndeComer.API).
+2026-06-20 23:47:11.207 -03:00 [INF] Route matched with {action = "GetCommentMetrics", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetCommentMetrics(System.Guid, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.DashboardController (OndeComer.API).
+2026-06-20 23:47:11.221 -03:00 [INF] Route matched with {action = "GetHourMetrics", controller = "Dashboard"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetHourMetrics(System.Guid, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.DashboardController (OndeComer.API).
+2026-06-20 23:47:11.303 -03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__id_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."Address", t."Category", t."City", t."CoverUrl", t."CreatedAt", t."Description", t."InstagramUrl", t."IsActive", t."Latitude", t."LogoUrl", t."Longitude", t."Name", t."OpeningHours", t."OwnerUserId", t."YouTubeVideoUrl", d."Id", d."AvailabilityEnd", d."AvailabilityStart", d."Category", d."CreatedAt", d."Description", d."ImageUrl", d."IsActive", d."Name", d."Price", d."RatingAverage", d."RatingCount", d."RestaurantId", d."UpdatedAt"
+FROM (
+    SELECT r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+    FROM "Restaurants" AS r
+    WHERE r."Id" = @__id_0
+    LIMIT 1
+) AS t
+LEFT JOIN "Dishes" AS d ON t."Id" = d."RestaurantId"
+ORDER BY t."Id"
+2026-06-20 23:47:11.805 -03:00 [INF] Executed DbCommand (66ms) [Parameters=[@__id_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."Address", t."Category", t."City", t."CoverUrl", t."CreatedAt", t."Description", t."InstagramUrl", t."IsActive", t."Latitude", t."LogoUrl", t."Longitude", t."Name", t."OpeningHours", t."OwnerUserId", t."YouTubeVideoUrl", d."Id", d."AvailabilityEnd", d."AvailabilityStart", d."Category", d."CreatedAt", d."Description", d."ImageUrl", d."IsActive", d."Name", d."Price", d."RatingAverage", d."RatingCount", d."RestaurantId", d."UpdatedAt"
+FROM (
+    SELECT r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+    FROM "Restaurants" AS r
+    WHERE r."Id" = @__id_0
+    LIMIT 1
+) AS t
+LEFT JOIN "Dishes" AS d ON t."Id" = d."RestaurantId"
+ORDER BY t."Id"
+2026-06-20 23:47:11.805 -03:00 [INF] Executed DbCommand (74ms) [Parameters=[@__id_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."Address", t."Category", t."City", t."CoverUrl", t."CreatedAt", t."Description", t."InstagramUrl", t."IsActive", t."Latitude", t."LogoUrl", t."Longitude", t."Name", t."OpeningHours", t."OwnerUserId", t."YouTubeVideoUrl", d."Id", d."AvailabilityEnd", d."AvailabilityStart", d."Category", d."CreatedAt", d."Description", d."ImageUrl", d."IsActive", d."Name", d."Price", d."RatingAverage", d."RatingCount", d."RestaurantId", d."UpdatedAt"
+FROM (
+    SELECT r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+    FROM "Restaurants" AS r
+    WHERE r."Id" = @__id_0
+    LIMIT 1
+) AS t
+LEFT JOIN "Dishes" AS d ON t."Id" = d."RestaurantId"
+ORDER BY t."Id"
+2026-06-20 23:47:11.859 -03:00 [INF] Executed DbCommand (22ms) [Parameters=[@__id_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."Address", t."Category", t."City", t."CoverUrl", t."CreatedAt", t."Description", t."InstagramUrl", t."IsActive", t."Latitude", t."LogoUrl", t."Longitude", t."Name", t."OpeningHours", t."OwnerUserId", t."YouTubeVideoUrl", d."Id", d."AvailabilityEnd", d."AvailabilityStart", d."Category", d."CreatedAt", d."Description", d."ImageUrl", d."IsActive", d."Name", d."Price", d."RatingAverage", d."RatingCount", d."RestaurantId", d."UpdatedAt"
+FROM (
+    SELECT r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+    FROM "Restaurants" AS r
+    WHERE r."Id" = @__id_0
+    LIMIT 1
+) AS t
+LEFT JOIN "Dishes" AS d ON t."Id" = d."RestaurantId"
+ORDER BY t."Id"
+2026-06-20 23:47:12.114 -03:00 [INF] Executed DbCommand (2ms) [Parameters=[@__restaurantId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."AvailabilityEnd", d."AvailabilityStart", d."Category", d."CreatedAt", d."Description", d."ImageUrl", d."IsActive", d."Name", d."Price", d."RatingAverage", d."RatingCount", d."RestaurantId", d."UpdatedAt"
+FROM "Dishes" AS d
+WHERE d."RestaurantId" = @__restaurantId_0
+2026-06-20 23:47:12.115 -03:00 [INF] Executed DbCommand (18ms) [Parameters=[@__restaurantId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."AvailabilityEnd", d."AvailabilityStart", d."Category", d."CreatedAt", d."Description", d."ImageUrl", d."IsActive", d."Name", d."Price", d."RatingAverage", d."RatingCount", d."RestaurantId", d."UpdatedAt"
+FROM "Dishes" AS d
+WHERE d."RestaurantId" = @__restaurantId_0
+2026-06-20 23:47:12.281 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__restaurantId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id"
+FROM "Dishes" AS d
+WHERE d."RestaurantId" = @__restaurantId_0
+2026-06-20 23:47:12.401 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__restaurantId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id"
+FROM "Dishes" AS d
+WHERE d."RestaurantId" = @__restaurantId_0
+2026-06-20 23:47:13.381 -03:00 [INF] Executed DbCommand (262ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Reviews" AS r
+WHERE r."DishId" = ANY (@__dishIds_0)
+2026-06-20 23:47:13.388 -03:00 [INF] Executed DbCommand (288ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT r."DishId", count(*)::int AS "Count", avg(r."Rating"::double precision) AS "Avg"
+FROM "Reviews" AS r
+WHERE r."DishId" = ANY (@__dishIds_0) AND r."Status" = 'Approved'
+GROUP BY r."DishId"
+2026-06-20 23:47:13.724 -03:00 [INF] Executed DbCommand (15ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Key" AS "Hour", count(*)::int AS "Count"
+FROM (
+    SELECT date_part('hour', r."CreatedAt" AT TIME ZONE 'UTC')::int AS "Key"
+    FROM "Reviews" AS r
+    WHERE r."DishId" = ANY (@__dishIds_0)
+) AS t
+GROUP BY t."Key"
+2026-06-20 23:47:13.820 -03:00 [INF] Executed DbCommand (17ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Comments" AS c
+WHERE c."DishId" = ANY (@__dishIds_0)
+2026-06-20 23:47:13.944 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Reviews" AS r
+WHERE r."DishId" = ANY (@__dishIds_0) AND r."Status" = 'Approved'
+2026-06-20 23:47:14.264 -03:00 [INF] Executed DbCommand (18ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT c."DishId", count(*)::int AS "Count"
+FROM "Comments" AS c
+WHERE c."DishId" = ANY (@__dishIds_0)
+GROUP BY c."DishId"
+2026-06-20 23:47:14.531 -03:00 [INF] Executed DbCommand (11ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Key" AS "Hour", count(*)::int AS "Count"
+FROM (
+    SELECT date_part('hour', c."CreatedAt" AT TIME ZONE 'UTC')::int AS "Key"
+    FROM "Comments" AS c
+    WHERE c."DishId" = ANY (@__dishIds_0)
+) AS t
+GROUP BY t."Key"
+2026-06-20 23:47:14.679 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Reviews" AS r
+WHERE r."DishId" = ANY (@__dishIds_0) AND r."Status" = 'Pending'
+2026-06-20 23:47:14.753 -03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[OndeComer.Application.DTOs.Dashboard.DishMetricDto, OndeComer.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-06-20 23:47:14.777 -03:00 [INF] Executed DbCommand (189ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Comments" AS c
+WHERE c."DishId" = ANY (@__dishIds_0) AND c."Status" = 'Approved'
+2026-06-20 23:47:14.836 -03:00 [INF] Executing OkObjectResult, writing value of type 'System.Collections.Generic.List`1[[OndeComer.Application.DTOs.Dashboard.HourMetricDto, OndeComer.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-06-20 23:47:15.093 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.DashboardController.GetHourMetrics (OndeComer.API) in 3816.4684ms
+2026-06-20 23:47:15.138 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.DashboardController.GetHourMetrics (OndeComer.API)'
+2026-06-20 23:47:15.173 -03:00 [INF] HTTP GET /api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/hours responded 200 in 4031.3955 ms
+2026-06-20 23:47:15.112 -03:00 [INF] Executed DbCommand (47ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Comments" AS c
+WHERE c."DishId" = ANY (@__dishIds_0) AND c."Status" = 'Rejected'
+2026-06-20 23:47:14.997 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.DashboardController.GetDishMetrics (OndeComer.API) in 3738.0358ms
+2026-06-20 23:47:15.336 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.DashboardController.GetDishMetrics (OndeComer.API)'
+2026-06-20 23:47:15.347 -03:00 [INF] HTTP GET /api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/dishes responded 200 in 4226.5815 ms
+2026-06-20 23:47:14.929 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Comments" AS c
+WHERE c."DishId" = ANY (@__dishIds_0)
+2026-06-20 23:47:15.239 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/hours - 200 null application/json; charset=utf-8 4302.3328ms
+2026-06-20 23:47:15.391 -03:00 [INF] Executed DbCommand (82ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Comments" AS c
+WHERE c."DishId" = ANY (@__dishIds_0) AND c."Status" = 'Pending'
+2026-06-20 23:47:15.408 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/dishes - 200 null application/json; charset=utf-8 5122.8364ms
+2026-06-20 23:47:15.770 -03:00 [INF] Executed DbCommand (5ms) [Parameters=[@__dishIds_0='?' (DbType = Object)], CommandType='"Text"', CommandTimeout='30']
+SELECT count(*)::int
+FROM "Comments" AS c
+WHERE c."DishId" = ANY (@__dishIds_0) AND c."Status" = 'Pending'
+2026-06-20 23:47:16.127 -03:00 [INF] Executed DbCommand (11ms) [Parameters=[@__dishIds_0='?' (DbType = Object), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", d."Name", u."Name", t."Text", t."Status", t."CreatedAt"
+FROM (
+    SELECT c."Id", c."CreatedAt", c."DishId", c."Status", c."Text", c."UserId"
+    FROM "Comments" AS c
+    WHERE c."DishId" = ANY (@__dishIds_0)
+    ORDER BY c."CreatedAt" DESC
+    LIMIT @__p_1
+) AS t
+INNER JOIN "Dishes" AS d ON t."DishId" = d."Id"
+INNER JOIN "Users" AS u ON t."UserId" = u."Id"
+ORDER BY t."CreatedAt" DESC
+2026-06-20 23:47:16.424 -03:00 [INF] Executing OkObjectResult, writing value of type 'OndeComer.Application.DTOs.Dashboard.DashboardOverviewDto'.
+2026-06-20 23:47:16.474 -03:00 [INF] Executing OkObjectResult, writing value of type 'OndeComer.Application.DTOs.Dashboard.CommentMetricDto'.
+2026-06-20 23:47:16.626 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.DashboardController.GetOverview (OndeComer.API) in 5396.2177ms
+2026-06-20 23:47:16.818 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.DashboardController.GetOverview (OndeComer.API)'
+2026-06-20 23:47:16.844 -03:00 [INF] HTTP GET /api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/overview responded 200 in 5863.1345 ms
+2026-06-20 23:47:16.810 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.DashboardController.GetCommentMetrics (OndeComer.API) in 5538.0445ms
+2026-06-20 23:47:16.915 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.DashboardController.GetCommentMetrics (OndeComer.API)'
+2026-06-20 23:47:16.926 -03:00 [INF] HTTP GET /api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/comments responded 200 in 5791.4657 ms
+2026-06-20 23:47:16.907 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/overview - 200 null application/json; charset=utf-8 6669.3527ms
+2026-06-20 23:47:16.929 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dashboard/metrics/comments - 200 null application/json; charset=utf-8 6609.0744ms
+2026-06-20 23:47:26.915 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/me - null null
+2026-06-20 23:47:26.919 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:26.923 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/me - 204 null null 5.4209ms
+2026-06-20 23:47:26.937 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/me - application/json null
+2026-06-20 23:47:26.967 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:26.973 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.RestaurantsController.GetMine (OndeComer.API)'
+2026-06-20 23:47:26.977 -03:00 [INF] Route matched with {action = "GetMine", controller = "Restaurants"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetMine(System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.RestaurantsController (OndeComer.API).
+2026-06-20 23:47:26.983 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__ownerId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."Address", t."Category", t."City", t."CoverUrl", t."CreatedAt", t."Description", t."InstagramUrl", t."IsActive", t."Latitude", t."LogoUrl", t."Longitude", t."Name", t."OpeningHours", t."OwnerUserId", t."YouTubeVideoUrl", d."Id", d."AvailabilityEnd", d."AvailabilityStart", d."Category", d."CreatedAt", d."Description", d."ImageUrl", d."IsActive", d."Name", d."Price", d."RatingAverage", d."RatingCount", d."RestaurantId", d."UpdatedAt"
+FROM (
+    SELECT r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+    FROM "Restaurants" AS r
+    WHERE r."OwnerUserId" = @__ownerId_0
+    LIMIT 1
+) AS t
+LEFT JOIN "Dishes" AS d ON t."Id" = d."RestaurantId"
+ORDER BY t."Id"
+2026-06-20 23:47:26.997 -03:00 [INF] Executing OkObjectResult, writing value of type 'OndeComer.Application.DTOs.Restaurant.RestaurantDto'.
+2026-06-20 23:47:27.000 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.RestaurantsController.GetMine (OndeComer.API) in 21.149ms
+2026-06-20 23:47:27.004 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.RestaurantsController.GetMine (OndeComer.API)'
+2026-06-20 23:47:27.009 -03:00 [INF] HTTP GET /api/v1/restaurants/me responded 200 in 39.1811 ms
+2026-06-20 23:47:27.017 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/me - 200 null application/json; charset=utf-8 79.6657ms
+2026-06-20 23:47:27.246 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dishes?onlyAvailable=false - null null
+2026-06-20 23:47:27.296 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:27.303 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dishes?onlyAvailable=false - 204 null null 56.8909ms
+2026-06-20 23:47:27.351 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dishes?onlyAvailable=false - application/json null
+2026-06-20 23:47:27.368 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:27.374 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.RestaurantsController.GetDishes (OndeComer.API)'
+2026-06-20 23:47:27.394 -03:00 [INF] Route matched with {action = "GetDishes", controller = "Restaurants"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetDishes(System.Guid, Boolean, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.RestaurantsController (OndeComer.API).
+2026-06-20 23:47:27.434 -03:00 [INF] Executed DbCommand (1ms) [Parameters=[@__restaurantId_0='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT d."Id", d."AvailabilityEnd", d."AvailabilityStart", d."Category", d."CreatedAt", d."Description", d."ImageUrl", d."IsActive", d."Name", d."Price", d."RatingAverage", d."RatingCount", d."RestaurantId", d."UpdatedAt"
+FROM "Dishes" AS d
+WHERE d."RestaurantId" = @__restaurantId_0
+ORDER BY d."Category", d."Name"
+2026-06-20 23:47:27.451 -03:00 [INF] Executing OkObjectResult, writing value of type 'System.Linq.Enumerable+SelectListIterator`2[[OndeComer.Domain.Entities.Dish, OndeComer.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null],[OndeComer.Application.DTOs.Dish.DishDto, OndeComer.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2026-06-20 23:47:27.482 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.RestaurantsController.GetDishes (OndeComer.API) in 75.4376ms
+2026-06-20 23:47:27.520 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.RestaurantsController.GetDishes (OndeComer.API)'
+2026-06-20 23:47:27.529 -03:00 [INF] HTTP GET /api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dishes responded 200 in 156.0388 ms
+2026-06-20 23:47:27.537 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/restaurants/9b6e7370-c07f-40a7-a7f2-be2e95bbde09/dishes?onlyAvailable=false - 200 null application/json; charset=utf-8 186.2228ms
+2026-06-20 23:47:27.791 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/uploads/2026/05/878bddd4-6a99-4e17-bfff-37f66c625341.jpg - null null
+2026-06-20 23:47:27.799 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:27.815 -03:00 [INF] Sending file. Request path: '/uploads/2026/05/878bddd4-6a99-4e17-bfff-37f66c625341.jpg'. Physical path: 'C:\OndeComerEmSalvador\backend\OndeComer.API\wwwroot\uploads\2026\05\878bddd4-6a99-4e17-bfff-37f66c625341.jpg'
+2026-06-20 23:47:27.834 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/uploads/2026/05/878bddd4-6a99-4e17-bfff-37f66c625341.jpg - 200 17731 image/jpeg 42.5789ms
+2026-06-20 23:47:27.881 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/uploads/2026/05/357b69fc-71be-4ad0-86cc-08b108a47017.jpg - null null
+2026-06-20 23:47:27.900 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:27.912 -03:00 [INF] Sending file. Request path: '/uploads/2026/05/357b69fc-71be-4ad0-86cc-08b108a47017.jpg'. Physical path: 'C:\OndeComerEmSalvador\backend\OndeComer.API\wwwroot\uploads\2026\05\357b69fc-71be-4ad0-86cc-08b108a47017.jpg'
+2026-06-20 23:47:27.928 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/uploads/2026/05/357b69fc-71be-4ad0-86cc-08b108a47017.jpg - 200 16709 image/jpeg 46.8656ms
+2026-06-20 23:47:36.563 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - null null
+2026-06-20 23:47:36.580 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:36.584 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - 204 null null 20.3555ms
+2026-06-20 23:47:36.633 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - application/json null
+2026-06-20 23:47:36.669 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:36.695 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.PromotionsController.GetAll (OndeComer.API)'
+2026-06-20 23:47:36.700 -03:00 [INF] Route matched with {action = "GetAll", controller = "Promotions"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetAll(Int32, Int32, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.PromotionsController (OndeComer.API).
+2026-06-20 23:47:36.743 -03:00 [INF] Executed DbCommand (12ms) [Parameters=[@__p_1='?' (DbType = Int32), @__p_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."CreatedAt", t."Description", t."DiscountPercent", t."ExpiresAt", t."ImageUrl", t."IsActive", t."RestaurantId", t."Title", r."Id", r."Address", r."Category", r."City", r."CoverUrl", r."CreatedAt", r."Description", r."InstagramUrl", r."IsActive", r."Latitude", r."LogoUrl", r."Longitude", r."Name", r."OpeningHours", r."OwnerUserId", r."YouTubeVideoUrl"
+FROM (
+    SELECT p."Id", p."CreatedAt", p."Description", p."DiscountPercent", p."ExpiresAt", p."ImageUrl", p."IsActive", p."RestaurantId", p."Title"
+    FROM "Promotions" AS p
+    WHERE p."IsActive" AND (p."ExpiresAt" IS NULL OR p."ExpiresAt" > now())
+    ORDER BY p."CreatedAt" DESC
+    LIMIT @__p_1 OFFSET @__p_0
+) AS t
+INNER JOIN "Restaurants" AS r ON t."RestaurantId" = r."Id"
+ORDER BY t."CreatedAt" DESC
+2026-06-20 23:47:36.764 -03:00 [INF] Executing OkObjectResult, writing value of type '<>f__AnonymousType7`3[[System.Collections.Generic.IEnumerable`1[[OndeComer.Application.DTOs.Promotion.PromotionDto, OndeComer.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2026-06-20 23:47:36.779 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.PromotionsController.GetAll (OndeComer.API) in 50.7692ms
+2026-06-20 23:47:36.800 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.PromotionsController.GetAll (OndeComer.API)'
+2026-06-20 23:47:36.814 -03:00 [INF] HTTP GET /api/v1/promotions responded 200 in 119.2141 ms
+2026-06-20 23:47:36.872 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/api/v1/promotions?page=1&pageSize=20 - 200 null application/json; charset=utf-8 238.9816ms
+2026-06-20 23:47:57.441 -03:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/v1/auth/logout - null null
+2026-06-20 23:47:57.446 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:57.453 -03:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/v1/auth/logout - 204 null null 12.2215ms
+2026-06-20 23:47:57.495 -03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/v1/auth/logout - application/json 0
+2026-06-20 23:47:57.531 -03:00 [INF] CORS policy execution successful.
+2026-06-20 23:47:57.555 -03:00 [INF] Executing endpoint 'OndeComer.API.Controllers.V1.AuthController.Logout (OndeComer.API)'
+2026-06-20 23:47:57.635 -03:00 [INF] Route matched with {action = "Logout", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Logout(OndeComer.Application.DTOs.Auth.RefreshTokenRequest, System.Threading.CancellationToken) on controller OndeComer.API.Controllers.V1.AuthController (OndeComer.API).
+2026-06-20 23:47:57.691 -03:00 [INF] Executing BadRequestObjectResult, writing value of type 'Microsoft.AspNetCore.Mvc.ValidationProblemDetails'.
+2026-06-20 23:47:57.709 -03:00 [INF] Executed action OndeComer.API.Controllers.V1.AuthController.Logout (OndeComer.API) in 19.1544ms
+2026-06-20 23:47:57.719 -03:00 [INF] Executed endpoint 'OndeComer.API.Controllers.V1.AuthController.Logout (OndeComer.API)'
+2026-06-20 23:47:57.730 -03:00 [INF] HTTP POST /api/v1/auth/logout responded 400 in 175.6126 ms
+2026-06-20 23:47:57.749 -03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/v1/auth/logout - 400 null application/problem+json; charset=utf-8 253.3947ms

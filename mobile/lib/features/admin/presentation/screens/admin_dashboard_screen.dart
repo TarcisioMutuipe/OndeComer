@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_router.dart';
 import '../viewmodels/admin_viewmodel.dart';
 import '../../data/models/admin_models.dart';
 
@@ -69,6 +70,18 @@ class _DashboardTab extends ConsumerWidget {
                   dashboard.pendingModerations.toString(), Icons.pending),
               _infoCard('Campanhas ativas',
                   dashboard.activeCampaigns.toString(), Icons.campaign),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: () => context.push(AppRoutes.adminPromotionSettings),
+                icon: const Icon(Icons.tune),
+                label: const Text('Parâmetros de Promoção'),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: () => context.push(AppRoutes.adminPromotionTickets),
+                icon: const Icon(Icons.receipt_long),
+                label: const Text('Tickets vendidos / consumidos / expirados'),
+              ),
             ],
           ),
         );

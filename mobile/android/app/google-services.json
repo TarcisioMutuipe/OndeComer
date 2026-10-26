@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "291510498020",
+    "project_id": "ondecomer-87c08",
+    "storage_bucket": "ondecomer-87c08.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291510498020:android:fedc0aaae6faaa2e0672f1",
+        "android_client_info": {
+          "package_name": "com.ondecomer.emsalvador"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCO8xh4Mqur8hBP7ptb1Nkv1vNrVJDNvr8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -9,7 +9,8 @@ final adminRestaurantDataSourceProvider = Provider((ref) {
 });
 
 /// StateNotifier para gerenciar restaurantes do admin
-class AdminRestaurantNotifier extends StateNotifier<AsyncValue<List<RestaurantModel>>> {
+class AdminRestaurantNotifier
+    extends StateNotifier<AsyncValue<List<RestaurantModel>>> {
   final AdminRestaurantDataSource dataSource;
   final Ref ref;
 
@@ -21,9 +22,9 @@ class AdminRestaurantNotifier extends StateNotifier<AsyncValue<List<RestaurantMo
   Future<void> loadRestaurants({String? search, String? category}) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => dataSource.getRestaurants(
-      search: search,
-      category: category,
-    ));
+          search: search,
+          category: category,
+        ));
   }
 
   Future<void> updateRestaurant(String id, Map<String, dynamic> data) async {
@@ -60,8 +61,8 @@ class AdminRestaurantNotifier extends StateNotifier<AsyncValue<List<RestaurantMo
   }
 }
 
-final adminRestaurantProvider =
-    StateNotifierProvider<AdminRestaurantNotifier, AsyncValue<List<RestaurantModel>>>((ref) {
+final adminRestaurantProvider = StateNotifierProvider<AdminRestaurantNotifier,
+    AsyncValue<List<RestaurantModel>>>((ref) {
   final dataSource = ref.watch(adminRestaurantDataSourceProvider);
   return AdminRestaurantNotifier(dataSource: dataSource, ref: ref);
 });

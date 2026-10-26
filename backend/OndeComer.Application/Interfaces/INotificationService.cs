@@ -8,6 +8,7 @@ public interface INotificationService
     Task UnregisterDeviceAsync(Guid userId, string fcmToken, CancellationToken ct = default);
     Task<NotificationPreferenceDto> GetPreferencesAsync(Guid userId, CancellationToken ct = default);
     Task UpdatePreferencesAsync(Guid userId, UpdatePreferencesRequest request, CancellationToken ct = default);
-    Task SendPushToUserAsync(Guid userId, PushNotificationDto notification, CancellationToken ct = default);
-    Task SendPushToRestaurantOwnerAsync(Guid restaurantId, PushNotificationDto notification, CancellationToken ct = default);
+    Task<bool> SendPushToUserAsync(Guid userId, PushNotificationDto notification, CancellationToken ct = default);
+    Task<bool> SendPushToRestaurantOwnerAsync(Guid restaurantId, PushNotificationDto notification, CancellationToken ct = default);
+    Task<bool> SendPushToPromotionSubscribersAsync(PushNotificationDto notification, CancellationToken ct = default);
 }

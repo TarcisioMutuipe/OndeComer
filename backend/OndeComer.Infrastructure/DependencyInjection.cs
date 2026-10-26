@@ -45,9 +45,9 @@ public static class DependencyInjection
         services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<ICommentService, CommentService>();
-        services.AddScoped<IFavoriteService, FavoriteService>();
-        services.AddScoped<IWishlistService, WishlistService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IPromotionTicketLifecycleService, PromotionTicketLifecycleService>();
+        services.AddScoped<IPromotionService, PromotionService>();
         services.AddScoped<ICheckInRepository, CheckInRepository>();
         services.AddScoped<ICheckInService, CheckInService>();
         services.AddScoped<ILoyaltyRepository, LoyaltyRepository>();
@@ -56,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<IAdminService, AdminService>();
         services.AddSingleton<IPushSender, FcmPushSender>();
         services.AddScoped<IEmailService, ResendEmailService>();
+        services.AddHostedService<PromotionTicketReminderHostedService>();
         services.AddHttpClient("FCM");
         services.AddHttpClient("Moderation");
         services.AddHttpClient("Resend");

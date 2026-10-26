@@ -1,3 +1,5 @@
+using OndeComer.Domain.Enums;
+
 namespace OndeComer.Application.DTOs.Promotion;
 
 public record PromotionDto(
@@ -9,6 +11,16 @@ public record PromotionDto(
     string? Description,
     string? ImageUrl,
     decimal? DiscountPercent,
+    PromotionScope Scope,
+    IReadOnlyCollection<Guid> TargetDishIds,
+    IReadOnlyCollection<string> TargetDishNames,
+    int TotalTickets,
+    int RemainingTickets,
     DateTime? ExpiresAt,
+    DateTime ClaimStartsAt,
+    DateTime ClaimEndsAt,
+    int TicketValidityDays,
+    string? PixKey,
+    bool CanClaim,
     DateTime CreatedAt
 );

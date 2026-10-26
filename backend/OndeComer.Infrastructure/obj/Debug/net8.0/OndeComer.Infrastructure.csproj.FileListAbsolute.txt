@@ -17,3 +17,4 @@ C:\OndeComerEmSalvador\backend\OndeComer.Infrastructure\obj\Debug\net8.0\refint\
 C:\OndeComerEmSalvador\backend\OndeComer.Infrastructure\obj\Debug\net8.0\OndeComer.Infrastructure.pdb
 C:\OndeComerEmSalvador\backend\OndeComer.Infrastructure\obj\Debug\net8.0\OndeComer.Infrastructure.genruntimeconfig.cache
 C:\OndeComerEmSalvador\backend\OndeComer.Infrastructure\obj\Debug\net8.0\ref\OndeComer.Infrastructure.dll
+C:\OndeComerEmSalvador\backend\OndeComer.Infrastructure\obj\Debug\net8.0\OndeComer.Infrastructure.sourcelink.json

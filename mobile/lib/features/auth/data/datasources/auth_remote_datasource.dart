@@ -72,6 +72,19 @@ class AuthRemoteDataSource {
     await _dio.post(ApiConstants.logout);
   }
 
+  Future<void> deleteMyAccount() async {
+    await _dio.delete(ApiConstants.accountDeleteMe);
+  }
+
+  Future<String> exportMyData({String format = 'json'}) async {
+    final response = await _dio.get(
+      ApiConstants.accountExportMe,
+      queryParameters: {'format': format},
+      options: Options(responseType: ResponseType.plain),
+    );
+    return response.data.toString();
+  }
+
   Future<UserModel> getProfile() async {
     final response = await _dio.get(ApiConstants.me);
     // GET /me retorna UserDto diretamente (sem accessToken/refreshToken)

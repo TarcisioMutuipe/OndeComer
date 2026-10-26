@@ -8,6 +8,7 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import '../../features/restaurant/data/models/dish_model.dart';
 import '../../features/restaurant/data/models/restaurant_model.dart';
+import '../../features/feed/data/models/promotion_model.dart';
 import '../../features/restaurant/presentation/screens/restaurant_dashboard_screen.dart';
 import '../../features/restaurant/presentation/screens/restaurant_form_screen.dart';
 import '../../features/restaurant/presentation/screens/restaurant_detail_screen.dart';
@@ -17,6 +18,9 @@ import '../../features/restaurant/presentation/screens/dish_form_screen.dart';
 import '../../features/restaurant/presentation/screens/metrics_dashboard_screen.dart';
 import '../../features/reviews/presentation/screens/moderation_screen.dart';
 import '../../features/feed/presentation/screens/owner_promotions_screen.dart';
+import '../../features/feed/presentation/screens/my_tickets_screen.dart';
+import '../../features/feed/presentation/screens/finalize_promotion_ticket_screen.dart';
+import '../../features/feed/presentation/screens/promotion_detail_screen.dart';
 import '../../features/search/presentation/screens/search_screen.dart';
 import '../../features/feed/presentation/screens/feed_screen.dart';
 import '../../features/favorites/presentation/screens/minhas_favoritas_screen.dart';
@@ -30,9 +34,12 @@ import '../../features/loyalty/presentation/screens/loyalty_screen.dart';
 import '../../features/admin/presentation/screens/admin_dashboard_screen.dart';
 import '../../features/admin/presentation/screens/admin_restaurant_list_screen.dart';
 import '../../features/admin/presentation/screens/admin_dish_list_screen.dart';
+import '../../features/admin/presentation/screens/admin_promotion_settings_screen.dart';
+import '../../features/admin/presentation/screens/admin_promotion_tickets_screen.dart';
 import '../../features/legal/presentation/screens/terms_of_use_screen.dart';
 import '../../features/legal/presentation/screens/privacy_policy_screen.dart';
 import '../../features/rankings/presentation/screens/rankings_screen.dart';
+import '../../features/social/presentation/screens/onde_comer_hoje_screen.dart';
 import '../../shared/widgets/main_scaffold.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -84,6 +91,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => MainScaffold(child: const FeedScreen()),
       ),
       GoRoute(
+        path: AppRoutes.promotionDetails,
+        builder: (context, state) => PromotionDetailScreen(
+          promotion: state.extra as PromotionModel,
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.profile,
         builder: (context, state) => MainScaffold(child: const ProfileScreen()),
       ),
@@ -103,6 +116,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.wishlists,
         builder: (context, state) =>
             MainScaffold(child: const MinhasListasScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.myTickets,
+        builder: (context, state) =>
+            MainScaffold(child: const MyTicketsScreen()),
       ),
       // Restaurant owner routes (static — must come before parameterized :restaurantId)
       GoRoute(
@@ -157,6 +175,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           restaurantId: state.extra as String,
         ),
       ),
+      GoRoute(
+        path: AppRoutes.finalizePromotionTicket,
+        builder: (context, state) => const FinalizePromotionTicketScreen(),
+      ),
       // Restaurant public detail (parameterized — must come after static routes)
       GoRoute(
         path: '/restaurant/:restaurantId',
@@ -199,6 +221,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AdminDashboardScreen(),
         routes: [
           GoRoute(
+            path: 'promotions/settings',
+            builder: (context, state) => const AdminPromotionSettingsScreen(),
+          ),
+          GoRoute(
+            path: 'promotions/tickets',
+            builder: (context, state) => const AdminPromotionTicketsScreen(),
+          ),
+          GoRoute(
             path: 'restaurants',
             builder: (context, state) => const AdminRestaurantListScreen(),
           ),
@@ -225,6 +255,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             MainScaffold(child: const RankingsScreen()),
       ),
+      // Onde Comer Hoje (Enquete & Roleta de Decisão Social)
+      GoRoute(
+        path: AppRoutes.ondeComerHoje,
+        builder: (context, state) =>
+            MainScaffold(child: const OndeComerHojeScreen()),
+      ),
     ],
   );
 });
@@ -241,14 +277,20 @@ abstract class AppRoutes {
   static const restaurantForm = '/restaurant/form';
   static const moderation = '/restaurant/moderation';
   static const ownerPromotions = '/restaurant/promotions';
+  static const finalizePromotionTicket = '/restaurant/promotions/finalize';
   static const favorites = '/favorites';
   static const wishlists = '/wishlists';
+  static const myTickets = '/tickets';
+  static const promotionDetails = '/promotion/details';
   static const notificationPreferences = '/notifications/preferences';
   static const checkInHistory = '/checkins/history';
   static const loyalty = '/loyalty';
   static const admin = '/admin';
+  static const adminPromotionSettings = '/admin/promotions/settings';
+  static const adminPromotionTickets = '/admin/promotions/tickets';
   static const adminRestaurants = '/admin/restaurants';
   static const termsOfUse = '/terms';
   static const privacyPolicy = '/privacy';
   static const rankings = '/rankings';
+  static const ondeComerHoje = '/onde-comer-hoje';
 }

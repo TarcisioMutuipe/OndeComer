@@ -58,6 +58,20 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> deleteMyAccount() async {
+    try {
+      await _remote.deleteMyAccount();
+    } finally {
+      await _storage.deleteAll();
+    }
+  }
+
+  @override
+  Future<String> exportMyData({String format = 'json'}) {
+    return _remote.exportMyData(format: format);
+  }
+
+  @override
   Future<UserModel?> getCurrentUser() async {
     final token = await _storage.read(key: StorageKeys.accessToken);
     if (token == null) return null;

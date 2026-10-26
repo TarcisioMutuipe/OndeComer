@@ -12,7 +12,8 @@ class AdminDishListScreen extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  ConsumerState<AdminDishListScreen> createState() => _AdminDishListScreenState();
+  ConsumerState<AdminDishListScreen> createState() =>
+      _AdminDishListScreenState();
 }
 
 class _AdminDishListScreenState extends ConsumerState<AdminDishListScreen> {
@@ -64,9 +65,9 @@ class _AdminDishListScreenState extends ConsumerState<AdminDishListScreen> {
               ),
               onChanged: (value) {
                 ref.read(adminDishProvider.notifier).loadDishes(
-                  widget.restaurantId,
-                  search: value.isEmpty ? null : value,
-                );
+                      widget.restaurantId,
+                      search: value.isEmpty ? null : value,
+                    );
               },
             ),
           ),
@@ -78,7 +79,8 @@ class _AdminDishListScreenState extends ConsumerState<AdminDishListScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(Icons.error_outline,
+                        size: 48, color: Colors.red),
                     const SizedBox(height: 16),
                     Text('Erro ao carregar: $error'),
                   ],
@@ -108,7 +110,8 @@ class _AdminDishListScreenState extends ConsumerState<AdminDishListScreen> {
                       dish: dish,
                       onEdit: () => _editDish(context, dish),
                       onDelete: () => _deleteDish(context, dish.id),
-                      onToggleAvailability: () => _toggleAvailability(context, dish.id),
+                      onToggleAvailability: () =>
+                          _toggleAvailability(context, dish.id),
                     );
                   },
                 );
@@ -330,7 +333,8 @@ class _DishCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: dish.isActive ? Colors.green[100] : Colors.red[100],
                     borderRadius: BorderRadius.circular(4),
@@ -339,7 +343,8 @@ class _DishCard extends StatelessWidget {
                     dish.isActive ? 'Disponível' : 'Indisponível',
                     style: TextStyle(
                       fontSize: 12,
-                      color: dish.isActive ? Colors.green[700] : Colors.red[700],
+                      color:
+                          dish.isActive ? Colors.green[700] : Colors.red[700],
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -353,7 +358,8 @@ class _DishCard extends StatelessWidget {
               children: [
                 TextButton.icon(
                   onPressed: onToggleAvailability,
-                  icon: Icon(dish.isActive ? Icons.visibility : Icons.visibility_off),
+                  icon: Icon(
+                      dish.isActive ? Icons.visibility : Icons.visibility_off),
                   label: Text(dish.isActive ? 'Ocultar' : 'Mostrar'),
                 ),
                 const SizedBox(width: 8),

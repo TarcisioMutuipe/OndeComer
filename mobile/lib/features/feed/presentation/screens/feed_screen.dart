@@ -3,9 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/network/dio_client.dart' show friendlyErrorMessage;
 import '../../../../shared/widgets/skeleton_loader.dart';
+import '../../../../core/router/app_router.dart';
+import '../../data/datasources/feed_remote_datasource.dart';
 import '../../presentation/viewmodels/feed_viewmodel.dart';
 import '../../data/models/promotion_model.dart';
+import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
+import '../../../restaurant/presentation/viewmodels/restaurant_viewmodel.dart';
+import '../../../restaurant/data/models/restaurant_model.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
@@ -40,14 +46,31 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(feedViewModelProvider);
+    final authState = ref.watch(authViewModelProvider);
+    final isRestaurant = authState.user?.profileType == 'Restaurant';
 
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         backgroundColor: AppTheme.white,
-        title: const Text('Feed'),
+        title: const Text('Ofertas & Tickets'),
         actions: [
+          if (isRestaurant) ...[
+            IconButton(
+              tooltip: 'Validar Ticket QR',
+              icon: const Icon(Icons.qr_code_scanner, color: Colors.green),
+              onPressed: () => context.push(AppRoutes.finalizePromotionTicket),
+            ),
+          ] else ...[
+            IconButton(
+              tooltip: 'Meus Tickets Resgatados',
+              icon: const Icon(Icons.confirmation_number_outlined,
+                  color: AppTheme.primaryYellowDark),
+              onPressed: () => context.push(AppRoutes.myTickets),
+            ),
+          ],
           IconButton(
+            tooltip: 'Atualizar feed',
             icon: const Icon(Icons.refresh),
             onPressed: () =>
                 ref.read(feedViewModelProvider.notifier).load(refresh: true),
@@ -64,6 +87,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   Widget _buildBody(FeedState state) {
+    final authState = ref.watch(authViewModelProvider);
+    final isRestaurant = authState.user?.profileType == 'Restaurant';
+    final restaurant = ref.watch(restaurantViewModelProvider).restaurant;
+
     if (state.isLoading) {
       return ListView.builder(
           itemCount: 5, itemBuilder: (_, __) => const FeedSkeletonCard());
@@ -85,44 +112,176 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       );
     }
     if (state.promotions.isEmpty) {
-      return Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          const Icon(Icons.local_offer_outlined,
-              size: 64, color: AppTheme.divider),
-          const SizedBox(height: 16),
-          const Text('Nenhuma promoção no momento.',
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)),
-          const SizedBox(height: 8),
-          const Text(
-              'Em breve os restaurantes de Salvador\nvão publicar ofertas aqui!',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
-        ]),
+      return ListView(
+        children: [
+          if (isRestaurant) _buildRestaurantOwnerHeader(context, restaurant),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.local_offer_outlined,
+                    size: 64, color: AppTheme.divider),
+                SizedBox(height: 16),
+                Text('Nenhuma promoção no momento.',
+                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)),
+                SizedBox(height: 8),
+                Text(
+                    'Em breve os restaurantes de Salvador\nvão publicar ofertas aqui!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              ],
+            ),
+          ),
+        ],
       );
     }
+
+    final headerOffset = isRestaurant ? 1 : 0;
+    final totalCount = headerOffset + state.promotions.length + (state.isLoadingMore ? 2 : 0);
+
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: state.promotions.length + (state.isLoadingMore ? 2 : 0),
+      itemCount: totalCount,
       itemBuilder: (context, i) {
-        if (i >= state.promotions.length) return const FeedSkeletonCard();
+        if (isRestaurant && i == 0) {
+          return _buildRestaurantOwnerHeader(context, restaurant);
+        }
+        final promoIndex = i - headerOffset;
+        if (promoIndex >= state.promotions.length) return const FeedSkeletonCard();
         return _PromotionCard(
-          promotion: state.promotions[i],
-          onTap: () =>
-              context.push('/restaurant/${state.promotions[i].restaurantId}'),
+          promotion: state.promotions[promoIndex],
+          onTap: () => context.push(AppRoutes.promotionDetails,
+              extra: state.promotions[promoIndex]),
+          onClaim: () => _claimPromotion(context, state.promotions[promoIndex]),
         );
       },
     );
+  }
+
+  Widget _buildRestaurantOwnerHeader(
+      BuildContext context, RestaurantModel? restaurant) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.amber.shade50, Colors.orange.shade50],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.amber.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.storefront,
+                  color: AppTheme.primaryYellowDark, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  restaurant?.name != null
+                      ? 'Painel do Restaurante • ${restaurant!.name}'
+                      : 'Área do Estabelecimento',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Valide os cupons apresentados pelos clientes ou gerencie as ofertas promocionais do seu restaurante.',
+            style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.qr_code_scanner, size: 16),
+                  label: const Text('Validar Ticket QR',
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () =>
+                      context.push(AppRoutes.finalizePromotionTicket),
+                ),
+              ),
+              if (restaurant != null) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.campaign_outlined, size: 16),
+                    label: const Text('Minhas Ofertas',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.bold)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.deepOrange.shade800,
+                      side: BorderSide(color: Colors.deepOrange.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () => context.push(AppRoutes.ownerPromotions,
+                        extra: restaurant.id),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _claimPromotion(
+      BuildContext context, PromotionModel promotion) async {
+    try {
+      final response = await ref
+          .read(feedRemoteDatasourceProvider)
+          .claimPromotion(promotion.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response['message'] as String? ?? 'Ticket obtido com sucesso!'),
+          action: SnackBarAction(
+            label: 'Ver Meus Tickets',
+            textColor: AppTheme.primaryYellow,
+            onPressed: () => context.push(AppRoutes.myTickets),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(friendlyErrorMessage(e)),
+      ));
+    }
   }
 }
 
 class _PromotionCard extends StatelessWidget {
   final PromotionModel promotion;
   final VoidCallback onTap;
-  const _PromotionCard({required this.promotion, required this.onTap});
+  final VoidCallback onClaim;
+  const _PromotionCard(
+      {required this.promotion, required this.onTap, required this.onClaim});
 
   @override
   Widget build(BuildContext context) {
+    final canClaimNow = promotion.canClaim && promotion.remainingTickets > 0;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -147,8 +306,9 @@ class _PromotionCard extends StatelessWidget {
                   height: 160,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  memCacheWidth: 600,
                   placeholder: (_, __) =>
-                      Container(height: 160, color: AppTheme.divider),
+                      const SkeletonLoader(width: double.infinity, height: 160),
                   errorWidget: (_, __, ___) =>
                       Container(height: 80, color: AppTheme.divider),
                 ),
@@ -222,11 +382,71 @@ class _PromotionCard extends StatelessWidget {
                 ],
               ),
             ),
-            // ── Countdown badge ──────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: Row(
+                children: [
+                  _StatusPill(
+                    label: canClaimNow
+                        ? '${promotion.remainingTickets} tickets restantes'
+                        : promotion.remainingTickets <= 0
+                            ? 'Todos os tickets já foram pegos'
+                            : 'Fora da janela de retirada',
+                    color: canClaimNow ? Colors.green : Colors.orange,
+                  ),
+                  const SizedBox(width: 8),
+                  _StatusPill(
+                    label: 'Retirada até ${_formatDate(promotion.claimEndsAt)}',
+                    color: AppTheme.textSecondary,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: canClaimNow ? onClaim : null,
+                  icon: const Icon(Icons.back_hand_outlined),
+                  label: Text(canClaimNow ? 'Pegar ticket' : 'Indisponível'),
+                ),
+              ),
+            ),
             if (promotion.expiresAt != null)
               _ExpirationBadge(expiresAt: promotion.expiresAt!),
           ],
         ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime dateTime) {
+    final local = dateTime.toLocal();
+    final day = local.day.toString().padLeft(2, '0');
+    final month = local.month.toString().padLeft(2, '0');
+    return '$day/$month';
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _StatusPill({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style:
+            TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600),
       ),
     );
   }

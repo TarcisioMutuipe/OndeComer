@@ -73,6 +73,12 @@ class ApiConstants {
   static const String promotionsBase = '$apiVersion/promotions';
   static String promotionsByRestaurant(String restaurantId) =>
       '$promotionsBase/restaurant/$restaurantId';
+  static String claimPromotion(String promotionId) =>
+      '$promotionsBase/$promotionId/claim';
+  static const String myPromotionTickets = '$promotionsBase/me/tickets';
+  static const String restaurantPromotionTickets =
+      '$promotionsBase/restaurant/tickets';
+  static const String finalizePromotionTicket = '$promotionsBase/finalize';
 
   // Sync
   static const String syncBase = '$apiVersion/sync';

@@ -98,14 +98,14 @@ public class NotificationService : INotificationService
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task SendPushToUserAsync(Guid userId, PushNotificationDto notification, CancellationToken ct = default)
+    public async Task<bool> SendPushToUserAsync(Guid userId, PushNotificationDto notification, CancellationToken ct = default)
     {
         var tokens = await _db.NotificationDevices
             .Where(d => d.UserId == userId && d.IsActive)
             .Select(d => d.FcmToken)
             .ToListAsync(ct);
 
-        if (tokens.Count == 0) return;
+        if (tokens.Count == 0) return false;
 
         var data = notification.Data ?? new Dictionary<string, string>();
         if (notification.DeepLink != null)
@@ -113,19 +113,51 @@ public class NotificationService : INotificationService
 
         try
         {
-            await _pushSender.SendMultipleAsync(tokens, notification.Title, notification.Body, data, ct);
+            return await _pushSender.SendMultipleAsync(tokens, notification.Title, notification.Body, data, ct);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send push to user {UserId}", userId);
+            return false;
         }
     }
 
-    public async Task SendPushToRestaurantOwnerAsync(Guid restaurantId, PushNotificationDto notification, CancellationToken ct = default)
+    public async Task<bool> SendPushToRestaurantOwnerAsync(Guid restaurantId, PushNotificationDto notification, CancellationToken ct = default)
     {
         var restaurant = await _db.Restaurants.FindAsync(new object[] { restaurantId }, ct);
-        if (restaurant == null) return;
+        if (restaurant == null) return false;
 
-        await SendPushToUserAsync(restaurant.OwnerUserId, notification, ct);
+        return await SendPushToUserAsync(restaurant.OwnerUserId, notification, ct);
+    }
+
+    public async Task<bool> SendPushToPromotionSubscribersAsync(PushNotificationDto notification, CancellationToken ct = default)
+    {
+        var userIds = await _db.NotificationDevices
+            .Where(d => d.IsActive)
+            .Select(d => d.UserId)
+            .Distinct()
+            .ToListAsync(ct);
+
+        if (userIds.Count == 0)
+            return false;
+
+        var preferences = await _db.NotificationPreferences
+            .Where(p => userIds.Contains(p.UserId))
+            .Select(p => new { p.UserId, p.PromotionActive })
+            .ToListAsync(ct);
+
+        var preferenceMap = preferences.ToDictionary(p => p.UserId, p => p.PromotionActive);
+        var userIdsToNotify = userIds
+            .Where(userId => !preferenceMap.TryGetValue(userId, out var promotionActive) || promotionActive)
+            .ToList();
+
+        var anySent = false;
+
+        foreach (var userId in userIdsToNotify)
+        {
+            anySent |= await SendPushToUserAsync(userId, notification, ct);
+        }
+
+        return anySent;
     }
 }

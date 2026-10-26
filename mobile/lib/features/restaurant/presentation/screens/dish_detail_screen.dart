@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../features/reviews/presentation/screens/dish_review_section.dart';
 import '../../data/models/dish_model.dart';
@@ -35,6 +36,9 @@ class DishDetailScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 200,
                   fit: BoxFit.cover,
+                  memCacheWidth: 800,
+                  placeholder: (_, __) =>
+                      const SkeletonLoader(width: double.infinity, height: 200),
                   errorWidget: (_, __, ___) => Container(
                     height: 200,
                     color: AppTheme.divider,

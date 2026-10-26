@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
-import '../../../core/constants/api_constants.dart';
-import '../../../core/network/dio_client.dart';
+import 'package:onde_comer_em_salvador/core/constants/api_constants.dart';
+import 'package:onde_comer_em_salvador/core/network/dio_client.dart';
 
 class RankingsState {
   final bool isLoading;

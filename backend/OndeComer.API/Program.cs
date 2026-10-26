@@ -105,6 +105,8 @@ try
     app.UseSerilogRequestLogging();
     app.UseAuthentication();
     app.UseAuthorization();
+    app.MapGet("/", () => Results.Redirect("/swagger"));
+    app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
     app.MapControllers();
 
     // Auto-migrate on startup

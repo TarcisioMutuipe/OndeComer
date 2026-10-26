@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -7,6 +7,7 @@ import '../../../restaurant/presentation/widgets/restaurant_card.dart';
 import '../../../restaurant/data/models/restaurant_model.dart';
 import '../../data/models/restaurant_search_result_model.dart';
 import '../viewmodels/search_viewmodel.dart';
+import '../widgets/salvador_radar_view.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -19,6 +20,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final _queryCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
   bool _filtersExpanded = false;
+  String? _selectedNeighborhood;
+  bool _isRadarView = false;
 
   // Local filter state (applied only on "Aplicar")
   String? _localCategory;
@@ -30,6 +33,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   double _localRadius = 5.0;
 
   static const _categories = [
+    'Comida Baiana',
+    'Acarajé & Tabuleiro',
+    'Cafés & Docerias',
+    'Petiscos & Bar',
     'Nordestina',
     'Frutos do Mar',
     'Pizza',
@@ -74,6 +81,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
   }
 
+  void _onSelectNeighborhood(String neighborhood) {
+    setState(() {
+      if (_selectedNeighborhood == neighborhood || neighborhood == 'Todos') {
+        _selectedNeighborhood = null;
+        _queryCtrl.clear();
+      } else {
+        _selectedNeighborhood = neighborhood;
+        _queryCtrl.text = neighborhood;
+      }
+    });
+    _submitQuery();
+  }
+
   void _submitQuery() {
     ref
         .read(searchViewModelProvider.notifier)
@@ -103,6 +123,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _localIsOpenNow = null;
       _localSortBy = 'relevance';
       _localRadius = 5.0;
+      _selectedNeighborhood = null;
     });
     ref.read(searchViewModelProvider.notifier).clearFilters();
     ref.read(searchViewModelProvider.notifier).search(refresh: true);
@@ -130,6 +151,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             onSubmit: _submitQuery,
             filtersExpanded: _filtersExpanded,
             hasActiveFilters: state.hasActiveFilters,
+            selectedNeighborhood: _selectedNeighborhood,
+            onSelectNeighborhood: _onSelectNeighborhood,
             onToggleFilters: () =>
                 setState(() => _filtersExpanded = !_filtersExpanded),
           ),
@@ -167,11 +190,78 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           if (state.locationPermissionDenied && !_filtersExpanded)
             const SliverToBoxAdapter(child: _LocationDeniedBanner()),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Row(
+                children: [
+                  Text(
+                    _isRadarView
+                        ? 'Explorador Radar Salvador'
+                        : 'Restaurantes (${state.results.length})',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  const Spacer(),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () => setState(() => _isRadarView = !_isRadarView),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _isRadarView
+                            ? AppTheme.primaryYellow
+                            : AppTheme.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: _isRadarView
+                              ? AppTheme.primaryYellowDark
+                              : AppTheme.divider,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _isRadarView ? Icons.list_alt : Icons.radar,
+                            size: 15,
+                            color: AppTheme.textPrimary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _isRadarView ? 'Ver Lista' : 'Modo Radar',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           if (state.isLoading)
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (_, __) => const RestaurantSkeletonCard(),
                 childCount: 6,
+              ),
+            )
+          else if (_isRadarView)
+            SliverToBoxAdapter(
+              child: SalvadorRadarView(
+                results: state.results,
+                userLat: state.userLat,
+                userLng: state.userLng,
+                onSelectRestaurant: (r) => context.push('/restaurant/${r.id}'),
+                onSelectCircuit: _onSelectNeighborhood,
               ),
             )
           else if (state.results.isEmpty)
@@ -232,6 +322,8 @@ class _SearchAppBar extends StatelessWidget {
   final bool filtersExpanded;
   final bool hasActiveFilters;
   final VoidCallback onToggleFilters;
+  final String? selectedNeighborhood;
+  final ValueChanged<String> onSelectNeighborhood;
 
   const _SearchAppBar({
     required this.queryCtrl,
@@ -239,6 +331,8 @@ class _SearchAppBar extends StatelessWidget {
     required this.filtersExpanded,
     required this.hasActiveFilters,
     required this.onToggleFilters,
+    this.selectedNeighborhood,
+    required this.onSelectNeighborhood,
   });
 
   @override
@@ -255,10 +349,13 @@ class _SearchAppBar extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
       ),
       bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
+        preferredSize: const Size.fromHeight(104),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
             children: [
               Expanded(
                 child: TextField(
@@ -321,9 +418,61 @@ class _SearchAppBar extends StatelessWidget {
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 32,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                'Todos',
+                'Rio Vermelho',
+                'Pelourinho',
+                'Barra',
+                'Pituba',
+                'Ribeira',
+                'Itapuã',
+                'Stella Maris',
+                'Santo Antônio',
+              ].map((hub) {
+                final isSelected =
+                    (selectedNeighborhood == null && hub == 'Todos') ||
+                        selectedNeighborhood == hub;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: ChoiceChip(
+                    label: Text(
+                      hub,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected
+                            ? AppTheme.textPrimary
+                            : AppTheme.textSecondary,
+                      ),
+                    ),
+                    selected: isSelected,
+                    selectedColor: AppTheme.primaryYellow,
+                    backgroundColor: AppTheme.white,
+                    side: BorderSide(
+                      color:
+                          isSelected ? AppTheme.primaryYellow : AppTheme.divider,
+                      width: 1,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    onSelected: (_) => onSelectNeighborhood(hub),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
-    );
+    ),
+  ),
+);
   }
 }
 

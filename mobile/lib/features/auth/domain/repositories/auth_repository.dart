@@ -7,6 +7,8 @@ abstract class AuthRepository {
       String name, String email, String password, String profileType);
   Future<UserModel> refreshToken(String refreshToken);
   Future<void> logout();
+  Future<void> deleteMyAccount();
+  Future<String> exportMyData({String format});
   Future<UserModel?> getCurrentUser();
   Future<UserModel> updateProfile(String name, String? avatarUrl);
 }

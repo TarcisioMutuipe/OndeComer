@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../data/models/restaurant_model.dart';
+import 'restaurant_open_status_badge.dart';
 
 class RestaurantCard extends StatelessWidget {
   final RestaurantModel restaurant;
@@ -29,16 +31,31 @@ class RestaurantCard extends StatelessWidget {
             ClipRRect(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(16)),
-              child: restaurant.coverUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: restaurant.coverUrl!,
-                      height: 140,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => _placeholder(),
-                      errorWidget: (_, __, ___) => _placeholder(),
-                    )
-                  : _placeholder(),
+              child: Stack(
+                children: [
+                  restaurant.coverUrl != null
+                      ? CachedNetworkImage(
+                          imageUrl: restaurant.coverUrl!,
+                          height: 140,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 600,
+                          placeholder: (_, __) => const SkeletonLoader(
+                            height: 140,
+                            borderRadius: 0,
+                          ),
+                          errorWidget: (_, __, ___) => _errorPlaceholder(),
+                        )
+                      : _errorPlaceholder(),
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: RestaurantOpenStatusBadge(
+                      openingHours: restaurant.openingHours,
+                    ),
+                  ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(12),
@@ -53,6 +70,13 @@ class RestaurantCard extends StatelessWidget {
                         width: 40,
                         height: 40,
                         fit: BoxFit.cover,
+                        memCacheWidth: 120,
+                        memCacheHeight: 120,
+                        placeholder: (_, __) => const SkeletonLoader(
+                          width: 40,
+                          height: 40,
+                          borderRadius: 8,
+                        ),
                         errorWidget: (_, __, ___) =>
                             const Icon(Icons.restaurant, size: 40),
                       ),
@@ -107,7 +131,7 @@ class RestaurantCard extends StatelessWidget {
     );
   }
 
-  Widget _placeholder() => Container(
+  Widget _errorPlaceholder() => Container(
         height: 140,
         width: double.infinity,
         color: AppTheme.divider,

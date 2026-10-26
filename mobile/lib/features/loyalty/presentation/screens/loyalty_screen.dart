@@ -185,7 +185,10 @@ class LoyaltyScreen extends ConsumerWidget {
         ? (totalPoints / badge.requiredPoints).clamp(0.0, 1.0)
         : 1.0;
 
-    return Container(
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => _showBadgeDetails(context, badge, totalPoints),
+      child: Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: badge.isUnlocked
@@ -225,6 +228,102 @@ class LoyaltyScreen extends ConsumerWidget {
               minHeight: 4,
             ),
         ],
+      ),
+    ),
+  );
+  }
+
+  void _showBadgeDetails(
+      BuildContext context, BadgeModel badge, int totalPoints) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            CircleAvatar(
+              radius: 36,
+              backgroundColor: badge.isUnlocked
+                  ? Colors.amber.shade100
+                  : Colors.grey.shade200,
+              child: Icon(
+                badge.isUnlocked ? Icons.emoji_events : Icons.lock_outline,
+                size: 40,
+                color: badge.isUnlocked ? Colors.amber.shade800 : Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              badge.name,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              badge.description.isNotEmpty
+                  ? badge.description
+                  : 'Selo oficial de conquista gastronômica em Salvador.',
+              style: const TextStyle(color: Colors.black54, fontSize: 13),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: badge.isUnlocked
+                    ? Colors.green.shade50
+                    : Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: badge.isUnlocked
+                      ? Colors.green.shade200
+                      : Colors.amber.shade200,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    badge.isUnlocked
+                        ? Icons.check_circle
+                        : Icons.info_outline,
+                    color: badge.isUnlocked
+                        ? Colors.green.shade700
+                        : Colors.amber.shade800,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      badge.isUnlocked
+                          ? 'Selo conquistado! Ele fica visível no seu perfil.'
+                          : 'Meta: ${badge.requiredPoints} pontos necessários (você tem $totalPoints pts).',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: badge.isUnlocked
+                            ? Colors.green.shade900
+                            : Colors.amber.shade900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -28,7 +28,8 @@ class AdminRestaurantDataSource {
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
         return data
-            .map((json) => RestaurantModel.fromJson(json as Map<String, dynamic>))
+            .map((json) =>
+                RestaurantModel.fromJson(json as Map<String, dynamic>))
             .toList();
       }
       throw Exception('Erro ao carregar restaurantes');

@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OndeComer.Application.Common.Exceptions;
 using OndeComer.Application.DTOs.Promotion;
-using OndeComer.Domain.Entities;
-using OndeComer.Domain.Interfaces;
+using OndeComer.Application.Interfaces;
 using System.Security.Claims;
 
 namespace OndeComer.API.Controllers.V1;
@@ -12,9 +10,12 @@ namespace OndeComer.API.Controllers.V1;
 [Route("api/v1/promotions")]
 public class PromotionsController : ControllerBase
 {
-    private readonly IUnitOfWork _uow;
+    private readonly IPromotionService _promotionService;
 
-    public PromotionsController(IUnitOfWork uow) => _uow = uow;
+    public PromotionsController(IPromotionService promotionService)
+    {
+        _promotionService = promotionService;
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -22,18 +23,15 @@ public class PromotionsController : ControllerBase
         [FromQuery] int pageSize = 20,
         CancellationToken ct = default)
     {
-        pageSize = Math.Clamp(pageSize, 1, 50);
-        page = Math.Max(page, 1);
-        var promotions = await _uow.Promotions.GetActiveAsync(page, pageSize, ct);
-        var dtos = promotions.Select(p => ToDto(p));
-        return Ok(new { items = dtos, page, pageSize });
+        var result = await _promotionService.GetFeedAsync(page, pageSize, ct);
+        return Ok(result);
     }
 
     [HttpGet("restaurant/{restaurantId:guid}")]
     public async Task<IActionResult> GetByRestaurant(Guid restaurantId, CancellationToken ct)
     {
-        var promotions = await _uow.Promotions.GetByRestaurantAsync(restaurantId, ct);
-        return Ok(promotions.Select(p => ToDto(p)));
+        var promotions = await _promotionService.GetByRestaurantAsync(restaurantId, ct);
+        return Ok(promotions);
     }
 
     [Authorize]
@@ -41,27 +39,7 @@ public class PromotionsController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreatePromotionRequest request, CancellationToken ct)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var restaurant = await _uow.Restaurants.GetByOwnerIdAsync(userId, ct)
-            ?? throw new NotFoundException("Restaurante não encontrado para este usuário.");
-
-        if (request.ExpiresAt.HasValue && request.ExpiresAt.Value <= DateTime.UtcNow)
-            throw new AppException("A data de expiração deve ser no futuro.", 400);
-
-        var promotion = new Promotion
-        {
-            RestaurantId = restaurant.Id,
-            Title = request.Title,
-            Description = request.Description,
-            ImageUrl = request.ImageUrl,
-            DiscountPercent = request.DiscountPercent,
-            ExpiresAt = request.ExpiresAt,
-            IsActive = true
-        };
-
-        await _uow.Promotions.AddAsync(promotion, ct);
-        await _uow.CommitAsync(ct);
-
-        var dto = ToDto(promotion, restaurant.Name, restaurant.LogoUrl);
+        var dto = await _promotionService.CreateAsync(userId, request, ct);
         return CreatedAtAction(nameof(GetAll), dto);
     }
 
@@ -70,16 +48,7 @@ public class PromotionsController : ControllerBase
     public async Task<IActionResult> Delete(Guid promotionId, CancellationToken ct)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var restaurant = await _uow.Restaurants.GetByOwnerIdAsync(userId, ct)
-            ?? throw new NotFoundException("Restaurante não encontrado para este usuário.");
-
-        var belongs = await _uow.Promotions.BelongsToRestaurantAsync(promotionId, restaurant.Id, ct);
-        if (!belongs) throw new NotFoundException("Promoção não encontrada.");
-
-        var promotion = await _uow.Promotions.GetByIdAsync(promotionId, ct);
-        promotion!.IsActive = false;
-        await _uow.CommitAsync(ct);
-
+        await _promotionService.DeleteAsync(userId, promotionId, ct);
         return NoContent();
     }
 
@@ -88,31 +57,43 @@ public class PromotionsController : ControllerBase
     public async Task<IActionResult> Update(Guid promotionId, [FromBody] UpdatePromotionRequest request, CancellationToken ct)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var restaurant = await _uow.Restaurants.GetByOwnerIdAsync(userId, ct)
-            ?? throw new NotFoundException("Restaurante não encontrado para este usuário.");
-
-        var belongs = await _uow.Promotions.BelongsToRestaurantAsync(promotionId, restaurant.Id, ct);
-        if (!belongs) throw new NotFoundException("Promoção não encontrada.");
-
-        var promotion = await _uow.Promotions.GetByIdAsync(promotionId, ct)
-            ?? throw new NotFoundException("Promoção não encontrada.");
-
-        if (request.Title != null) promotion.Title = request.Title;
-        if (request.Description != null) promotion.Description = request.Description;
-        if (request.ImageUrl != null) promotion.ImageUrl = request.ImageUrl;
-        if (request.DiscountPercent.HasValue) promotion.DiscountPercent = request.DiscountPercent;
-        if (request.ExpiresAt.HasValue) promotion.ExpiresAt = request.ExpiresAt;
-        if (request.IsActive.HasValue) promotion.IsActive = request.IsActive.Value;
-
-        await _uow.CommitAsync(ct);
-        return Ok(ToDto(promotion, restaurant.Name, restaurant.LogoUrl));
+        var dto = await _promotionService.UpdateAsync(userId, promotionId, request, ct);
+        return Ok(dto);
     }
 
-    private static PromotionDto ToDto(Promotion p, string? restaurantName = null, string? logoUrl = null)
-        => new(p.Id, p.RestaurantId,
-               restaurantName ?? p.Restaurant?.Name ?? string.Empty,
-               logoUrl ?? p.Restaurant?.LogoUrl,
-               p.Title, p.Description, p.ImageUrl,
-               p.DiscountPercent, p.ExpiresAt, p.CreatedAt);
-}
+    [Authorize]
+    [HttpPost("{promotionId:guid}/claim")]
+    public async Task<IActionResult> Claim(Guid promotionId, CancellationToken ct)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await _promotionService.ClaimAsync(userId, promotionId, ct);
+        return Ok(result);
+    }
 
+    [Authorize]
+    [HttpGet("me/tickets")]
+    public async Task<IActionResult> GetMyTickets(CancellationToken ct)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await _promotionService.GetMyTicketsAsync(userId, ct);
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpGet("restaurant/tickets")]
+    public async Task<IActionResult> GetRestaurantTickets(CancellationToken ct)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await _promotionService.GetRestaurantTicketsAsync(userId, ct);
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPost("finalize")]
+    public async Task<IActionResult> Finalize([FromBody] FinalizePromotionTicketRequest request, CancellationToken ct)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await _promotionService.FinalizeAsync(userId, request, ct);
+        return Ok(result);
+    }
+}

@@ -256,11 +256,51 @@ mobile/lib/
 - Backend `POST /api/v1/sync`: processa batch de operações, retorna `SyncResponse` com resultado por `clientId`
 - Backend `GET /api/v1/sync/changes?since=`: retorna delta (estrutura preparada, sem persistência de eventos)
 
+### ENTREGAS 7+ / Fluxo de Promoções e Tickets
+
+#### Estado atual implementado
+- O fluxo de promoções foi convertido para um modelo baseado em tickets.
+- A criação de promoção gera uma quantidade fixa de tickets por lote e publica a promoção no feed.
+- O cliente pega 1 ticket por promoção e entra em cooldown caso exceda a regra de expiração repetida.
+- O restaurante finaliza o ticket por QR code ou token manual.
+- O admin enxerga resumo, filtros e auditoria dos tickets.
+- O app mostra o ticket perto de vencer no próprio fluxo de tickets e o backend agora também está preparado para disparar lembretes por push.
+
+#### Contrato de negócio das promoções
+- `Promotion` representa o anúncio da oferta, a janela de retirada e os dados do restaurante.
+- `PromotionTicket` representa a unidade consumível da promoção.
+- Uma promoção pode ter `TotalTickets` e `RemainingTickets`.
+- A janela de retirada é controlada por `ClaimStartsAt` e `ClaimEndsAt`.
+- O prazo de consumo do ticket é controlado por `TicketValidityDays`.
+- Um ticket fica `Claimed` quando o cliente pega a promoção.
+- Um ticket vira `Redeemed` quando o restaurante confirma o consumo.
+- Um ticket vira `Expired` quando passa do prazo sem consumo.
+- O backend grava `ExpirationReason` e `ReminderSentAt` para manter auditoria do ciclo de vida do ticket.
+
+#### Regras atuais de fluxo
+- O feed só mostra promoções ativas e dentro da janela de retirada.
+- A criação de promoção envia push para os usuários inscritos em promoções.
+- O cliente recebe mensagem clara quando a ação falha: sem tickets, fora da janela, já pegou ticket ou cooldown ativo.
+- O admin considera cooldown quando o usuário acumula 3 tickets expirados; o bloqueio dura 30 dias após o 3º ticket expirado.
+- O restaurante possui fallback manual no modo de finalização caso o leitor de QR falhe.
+- O app já tem rota de tickets em `/tickets` e rota de finalização em `/restaurant/promotions/finalize`.
+
+#### Aviso de ticket perto de vencer
+- Há alerta in-app na tela de tickets ativos.
+- O backend possui um hosted service que processa expiração e lembrete em intervalo periódico.
+- O push real depende da configuração de `Firebase:ServerKey` no backend.
+- Sem essa chave, o sistema registra o envio em log, mas não entrega push real ao dispositivo.
+
+#### O que ainda pode faltar no futuro
+- Persistir métricas separadas de reincidência por usuário/restaurante, se quisermos análises mais ricas do cooldown.
+- Expor dashboard específico de expirações por período, se a operação pedir acompanhamento mais gerencial.
+- Criar automação externa de monitoramento caso o backend não rode sempre em modo contínuo.
+
 ---
 
 ## Pendências / Próximas Entregas
 
-> O usuário disse "Aguarde minha validação para prosseguir" — não iniciar próximas entregas até confirmação.
+> O fluxo principal de promoções/tickets está implementado e validado em build. O que falta para produção completa é configurar a `Firebase:ServerKey` no backend e, se necessário, monitorar o hosted service em ambiente final.
 
 ### Possíveis Entregas Futuras (ainda não iniciadas)
 - **ENTREGA 7**: Busca avançada (filtros por avaliação, distância, promoção ativa)

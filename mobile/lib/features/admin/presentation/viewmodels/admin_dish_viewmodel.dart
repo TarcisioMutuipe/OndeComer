@@ -23,9 +23,9 @@ class AdminDishNotifier extends StateNotifier<AsyncValue<List<DishModel>>> {
     currentRestaurantId = restaurantId;
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => dataSource.getDishes(
-      restaurantId: restaurantId,
-      search: search,
-    ));
+          restaurantId: restaurantId,
+          search: search,
+        ));
   }
 
   Future<void> createDish(Map<String, dynamic> data) async {
@@ -75,7 +75,8 @@ class AdminDishNotifier extends StateNotifier<AsyncValue<List<DishModel>>> {
 }
 
 final adminDishProvider =
-    StateNotifierProvider<AdminDishNotifier, AsyncValue<List<DishModel>>>((ref) {
+    StateNotifierProvider<AdminDishNotifier, AsyncValue<List<DishModel>>>(
+        (ref) {
   final dataSource = ref.watch(adminDishDataSourceProvider);
   return AdminDishNotifier(dataSource: dataSource, ref: ref);
 });

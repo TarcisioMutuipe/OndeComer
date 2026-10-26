@@ -13,3 +13,4 @@ C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeComer.
 C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\refint\OndeComer.Application.dll
 C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeComer.Application.pdb
 C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\ref\OndeComer.Application.dll
+C:\OndeComerEmSalvador\backend\OndeComer.Application\obj\Debug\net8.0\OndeComer.Application.sourcelink.json

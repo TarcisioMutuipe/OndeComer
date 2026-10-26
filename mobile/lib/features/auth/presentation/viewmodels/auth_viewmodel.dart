@@ -159,6 +159,20 @@ class AuthViewModel extends StateNotifier<AuthState> {
     }
   }
 
+  Future<String> exportMyData({String format = 'json'}) async {
+    return _repo.exportMyData(format: format);
+  }
+
+  Future<void> deleteMyAccount() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _repo.deleteMyAccount();
+      await _google.signOut();
+    } finally {
+      state = const AuthState(status: AuthStatus.unauthenticated);
+    }
+  }
+
   String _mapError(Object e) {
     // Verificar primeiro o tipo do DioException (mais preciso)
     if (e is DioException) {

@@ -64,6 +64,19 @@ public class ImageService : IImageService
         }
         await image.SaveAsync(fullPath, new JpegEncoder { Quality = JpegQuality }, ct);
 
+        // Gera thumbnail otimizado (~400px, 75% qualidade) para listagens rapidas
+        var thumbFileName = $"{Path.GetFileNameWithoutExtension(storedFileName)}_thumb.jpg";
+        var thumbPath = Path.Combine(datePath, thumbFileName);
+        using var thumb = image.Clone(ctx =>
+        {
+            if (image.Width > 400)
+            {
+                var thumbRatio = 400.0 / image.Width;
+                ctx.Resize(400, (int)(image.Height * thumbRatio));
+            }
+        });
+        await thumb.SaveAsync(thumbPath, new JpegEncoder { Quality = 75 }, ct);
+
         var fileInfo     = new FileInfo(fullPath);
         var relativePath = $"uploads/{year}/{month}/{storedFileName}";
 

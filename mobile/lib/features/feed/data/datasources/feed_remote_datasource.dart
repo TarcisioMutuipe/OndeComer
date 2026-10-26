@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../models/promotion_model.dart';
+import '../models/promotion_ticket_model.dart';
 
 final feedRemoteDatasourceProvider =
     Provider((ref) => FeedRemoteDatasource(ref.watch(dioProvider)));
@@ -49,6 +50,36 @@ class FeedRemoteDatasource {
       if (expiresAt != null) 'expiresAt': expiresAt.toUtc().toIso8601String(),
     });
     return PromotionModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<Map<String, dynamic>> claimPromotion(String promotionId) async {
+    final response = await _dio.post(ApiConstants.claimPromotion(promotionId));
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<List<PromotionTicketModel>> getMyTickets() async {
+    final response = await _dio.get(ApiConstants.myPromotionTickets);
+    final data = response.data as List<dynamic>;
+    return data
+        .map((e) => PromotionTicketModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<PromotionTicketModel>> getRestaurantTickets() async {
+    final response = await _dio.get(ApiConstants.restaurantPromotionTickets);
+    final data = response.data as List<dynamic>;
+    return data
+        .map((e) => PromotionTicketModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<Map<String, dynamic>> finalizePromotionTicket(
+      String qrCodeToken) async {
+    final response = await _dio.post(
+      ApiConstants.finalizePromotionTicket,
+      data: {'qrCodeToken': qrCodeToken},
+    );
+    return response.data as Map<String, dynamic>;
   }
 
   Future<void> deletePromotion(String promotionId) async {

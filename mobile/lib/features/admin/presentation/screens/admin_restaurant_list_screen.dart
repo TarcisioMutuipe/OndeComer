@@ -12,7 +12,8 @@ class AdminRestaurantListScreen extends ConsumerStatefulWidget {
       _AdminRestaurantListScreenState();
 }
 
-class _AdminRestaurantListScreenState extends ConsumerState<AdminRestaurantListScreen> {
+class _AdminRestaurantListScreenState
+    extends ConsumerState<AdminRestaurantListScreen> {
   late TextEditingController _searchController;
 
   @override
@@ -44,7 +45,8 @@ class _AdminRestaurantListScreenState extends ConsumerState<AdminRestaurantListS
             onPressed: () {
               // TODO: Navigate to create restaurant screen
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Criar novo restaurante em desenvolvimento')),
+                const SnackBar(
+                    content: Text('Criar novo restaurante em desenvolvimento')),
               );
             },
           ),
@@ -66,8 +68,8 @@ class _AdminRestaurantListScreenState extends ConsumerState<AdminRestaurantListS
               ),
               onChanged: (value) {
                 ref.read(adminRestaurantProvider.notifier).loadRestaurants(
-                  search: value.isEmpty ? null : value,
-                );
+                      search: value.isEmpty ? null : value,
+                    );
               },
             ),
           ),
@@ -79,7 +81,8 @@ class _AdminRestaurantListScreenState extends ConsumerState<AdminRestaurantListS
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const Icon(Icons.error_outline,
+                        size: 48, color: Colors.red),
                     const SizedBox(height: 16),
                     Text('Erro ao carregar: $error'),
                   ],
@@ -91,7 +94,8 @@ class _AdminRestaurantListScreenState extends ConsumerState<AdminRestaurantListS
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.restaurant, size: 48, color: Colors.grey[400]),
+                        Icon(Icons.restaurant,
+                            size: 48, color: Colors.grey[400]),
                         const SizedBox(height: 16),
                         Text('Nenhum restaurante encontrado',
                             style: TextStyle(color: Colors.grey[600])),
@@ -141,7 +145,9 @@ class _AdminRestaurantListScreenState extends ConsumerState<AdminRestaurantListS
           ),
           TextButton(
             onPressed: () {
-              ref.read(adminRestaurantProvider.notifier).deleteRestaurant(restaurantId);
+              ref
+                  .read(adminRestaurantProvider.notifier)
+                  .deleteRestaurant(restaurantId);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Restaurante deletado')),
@@ -185,7 +191,8 @@ class _RestaurantCard extends StatelessWidget {
             Row(
               children: [
                 // Image
-                if (restaurant.coverUrl != null && restaurant.coverUrl!.isNotEmpty)
+                if (restaurant.coverUrl != null &&
+                    restaurant.coverUrl!.isNotEmpty)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
@@ -231,7 +238,8 @@ class _RestaurantCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             // YouTube URL status
-            if (restaurant.youTubeVideoUrl != null && restaurant.youTubeVideoUrl!.isNotEmpty)
+            if (restaurant.youTubeVideoUrl != null &&
+                restaurant.youTubeVideoUrl!.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using OndeComer.Domain.Enums;
 
 namespace OndeComer.Application.DTOs.Promotion;
 
@@ -7,5 +8,10 @@ public record CreatePromotionRequest(
     [MaxLength(1000)] string? Description,
     string? ImageUrl,
     [Range(1, 100)] decimal? DiscountPercent,
-    DateTime? ExpiresAt
+    PromotionScope Scope = PromotionScope.AllDishes,
+    IReadOnlyCollection<Guid>? TargetDishIds = null,
+    [Range(1, 1000)] int? TicketCount = null,
+    DateTime? ClaimStartsAt = null,
+    DateTime? ClaimEndsAt = null,
+    string? PixKey = null
 );

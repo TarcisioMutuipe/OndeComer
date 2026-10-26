@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -7,6 +8,7 @@ import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../../shared/widgets/youtube_video_player.dart';
 import '../viewmodels/restaurant_list_viewmodel.dart';
 import '../viewmodels/dish_viewmodel.dart';
+import '../widgets/restaurant_open_status_badge.dart';
 
 class RestaurantDetailScreen extends ConsumerStatefulWidget {
   final String restaurantId;
@@ -19,6 +21,128 @@ class RestaurantDetailScreen extends ConsumerStatefulWidget {
 
 class _RestaurantDetailScreenState
     extends ConsumerState<RestaurantDetailScreen> {
+  void _copyAddress(String address) {
+    Clipboard.setData(ClipboardData(text: address));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Endereço copiado! Cole no Google Maps, Waze ou Uber.'),
+        duration: Duration(seconds: 3),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _shareRestaurant(dynamic restaurant) {
+    final text = '🍽️ Bora conhecer o ${restaurant.name} em Salvador?\n'
+        '📍 ${restaurant.address}\n'
+        '⭐ Avaliação: ${restaurant.ratingAverage.toStringAsFixed(1)} estrelas\n\n'
+        'Confira o cardápio e promoções no app Onde Comer em Salvador!';
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Convite copiado! Cole no WhatsApp ou no grupo.'),
+        duration: Duration(seconds: 3),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  void _openWhatsAppReservation(dynamic restaurant) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final reservationMsg =
+            'Olá! Vi o perfil do ${restaurant.name} no app Onde Comer em Salvador e gostaria de saber sobre reserva de mesa e atendimento para hoje. 🍽️';
+
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.chat_outlined,
+                        color: Colors.green.shade700, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Falar com ${restaurant.name}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        const Text(
+                          'Reservas, aniversários e informações',
+                          style: TextStyle(
+                              fontSize: 12, color: AppTheme.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Text(
+                  reservationMsg,
+                  style: const TextStyle(
+                      fontSize: 13, fontStyle: FontStyle.italic),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.copy),
+                  label: const Text('Copiar Mensagem Pronta de Reserva',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Clipboard.setData(ClipboardData(text: reservationMsg));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'Mensagem copiada! Cole na conversa do restaurante.'),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -73,13 +197,25 @@ class _RestaurantDetailScreenState
                   ),
                   onPressed: () => context.pop(),
                 ),
+                actions: [
+                  IconButton(
+                    icon: const CircleAvatar(
+                      backgroundColor: Colors.white70,
+                      child: Icon(Icons.share_outlined,
+                          color: AppTheme.textPrimary, size: 20),
+                    ),
+                    onPressed: () => _shareRestaurant(restaurant),
+                    tooltip: 'Compartilhar no WhatsApp ou grupo',
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: restaurant.coverUrl != null
                       ? CachedNetworkImage(
                           imageUrl: restaurant.coverUrl!,
                           fit: BoxFit.cover,
                           placeholder: (_, __) =>
-                              Container(color: AppTheme.divider),
+                              const SkeletonLoader(height: 220, borderRadius: 0),
                           errorWidget: (_, __, ___) => Container(
                             color: AppTheme.divider,
                             child: const Icon(Icons.restaurant,
@@ -142,15 +278,140 @@ class _RestaurantDetailScreenState
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                  child: Row(children: [
-                    const Icon(Icons.location_on,
-                        size: 14, color: AppTheme.textSecondary),
-                    const SizedBox(width: 4),
-                    Expanded(
-                        child: Text(restaurant.address,
-                            style: const TextStyle(
-                                color: AppTheme.textSecondary, fontSize: 12))),
-                  ]),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => _copyAddress(restaurant.address),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(children: [
+                        const Icon(Icons.location_on,
+                            size: 16, color: AppTheme.primaryYellowDark),
+                        const SizedBox(width: 6),
+                        Expanded(
+                            child: Text(restaurant.address,
+                                style: const TextStyle(
+                                    color: AppTheme.textPrimary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500))),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryYellow.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.copy, size: 12, color: AppTheme.primaryYellowDark),
+                              SizedBox(width: 4),
+                              Text('Copiar GPS',
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.primaryYellowDark)),
+                            ],
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryYellow,
+                          foregroundColor: AppTheme.textPrimary,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          minimumSize: const Size(0, 38),
+                        ),
+                        icon: const Icon(Icons.qr_code_scanner, size: 18),
+                        label: const Text('Fazer Check-in & Pontuar',
+                            style: TextStyle(
+                                fontSize: 13, fontWeight: FontWeight.bold)),
+                        onPressed: () =>
+                            context.push('/checkin/${restaurant.id}'),
+                      ),
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.green.shade800,
+                          side: BorderSide(color: Colors.green.shade600),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          minimumSize: const Size(0, 38),
+                        ),
+                        icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                        label: const Text('Reservar / WhatsApp',
+                            style: TextStyle(
+                                fontSize: 13, fontWeight: FontWeight.bold)),
+                        onPressed: () => _openWhatsAppReservation(restaurant),
+                      ),
+                      if (restaurant.openingHours.isNotEmpty) ...[
+                        RestaurantOpenStatusBadge(
+                          openingHours: restaurant.openingHours,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppTheme.divider),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.access_time,
+                                  size: 15, color: AppTheme.textSecondary),
+                              const SizedBox(width: 4),
+                              Text(restaurant.openingHours,
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary)),
+                            ],
+                          ),
+                        ),
+                      ],
+                      if (restaurant.instagramUrl != null &&
+                          restaurant.instagramUrl!.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppTheme.divider),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.camera_alt_outlined,
+                                  size: 15, color: Colors.purple),
+                              const SizedBox(width: 4),
+                              Text(
+                                restaurant.instagramUrl!.contains('/')
+                                    ? '@${restaurant.instagramUrl!.split('/').last}'
+                                    : '@${restaurant.instagramUrl}',
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppTheme.textSecondary,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
               // YouTube Video Section
@@ -306,8 +567,10 @@ class _DishTile extends StatelessWidget {
                   width: 64,
                   height: 64,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) =>
-                      Container(width: 64, height: 64, color: AppTheme.divider),
+                  memCacheWidth: 200,
+                  memCacheHeight: 200,
+                  placeholder: (_, __) => const SkeletonLoader(
+                      width: 64, height: 64, borderRadius: 8),
                   errorWidget: (_, __, ___) =>
                       const Icon(Icons.fastfood, size: 40),
                 ),

@@ -12,6 +12,8 @@ public class AppDbContext : DbContext
     public DbSet<Restaurant> Restaurants => Set<Restaurant>();
     public DbSet<Dish> Dishes => Set<Dish>();
     public DbSet<Promotion> Promotions => Set<Promotion>();
+      public DbSet<PromotionTicket> PromotionTickets => Set<PromotionTicket>();
+      public DbSet<PromotionSettings> PromotionSettings => Set<PromotionSettings>();
     public DbSet<UploadedImage> UploadedImages => Set<UploadedImage>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<Comment> Comments => Set<Comment>();
@@ -100,11 +102,45 @@ public class AppDbContext : DbContext
             entity.Property(p => p.Description).HasMaxLength(1000);
             entity.Property(p => p.ImageUrl).HasMaxLength(500);
             entity.Property(p => p.DiscountPercent).HasPrecision(5, 2);
+                  entity.Property(p => p.Scope).HasConversion<string>().HasMaxLength(30);
+                  entity.Property(p => p.TargetDishIdsJson).HasColumnType("text");
+                  entity.Property(p => p.PixKey).HasMaxLength(200);
+                  entity.Property(p => p.TotalTickets).HasDefaultValue(10);
+                  entity.Property(p => p.RemainingTickets).HasDefaultValue(10);
+                  entity.Property(p => p.ClaimStartsAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                  entity.Property(p => p.ClaimEndsAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+                  entity.Property(p => p.TicketValidityDays).HasDefaultValue(7);
             entity.HasOne(p => p.Restaurant)
                   .WithMany()
                   .HasForeignKey(p => p.RestaurantId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
+
+            modelBuilder.Entity<PromotionTicket>(entity =>
+            {
+                  entity.HasKey(t => t.Id);
+                  entity.Property(t => t.QrCodeToken).HasMaxLength(200).IsRequired();
+                  entity.HasIndex(t => t.QrCodeToken).IsUnique();
+                  entity.Property(t => t.Status).HasConversion<string>().HasMaxLength(20);
+                  entity.Property(t => t.ExpirationReason).HasMaxLength(500);
+                  entity.Property(t => t.ReminderSentAt).HasColumnType("timestamp with time zone");
+                  entity.HasOne(t => t.Promotion)
+                          .WithMany(p => p.Tickets)
+                          .HasForeignKey(t => t.PromotionId)
+                          .OnDelete(DeleteBehavior.Cascade);
+                  entity.HasOne(t => t.User)
+                          .WithMany()
+                          .HasForeignKey(t => t.UserId)
+                          .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<PromotionSettings>(entity =>
+            {
+                  entity.HasKey(s => s.Id);
+                  entity.Property(s => s.BatchPrice).HasPrecision(10, 2);
+                  entity.Property(s => s.PixKey).HasMaxLength(200);
+                  entity.Property(s => s.ReceiptPhoneNumber).HasMaxLength(30);
+            });
 
         modelBuilder.Entity<UploadedImage>(entity =>
         {

@@ -23,12 +23,12 @@ public class FcmPushSender : IPushSender
         _logger = logger;
     }
 
-    public async Task SendAsync(string fcmToken, string title, string body, Dictionary<string, string>? data = null, CancellationToken ct = default)
+    public async Task<bool> SendAsync(string fcmToken, string title, string body, Dictionary<string, string>? data = null, CancellationToken ct = default)
     {
         if (string.IsNullOrEmpty(_serverKey))
         {
             _logger.LogWarning("[FCM] No server key configured. Would send: '{Title}' to token {Token}", title, fcmToken[..8]);
-            return;
+            return false;
         }
 
         var payload = new
@@ -49,18 +49,21 @@ public class FcmPushSender : IPushSender
         {
             var err = await response.Content.ReadAsStringAsync(ct);
             _logger.LogError("[FCM] Send failed ({Status}): {Error}", response.StatusCode, err);
+            return false;
         }
+
+        return true;
     }
 
-    public async Task SendMultipleAsync(IEnumerable<string> fcmTokens, string title, string body, Dictionary<string, string>? data = null, CancellationToken ct = default)
+    public async Task<bool> SendMultipleAsync(IEnumerable<string> fcmTokens, string title, string body, Dictionary<string, string>? data = null, CancellationToken ct = default)
     {
         var tokens = fcmTokens.ToList();
-        if (tokens.Count == 0) return;
+        if (tokens.Count == 0) return false;
 
         if (string.IsNullOrEmpty(_serverKey))
         {
             _logger.LogWarning("[FCM] No server key configured. Would send: '{Title}' to {Count} devices", title, tokens.Count);
-            return;
+            return false;
         }
 
         var payload = new
@@ -81,6 +84,9 @@ public class FcmPushSender : IPushSender
         {
             var err = await response.Content.ReadAsStringAsync(ct);
             _logger.LogError("[FCM] SendMultiple failed ({Status}): {Error}", response.StatusCode, err);
+            return false;
         }
+
+        return true;
     }
 }

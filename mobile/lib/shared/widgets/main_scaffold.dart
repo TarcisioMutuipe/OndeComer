@@ -27,8 +27,13 @@ class MainScaffold extends ConsumerWidget {
     _NavTab(
         icon: Icons.local_offer_outlined,
         activeIcon: Icons.local_offer,
-        label: 'Feed',
+        label: 'Ofertas & Tickets',
         route: '/feed'),
+    _NavTab(
+      icon: Icons.emoji_events_outlined,
+      activeIcon: Icons.emoji_events,
+      label: 'Rankings',
+      route: '/rankings'),
     _NavTab(
         icon: Icons.person_outline,
         activeIcon: Icons.person,

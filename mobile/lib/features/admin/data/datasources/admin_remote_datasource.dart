@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../models/admin_models.dart';
+import '../models/promotion_ticket_admin_models.dart';
 
 final adminDatasourceProvider = Provider<AdminRemoteDatasource>((ref) {
   return AdminRemoteDatasource(ref.watch(dioProvider));
@@ -62,5 +63,65 @@ class AdminRemoteDatasource {
       '${ApiConstants.adminModerationLogs}/$logId/review',
       data: {'decision': decision},
     );
+  }
+
+  Future<PromotionSettingsModel> getPromotionSettings() async {
+    final response =
+        await _dio.get('${ApiConstants.adminBase}/promotions/settings');
+    return PromotionSettingsModel.fromJson(
+        response.data as Map<String, dynamic>);
+  }
+
+  Future<PromotionSettingsModel> updatePromotionSettings(
+    PromotionSettingsModel settings,
+  ) async {
+    final response = await _dio.put(
+      '${ApiConstants.adminBase}/promotions/settings',
+      data: settings.toJson(),
+    );
+    return PromotionSettingsModel.fromJson(
+        response.data as Map<String, dynamic>);
+  }
+
+  Future<PromotionTicketsSummaryModel> getPromotionTicketsSummary({
+    String? restaurantId,
+    String? status,
+    DateTime? from,
+    DateTime? to,
+  }) async {
+    final response = await _dio.get(
+      '${ApiConstants.adminBase}/promotions/tickets/summary',
+      queryParameters: {
+        if (restaurantId != null) 'restaurantId': restaurantId,
+        if (status != null) 'status': status,
+        if (from != null) 'from': from.toUtc().toIso8601String(),
+        if (to != null) 'to': to.toUtc().toIso8601String(),
+      },
+    );
+    return PromotionTicketsSummaryModel.fromJson(
+        response.data as Map<String, dynamic>);
+  }
+
+  Future<PromotionTicketAdminPageModel> getPromotionTickets({
+    String? restaurantId,
+    String? status,
+    DateTime? from,
+    DateTime? to,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _dio.get(
+      '${ApiConstants.adminBase}/promotions/tickets',
+      queryParameters: {
+        'page': page,
+        'pageSize': pageSize,
+        if (restaurantId != null) 'restaurantId': restaurantId,
+        if (status != null) 'status': status,
+        if (from != null) 'from': from.toUtc().toIso8601String(),
+        if (to != null) 'to': to.toUtc().toIso8601String(),
+      },
+    );
+    return PromotionTicketAdminPageModel.fromJson(
+        response.data as Map<String, dynamic>);
   }
 }

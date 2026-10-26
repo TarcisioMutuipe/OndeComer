@@ -28,6 +28,15 @@ mixin _$PromotionModel {
   String? get description => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
   double? get discountPercent => throw _privateConstructorUsedError;
+  int get totalTickets => throw _privateConstructorUsedError;
+  int get remainingTickets => throw _privateConstructorUsedError;
+  String get scope => throw _privateConstructorUsedError;
+  DateTime get claimStartsAt => throw _privateConstructorUsedError;
+  DateTime get claimEndsAt => throw _privateConstructorUsedError;
+  int get ticketValidityDays => throw _privateConstructorUsedError;
+  bool get canClaim => throw _privateConstructorUsedError;
+  String? get pixKey => throw _privateConstructorUsedError;
+  List<String>? get targetDishNames => throw _privateConstructorUsedError;
   DateTime? get expiresAt => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
 
@@ -56,6 +65,15 @@ abstract class $PromotionModelCopyWith<$Res> {
       String? description,
       String? imageUrl,
       double? discountPercent,
+      int totalTickets,
+      int remainingTickets,
+      String scope,
+      DateTime claimStartsAt,
+      DateTime claimEndsAt,
+      int ticketValidityDays,
+      bool canClaim,
+      String? pixKey,
+      List<String>? targetDishNames,
       DateTime? expiresAt,
       DateTime createdAt});
 }
@@ -83,6 +101,15 @@ class _$PromotionModelCopyWithImpl<$Res, $Val extends PromotionModel>
     Object? description = freezed,
     Object? imageUrl = freezed,
     Object? discountPercent = freezed,
+    Object? totalTickets = null,
+    Object? remainingTickets = null,
+    Object? scope = null,
+    Object? claimStartsAt = null,
+    Object? claimEndsAt = null,
+    Object? ticketValidityDays = null,
+    Object? canClaim = null,
+    Object? pixKey = freezed,
+    Object? targetDishNames = freezed,
     Object? expiresAt = freezed,
     Object? createdAt = null,
   }) {
@@ -119,6 +146,42 @@ class _$PromotionModelCopyWithImpl<$Res, $Val extends PromotionModel>
           ? _value.discountPercent
           : discountPercent // ignore: cast_nullable_to_non_nullable
               as double?,
+      totalTickets: null == totalTickets
+          ? _value.totalTickets
+          : totalTickets // ignore: cast_nullable_to_non_nullable
+              as int,
+      remainingTickets: null == remainingTickets
+          ? _value.remainingTickets
+          : remainingTickets // ignore: cast_nullable_to_non_nullable
+              as int,
+      scope: null == scope
+          ? _value.scope
+          : scope // ignore: cast_nullable_to_non_nullable
+              as String,
+      claimStartsAt: null == claimStartsAt
+          ? _value.claimStartsAt
+          : claimStartsAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      claimEndsAt: null == claimEndsAt
+          ? _value.claimEndsAt
+          : claimEndsAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      ticketValidityDays: null == ticketValidityDays
+          ? _value.ticketValidityDays
+          : ticketValidityDays // ignore: cast_nullable_to_non_nullable
+              as int,
+      canClaim: null == canClaim
+          ? _value.canClaim
+          : canClaim // ignore: cast_nullable_to_non_nullable
+              as bool,
+      pixKey: freezed == pixKey
+          ? _value.pixKey
+          : pixKey // ignore: cast_nullable_to_non_nullable
+              as String?,
+      targetDishNames: freezed == targetDishNames
+          ? _value.targetDishNames
+          : targetDishNames // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
       expiresAt: freezed == expiresAt
           ? _value.expiresAt
           : expiresAt // ignore: cast_nullable_to_non_nullable
@@ -148,6 +211,15 @@ abstract class _$$PromotionModelImplCopyWith<$Res>
       String? description,
       String? imageUrl,
       double? discountPercent,
+      int totalTickets,
+      int remainingTickets,
+      String scope,
+      DateTime claimStartsAt,
+      DateTime claimEndsAt,
+      int ticketValidityDays,
+      bool canClaim,
+      String? pixKey,
+      List<String>? targetDishNames,
       DateTime? expiresAt,
       DateTime createdAt});
 }
@@ -173,6 +245,15 @@ class __$$PromotionModelImplCopyWithImpl<$Res>
     Object? description = freezed,
     Object? imageUrl = freezed,
     Object? discountPercent = freezed,
+    Object? totalTickets = null,
+    Object? remainingTickets = null,
+    Object? scope = null,
+    Object? claimStartsAt = null,
+    Object? claimEndsAt = null,
+    Object? ticketValidityDays = null,
+    Object? canClaim = null,
+    Object? pixKey = freezed,
+    Object? targetDishNames = freezed,
     Object? expiresAt = freezed,
     Object? createdAt = null,
   }) {
@@ -209,6 +290,42 @@ class __$$PromotionModelImplCopyWithImpl<$Res>
           ? _value.discountPercent
           : discountPercent // ignore: cast_nullable_to_non_nullable
               as double?,
+      totalTickets: null == totalTickets
+          ? _value.totalTickets
+          : totalTickets // ignore: cast_nullable_to_non_nullable
+              as int,
+      remainingTickets: null == remainingTickets
+          ? _value.remainingTickets
+          : remainingTickets // ignore: cast_nullable_to_non_nullable
+              as int,
+      scope: null == scope
+          ? _value.scope
+          : scope // ignore: cast_nullable_to_non_nullable
+              as String,
+      claimStartsAt: null == claimStartsAt
+          ? _value.claimStartsAt
+          : claimStartsAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      claimEndsAt: null == claimEndsAt
+          ? _value.claimEndsAt
+          : claimEndsAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      ticketValidityDays: null == ticketValidityDays
+          ? _value.ticketValidityDays
+          : ticketValidityDays // ignore: cast_nullable_to_non_nullable
+              as int,
+      canClaim: null == canClaim
+          ? _value.canClaim
+          : canClaim // ignore: cast_nullable_to_non_nullable
+              as bool,
+      pixKey: freezed == pixKey
+          ? _value.pixKey
+          : pixKey // ignore: cast_nullable_to_non_nullable
+              as String?,
+      targetDishNames: freezed == targetDishNames
+          ? _value._targetDishNames
+          : targetDishNames // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
       expiresAt: freezed == expiresAt
           ? _value.expiresAt
           : expiresAt // ignore: cast_nullable_to_non_nullable
@@ -233,8 +350,18 @@ class _$PromotionModelImpl implements _PromotionModel {
       this.description,
       this.imageUrl,
       this.discountPercent,
+      required this.totalTickets,
+      required this.remainingTickets,
+      required this.scope,
+      required this.claimStartsAt,
+      required this.claimEndsAt,
+      required this.ticketValidityDays,
+      required this.canClaim,
+      this.pixKey,
+      final List<String>? targetDishNames,
       this.expiresAt,
-      required this.createdAt});
+      required this.createdAt})
+      : _targetDishNames = targetDishNames;
 
   factory _$PromotionModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$PromotionModelImplFromJson(json);
@@ -256,13 +383,39 @@ class _$PromotionModelImpl implements _PromotionModel {
   @override
   final double? discountPercent;
   @override
+  final int totalTickets;
+  @override
+  final int remainingTickets;
+  @override
+  final String scope;
+  @override
+  final DateTime claimStartsAt;
+  @override
+  final DateTime claimEndsAt;
+  @override
+  final int ticketValidityDays;
+  @override
+  final bool canClaim;
+  @override
+  final String? pixKey;
+  final List<String>? _targetDishNames;
+  @override
+  List<String>? get targetDishNames {
+    final value = _targetDishNames;
+    if (value == null) return null;
+    if (_targetDishNames is EqualUnmodifiableListView) return _targetDishNames;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+  @override
   final DateTime? expiresAt;
   @override
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'PromotionModel(id: $id, restaurantId: $restaurantId, restaurantName: $restaurantName, restaurantLogoUrl: $restaurantLogoUrl, title: $title, description: $description, imageUrl: $imageUrl, discountPercent: $discountPercent, expiresAt: $expiresAt, createdAt: $createdAt)';
+    return 'PromotionModel(id: $id, restaurantId: $restaurantId, restaurantName: $restaurantName, restaurantLogoUrl: $restaurantLogoUrl, title: $title, description: $description, imageUrl: $imageUrl, discountPercent: $discountPercent, totalTickets: $totalTickets, remainingTickets: $remainingTickets, scope: $scope, claimStartsAt: $claimStartsAt, claimEndsAt: $claimEndsAt, ticketValidityDays: $ticketValidityDays, canClaim: $canClaim, pixKey: $pixKey, targetDishNames: $targetDishNames, expiresAt: $expiresAt, createdAt: $createdAt)';
   }
 
   @override
@@ -284,6 +437,22 @@ class _$PromotionModelImpl implements _PromotionModel {
                 other.imageUrl == imageUrl) &&
             (identical(other.discountPercent, discountPercent) ||
                 other.discountPercent == discountPercent) &&
+            (identical(other.totalTickets, totalTickets) ||
+                other.totalTickets == totalTickets) &&
+            (identical(other.remainingTickets, remainingTickets) ||
+                other.remainingTickets == remainingTickets) &&
+            (identical(other.scope, scope) || other.scope == scope) &&
+            (identical(other.claimStartsAt, claimStartsAt) ||
+                other.claimStartsAt == claimStartsAt) &&
+            (identical(other.claimEndsAt, claimEndsAt) ||
+                other.claimEndsAt == claimEndsAt) &&
+            (identical(other.ticketValidityDays, ticketValidityDays) ||
+                other.ticketValidityDays == ticketValidityDays) &&
+            (identical(other.canClaim, canClaim) ||
+                other.canClaim == canClaim) &&
+            (identical(other.pixKey, pixKey) || other.pixKey == pixKey) &&
+            const DeepCollectionEquality()
+                .equals(other._targetDishNames, _targetDishNames) &&
             (identical(other.expiresAt, expiresAt) ||
                 other.expiresAt == expiresAt) &&
             (identical(other.createdAt, createdAt) ||
@@ -292,18 +461,28 @@ class _$PromotionModelImpl implements _PromotionModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      restaurantId,
-      restaurantName,
-      restaurantLogoUrl,
-      title,
-      description,
-      imageUrl,
-      discountPercent,
-      expiresAt,
-      createdAt);
+  int get hashCode => Object.hashAll([
+        runtimeType,
+        id,
+        restaurantId,
+        restaurantName,
+        restaurantLogoUrl,
+        title,
+        description,
+        imageUrl,
+        discountPercent,
+        totalTickets,
+        remainingTickets,
+        scope,
+        claimStartsAt,
+        claimEndsAt,
+        ticketValidityDays,
+        canClaim,
+        pixKey,
+        const DeepCollectionEquality().hash(_targetDishNames),
+        expiresAt,
+        createdAt
+      ]);
 
   /// Create a copy of PromotionModel
   /// with the given fields replaced by the non-null parameter values.
@@ -332,6 +511,15 @@ abstract class _PromotionModel implements PromotionModel {
       final String? description,
       final String? imageUrl,
       final double? discountPercent,
+      required final int totalTickets,
+      required final int remainingTickets,
+      required final String scope,
+      required final DateTime claimStartsAt,
+      required final DateTime claimEndsAt,
+      required final int ticketValidityDays,
+      required final bool canClaim,
+      final String? pixKey,
+      final List<String>? targetDishNames,
       final DateTime? expiresAt,
       required final DateTime createdAt}) = _$PromotionModelImpl;
 
@@ -354,6 +542,24 @@ abstract class _PromotionModel implements PromotionModel {
   String? get imageUrl;
   @override
   double? get discountPercent;
+  @override
+  int get totalTickets;
+  @override
+  int get remainingTickets;
+  @override
+  String get scope;
+  @override
+  DateTime get claimStartsAt;
+  @override
+  DateTime get claimEndsAt;
+  @override
+  int get ticketValidityDays;
+  @override
+  bool get canClaim;
+  @override
+  String? get pixKey;
+  @override
+  List<String>? get targetDishNames;
   @override
   DateTime? get expiresAt;
   @override

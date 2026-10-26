@@ -28,7 +28,8 @@ public class RestaurantRepository : IRestaurantRepository
 
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(r => r.Name.ToLower().Contains(search.ToLower())
-                                  || (r.Description != null && r.Description.ToLower().Contains(search.ToLower())));
+                                  || (r.Description != null && r.Description.ToLower().Contains(search.ToLower()))
+                                  || r.Address.ToLower().Contains(search.ToLower()));
 
         if (!string.IsNullOrWhiteSpace(category))
             query = query.Where(r => r.Category.ToLower() == category.ToLower());
@@ -71,7 +72,8 @@ public class RestaurantRepository : IRestaurantRepository
             var lower = query.ToLower();
             q = q.Where(r =>
                 r.Name.ToLower().Contains(lower) ||
-                (r.Description != null && r.Description.ToLower().Contains(lower)));
+                (r.Description != null && r.Description.ToLower().Contains(lower)) ||
+                r.Address.ToLower().Contains(lower));
         }
 
         if (!string.IsNullOrWhiteSpace(category))
