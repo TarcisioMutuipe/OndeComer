@@ -60,6 +60,23 @@ class _DashboardTab extends ConsumerWidget {
               const SizedBox(height: 16),
               _buildGrid(context, dashboard),
               const SizedBox(height: 24),
+              Text('Restaurantes mais salvos',
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              if (dashboard.mostFollowedRestaurants.isEmpty)
+                const Text('Ainda não há favoritos de restaurantes.')
+              else
+                ...dashboard.mostFollowedRestaurants.map((restaurant) => Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.restaurant),
+                        title: Text(restaurant.restaurantName),
+                        trailing: Text(
+                          '${restaurant.favoriteCount} favoritos',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    )),
+              const SizedBox(height: 24),
               Text('Atividade', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 12),
               _infoCard(
@@ -74,7 +91,7 @@ class _DashboardTab extends ConsumerWidget {
               ElevatedButton.icon(
                 onPressed: () => context.push(AppRoutes.adminPromotionSettings),
                 icon: const Icon(Icons.tune),
-                label: const Text('Parâmetros de Promoção'),
+                label: const Text('Cobrança Pix e aprovações'),
               ),
               const SizedBox(height: 12),
               ElevatedButton.icon(

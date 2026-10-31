@@ -19,4 +19,9 @@ public class UploadedImageRepository : IUploadedImageRepository
             .Where(i => i.EntityType == entityType && i.EntityId == entityId)
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync(ct);
+
+    public Task<UploadedImage?> GetByRelativePathAsync(string relativePath, CancellationToken ct = default)
+        => _context.UploadedImages.FirstOrDefaultAsync(i => i.RelativePath == relativePath, ct);
+
+    public void Delete(UploadedImage image) => _context.UploadedImages.Remove(image);
 }

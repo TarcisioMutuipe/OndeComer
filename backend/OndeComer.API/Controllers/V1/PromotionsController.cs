@@ -27,10 +27,12 @@ public class PromotionsController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize]
     [HttpGet("restaurant/{restaurantId:guid}")]
     public async Task<IActionResult> GetByRestaurant(Guid restaurantId, CancellationToken ct)
     {
-        var promotions = await _promotionService.GetByRestaurantAsync(restaurantId, ct);
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var promotions = await _promotionService.GetByRestaurantAsync(restaurantId, userId, ct);
         return Ok(promotions);
     }
 

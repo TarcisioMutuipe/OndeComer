@@ -14,7 +14,9 @@ _$DishModelImpl _$$DishModelImplFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       price: (json['price'] as num).toDouble(),
       category: json['category'] as String,
+      subcategory: json['subcategory'] as String?,
       imageUrl: json['imageUrl'] as String?,
+      showInFeed: json['showInFeed'] as bool? ?? true,
       availabilityStart: json['availabilityStart'] == null
           ? null
           : DateTime.parse(json['availabilityStart'] as String),
@@ -22,6 +24,9 @@ _$DishModelImpl _$$DishModelImplFromJson(Map<String, dynamic> json) =>
           ? null
           : DateTime.parse(json['availabilityEnd'] as String),
       isActive: json['isActive'] as bool,
+      deactivatedAt: json['deactivatedAt'] == null
+          ? null
+          : DateTime.parse(json['deactivatedAt'] as String),
       ratingAverage: (json['ratingAverage'] as num).toDouble(),
       ratingCount: (json['ratingCount'] as num).toInt(),
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -36,10 +41,13 @@ Map<String, dynamic> _$$DishModelImplToJson(_$DishModelImpl instance) =>
       'description': instance.description,
       'price': instance.price,
       'category': instance.category,
+      'subcategory': instance.subcategory,
       'imageUrl': instance.imageUrl,
+      'showInFeed': instance.showInFeed,
       'availabilityStart': instance.availabilityStart?.toIso8601String(),
       'availabilityEnd': instance.availabilityEnd?.toIso8601String(),
       'isActive': instance.isActive,
+      'deactivatedAt': instance.deactivatedAt?.toIso8601String(),
       'ratingAverage': instance.ratingAverage,
       'ratingCount': instance.ratingCount,
       'createdAt': instance.createdAt.toIso8601String(),

@@ -4,12 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/network/image_upload_service.dart';
+import '../../../admin/presentation/viewmodels/admin_restaurant_viewmodel.dart';
 import '../../data/models/restaurant_model.dart';
 import '../viewmodels/restaurant_viewmodel.dart';
 
 class RestaurantFormScreen extends ConsumerStatefulWidget {
   final RestaurantModel? restaurant;
-  const RestaurantFormScreen({super.key, this.restaurant});
+  final bool isAdmin;
+  const RestaurantFormScreen(
+      {super.key, this.restaurant, this.isAdmin = false});
 
   @override
   ConsumerState<RestaurantFormScreen> createState() =>
@@ -39,6 +42,8 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
   Uint8List? _coverBytes;
   bool _uploadingLogo = false;
   bool _uploadingCover = false;
+  bool _isSubmitting = false;
+  String? _submitError;
 
   @override
   void initState() {
@@ -74,15 +79,26 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
   @override
   void dispose() {
     for (final c in [
-      _name, _description, _address, _city, _category,
-      _logoUrl, _coverUrl, _instagramHandle, _lat, _lng, _openingHours,
-    ]) { c.dispose(); }
+      _name,
+      _description,
+      _address,
+      _city,
+      _category,
+      _logoUrl,
+      _coverUrl,
+      _instagramHandle,
+      _lat,
+      _lng,
+      _openingHours,
+    ]) {
+      c.dispose();
+    }
     super.dispose();
   }
 
   Future<void> _pickImage({required bool isLogo}) async {
-    final xFile = await _picker.pickImage(
-        source: ImageSource.gallery, imageQuality: 90);
+    final xFile =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 90);
     if (xFile == null) return;
 
     final bytes = await xFile.readAsBytes();
@@ -105,8 +121,10 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
             entityId: widget.restaurant?.id,
           );
       setState(() {
-        if (isLogo) _logoUrl.text = url;
-        else _coverUrl.text = url;
+        if (isLogo)
+          _logoUrl.text = url;
+        else
+          _coverUrl.text = url;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -125,15 +143,22 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
           ),
         );
         setState(() {
-          if (isLogo) { _logoXFile = null; _logoBytes = null; }
-          else { _coverXFile = null; _coverBytes = null; }
+          if (isLogo) {
+            _logoXFile = null;
+            _logoBytes = null;
+          } else {
+            _coverXFile = null;
+            _coverBytes = null;
+          }
         });
       }
     } finally {
       if (mounted) {
         setState(() {
-          if (isLogo) _uploadingLogo = false;
-          else _uploadingCover = false;
+          if (isLogo)
+            _uploadingLogo = false;
+          else
+            _uploadingCover = false;
         });
       }
     }
@@ -146,7 +171,8 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
     required String? currentUrl,
     required bool uploading,
   }) {
-    final hasImage = pickedBytes != null || (currentUrl != null && currentUrl.isNotEmpty);
+    final hasImage =
+        pickedBytes != null || (currentUrl != null && currentUrl.isNotEmpty);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -175,8 +201,9 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
                                 : Image.network(
                                     currentUrl!,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) =>
-                                        const Icon(Icons.broken_image, size: 40),
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                        Icons.broken_image,
+                                        size: 40),
                                   ),
                           ),
                           Positioned(
@@ -234,24 +261,46 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
       'openingHours': _openingHours.text.isEmpty ? null : _openingHours.text,
     };
 
-    bool success;
-    if (widget.restaurant == null) {
-      success = await ref
-          .read(restaurantViewModelProvider.notifier)
-          .createRestaurant(data);
-    } else {
-      success = await ref
-          .read(restaurantViewModelProvider.notifier)
-          .updateRestaurant(widget.restaurant!.id, data);
-    }
+    setState(() {
+      _isSubmitting = true;
+      _submitError = null;
+    });
+    try {
+      if (widget.isAdmin) {
+        final dataSource = ref.read(adminRestaurantDataSourceProvider);
+        if (widget.restaurant == null) {
+          await dataSource.createRestaurant(data);
+        } else {
+          await dataSource.updateRestaurant(widget.restaurant!.id, data);
+        }
+      } else {
+        final success = widget.restaurant == null
+            ? await ref
+                .read(restaurantViewModelProvider.notifier)
+                .createRestaurant(data)
+            : await ref
+                .read(restaurantViewModelProvider.notifier)
+                .updateRestaurant(widget.restaurant!.id, data);
+        if (!success) {
+          throw Exception(ref.read(restaurantViewModelProvider).error ??
+              'Não foi possível salvar o restaurante.');
+        }
+      }
 
-    if (success && mounted) context.pop();
+      if (mounted) context.pop(true);
+    } catch (error) {
+      if (mounted) setState(() => _submitError = error.toString());
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.restaurant != null;
     final state = ref.watch(restaurantViewModelProvider);
+    final isLoading = widget.isAdmin ? _isSubmitting : state.isLoading;
+    final errorMessage = _submitError ?? (widget.isAdmin ? null : state.error);
 
     return Scaffold(
       appBar: AppBar(
@@ -262,7 +311,7 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            if (state.error != null)
+            if (errorMessage != null)
               Container(
                 padding: const EdgeInsets.all(8),
                 margin: const EdgeInsets.only(bottom: 16),
@@ -270,15 +319,14 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
                   color: Colors.red.shade100,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(state.error!,
+                child: Text(errorMessage,
                     style: const TextStyle(color: Colors.red)),
               ),
             TextFormField(
               controller: _name,
               decoration:
                   const InputDecoration(labelText: 'Nome do Restaurante *'),
-              validator: (v) =>
-                  (v == null || v.isEmpty) ? 'Obrigatorio' : null,
+              validator: (v) => (v == null || v.isEmpty) ? 'Obrigatorio' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -290,24 +338,20 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
             TextFormField(
               controller: _address,
               decoration: const InputDecoration(labelText: 'Endereco *'),
-              validator: (v) =>
-                  (v == null || v.isEmpty) ? 'Obrigatorio' : null,
+              validator: (v) => (v == null || v.isEmpty) ? 'Obrigatorio' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _city,
               decoration: const InputDecoration(labelText: 'Cidade *'),
-              validator: (v) =>
-                  (v == null || v.isEmpty) ? 'Obrigatorio' : null,
+              validator: (v) => (v == null || v.isEmpty) ? 'Obrigatorio' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _category,
               decoration: const InputDecoration(
-                  labelText: 'Categoria *',
-                  hintText: 'Ex: Japonesa, Pizza...'),
-              validator: (v) =>
-                  (v == null || v.isEmpty) ? 'Obrigatorio' : null,
+                  labelText: 'Categoria *', hintText: 'Ex: Japonesa, Pizza...'),
+              validator: (v) => (v == null || v.isEmpty) ? 'Obrigatorio' : null,
             ),
             const SizedBox(height: 12),
             Row(children: [
@@ -364,12 +408,14 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: (state.isLoading || _uploadingLogo || _uploadingCover)
+              onPressed: (isLoading || _uploadingLogo || _uploadingCover)
                   ? null
                   : _submit,
-              child: (state.isLoading)
+              child: isLoading
                   ? const CircularProgressIndicator()
-                  : Text(isEditing ? 'Salvar Alteracoes' : 'Cadastrar Restaurante'),
+                  : Text(isEditing
+                      ? 'Salvar Alteracoes'
+                      : 'Cadastrar Restaurante'),
             ),
           ],
         ),

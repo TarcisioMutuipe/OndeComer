@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onde_comer_em_salvador/features/admin/presentation/viewmodels/admin_dish_viewmodel.dart';
 import 'package:onde_comer_em_salvador/features/restaurant/data/models/dish_model.dart';
 
@@ -45,7 +46,8 @@ class _AdminDishListScreenState extends ConsumerState<AdminDishListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => _showCreateDishDialog(context),
+            tooltip: 'Criar prato',
+            onPressed: () => _openDishForm(context),
           ),
         ],
       ),
@@ -123,101 +125,17 @@ class _AdminDishListScreenState extends ConsumerState<AdminDishListScreen> {
     );
   }
 
-  void _showCreateDishDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    final priceController = TextEditingController();
-    final categoryController = TextEditingController();
-    final descriptionController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Criar Novo Prato'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nome do Prato',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: categoryController,
-                decoration: const InputDecoration(
-                  labelText: 'Categoria',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: priceController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Preço',
-                  border: OutlineInputBorder(),
-                  prefixText: 'R\$ ',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: descriptionController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Descrição',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final name = nameController.text;
-              final price = double.tryParse(priceController.text) ?? 0;
-              final category = categoryController.text;
-              final description = descriptionController.text;
-
-              if (name.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Nome do prato é obrigatório')),
-                );
-                return;
-              }
-
-              ref.read(adminDishProvider.notifier).createDish({
-                'name': name,
-                'category': category,
-                'price': price,
-                'description': description,
-                'restaurantId': widget.restaurantId,
-                'isAvailable': true,
-              });
-
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Prato criado com sucesso')),
-              );
-            },
-            child: const Text('Criar'),
-          ),
-        ],
-      ),
+  Future<void> _openDishForm(BuildContext context, {DishModel? dish}) async {
+    final saved = await context.push<bool>(
+      '/restaurant/${widget.restaurantId}/dish/form',
+      extra: dish,
     );
+    if (!mounted || saved != true) return;
+    await ref.read(adminDishProvider.notifier).loadDishes(widget.restaurantId);
   }
 
-  void _editDish(BuildContext context, DishModel dish) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Editar ${dish.name} em desenvolvimento')),
-    );
+  Future<void> _editDish(BuildContext context, DishModel dish) async {
+    await _openDishForm(context, dish: dish);
   }
 
   void _deleteDish(BuildContext context, String dishId) {

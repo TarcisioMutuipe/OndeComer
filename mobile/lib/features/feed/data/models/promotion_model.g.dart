@@ -23,6 +23,12 @@ _$PromotionModelImpl _$$PromotionModelImplFromJson(Map<String, dynamic> json) =>
       claimEndsAt: DateTime.parse(json['claimEndsAt'] as String),
       ticketValidityDays: (json['ticketValidityDays'] as num).toInt(),
       canClaim: json['canClaim'] as bool,
+      requiresPayment: json['requiresPayment'] as bool? ?? false,
+      paymentApprovedAt: json['paymentApprovedAt'] == null
+          ? null
+          : DateTime.parse(json['paymentApprovedAt'] as String),
+      paymentAmount: (json['paymentAmount'] as num?)?.toDouble(),
+      paymentReceiptPhoneNumber: json['paymentReceiptPhoneNumber'] as String?,
       pixKey: json['pixKey'] as String?,
       targetDishNames: (json['targetDishNames'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -51,6 +57,10 @@ Map<String, dynamic> _$$PromotionModelImplToJson(
       'claimEndsAt': instance.claimEndsAt.toIso8601String(),
       'ticketValidityDays': instance.ticketValidityDays,
       'canClaim': instance.canClaim,
+      'requiresPayment': instance.requiresPayment,
+      'paymentApprovedAt': instance.paymentApprovedAt?.toIso8601String(),
+      'paymentAmount': instance.paymentAmount,
+      'paymentReceiptPhoneNumber': instance.paymentReceiptPhoneNumber,
       'pixKey': instance.pixKey,
       'targetDishNames': instance.targetDishNames,
       'expiresAt': instance.expiresAt?.toIso8601String(),

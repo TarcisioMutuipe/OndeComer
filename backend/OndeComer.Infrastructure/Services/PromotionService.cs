@@ -59,9 +59,82 @@ public class PromotionService : IPromotionService
         settings.ClaimWindowDays = request.ClaimWindowDays;
         settings.PixKey = request.PixKey;
         settings.ReceiptPhoneNumber = request.ReceiptPhoneNumber;
+        settings.ChargeEnabled = request.ChargeEnabled;
+        if (settings.ChargeEnabled &&
+            (string.IsNullOrWhiteSpace(settings.PixKey) ||
+             string.IsNullOrWhiteSpace(settings.ReceiptPhoneNumber)))
+            throw new AppException("Informe a chave Pix e o telefone para comprovantes antes de habilitar a cobrança.", 400);
         settings.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
         return Map(settings);
+    }
+
+    public async Task<IReadOnlyList<PendingPromotionPaymentDto>> GetPendingPaymentsAsync(CancellationToken ct = default)
+    {
+        return await _context.Promotions
+            .AsNoTracking()
+            .Include(p => p.Restaurant)
+            .Where(p => p.RequiresPayment && p.PaymentApprovedAt == null)
+            .OrderBy(p => p.CreatedAt)
+            .Select(p => new PendingPromotionPaymentDto(
+                p.Id,
+                p.RestaurantId,
+                p.Restaurant.Name,
+                p.Title,
+                p.TotalTickets,
+                p.PaymentAmount,
+                p.PixKey,
+                p.PaymentReceiptPhoneNumber,
+                p.CreatedAt,
+                p.ClaimStartsAt))
+            .ToListAsync(ct);
+    }
+
+    public async Task<PromotionDto> ApprovePaymentAsync(Guid promotionId, CancellationToken ct = default)
+    {
+        var promotion = await _context.Promotions
+            .Include(p => p.Restaurant)
+            .FirstOrDefaultAsync(p => p.Id == promotionId, ct)
+            ?? throw new NotFoundException("Promoção não encontrada.");
+
+        if (!promotion.RequiresPayment || promotion.PaymentApprovedAt.HasValue)
+            throw new ConflictException("Esta promoção não possui pagamento pendente.");
+
+        var now = DateTime.UtcNow;
+        var minimumStart = promotion.CreatedAt.AddHours(48);
+        if (promotion.ClaimStartsAt < minimumStart)
+        {
+            var duration = promotion.ClaimEndsAt - promotion.ClaimStartsAt;
+            promotion.ClaimStartsAt = minimumStart;
+            promotion.ClaimEndsAt = minimumStart.Add(duration);
+            promotion.ExpiresAt = promotion.ClaimEndsAt;
+        }
+
+        promotion.PaymentApprovedAt = now;
+        promotion.IsActive = true;
+        await _context.SaveChangesAsync(ct);
+
+        try
+        {
+            await _notificationService.SendPushToRestaurantOwnerAsync(
+                promotion.RestaurantId,
+                new PushNotificationDto(
+                    "Pagamento confirmado",
+                    $"O Pix da promoção {promotion.Title} foi confirmado. Início previsto: {promotion.ClaimStartsAt:dd/MM/yyyy HH:mm}.",
+                    "/restaurant/panel",
+                    new Dictionary<string, string>
+                    {
+                        ["promotionId"] = promotion.Id.ToString(),
+                        ["type"] = "promotion_payment_approved"
+                    }),
+                ct);
+        }
+        catch
+        {
+            // A promoção já foi liberada mesmo se a notificação falhar.
+        }
+
+        return await MapAsync(promotion, now, ct);
     }
 
     public async Task<PagedResult<PromotionDto>> GetFeedAsync(int page, int pageSize, CancellationToken ct = default)
@@ -73,7 +146,9 @@ public class PromotionService : IPromotionService
         var query = _context.Promotions
             .AsNoTracking()
             .Include(p => p.Restaurant)
-            .Where(p => p.IsActive && p.ClaimEndsAt >= now)
+            .Where(p => p.IsActive &&
+                        (!p.RequiresPayment || p.PaymentApprovedAt != null) &&
+                        p.ClaimStartsAt <= now && p.ClaimEndsAt >= now)
             .OrderBy(p => p.ClaimStartsAt)
             .ThenByDescending(p => p.CreatedAt);
 
@@ -83,8 +158,17 @@ public class PromotionService : IPromotionService
         return new PagedResult<PromotionDto>(dtos, page, pageSize, totalCount);
     }
 
-    public async Task<IEnumerable<PromotionDto>> GetByRestaurantAsync(Guid restaurantId, CancellationToken ct = default)
+    public async Task<IEnumerable<PromotionDto>> GetByRestaurantAsync(
+        Guid restaurantId,
+        Guid requesterId,
+        CancellationToken ct = default)
     {
+        var ownsRestaurant = await _context.Restaurants.AnyAsync(
+            restaurant => restaurant.Id == restaurantId && restaurant.OwnerUserId == requesterId,
+            ct);
+        if (!ownsRestaurant)
+            throw new ForbiddenException("Você não pode visualizar os pagamentos deste restaurante.");
+
         var now = DateTime.UtcNow;
         var items = await _context.Promotions
             .AsNoTracking()
@@ -93,7 +177,7 @@ public class PromotionService : IPromotionService
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync(ct);
 
-        return await MapManyAsync(items, now, ct);
+        return await MapManyAsync(items, now, ct, includePaymentDetails: true);
     }
 
     public async Task<PromotionDto> CreateAsync(Guid ownerId, CreatePromotionRequest request, CancellationToken ct = default)
@@ -103,7 +187,15 @@ public class PromotionService : IPromotionService
             ?? throw new NotFoundException("Restaurante não encontrado para este usuário.");
 
         var now = DateTime.UtcNow;
-        var claimStartsAt = request.ClaimStartsAt?.ToUniversalTime() ?? now;
+        var requiresPayment = settings.ChargeEnabled;
+        if (requiresPayment &&
+            (string.IsNullOrWhiteSpace(settings.PixKey) ||
+             string.IsNullOrWhiteSpace(settings.ReceiptPhoneNumber)))
+            throw new AppException("A cobrança está habilitada, mas falta configurar a chave Pix e o telefone para comprovantes.", 400);
+
+        var minimumStart = requiresPayment ? now.AddHours(48) : now;
+        var requestedStart = request.ClaimStartsAt?.ToUniversalTime() ?? minimumStart;
+        var claimStartsAt = requestedStart < minimumStart ? minimumStart : requestedStart;
         var claimEndsAt = request.ClaimEndsAt?.ToUniversalTime() ?? claimStartsAt.AddDays(settings.ClaimWindowDays);
         if (claimEndsAt <= claimStartsAt)
             throw new AppException("A data final deve ser maior que a data inicial.", 400);
@@ -137,35 +229,68 @@ public class PromotionService : IPromotionService
             ClaimStartsAt = claimStartsAt,
             ClaimEndsAt = claimEndsAt,
             TicketValidityDays = settings.TicketValidityDays,
-            PixKey = string.IsNullOrWhiteSpace(request.PixKey) ? settings.PixKey : request.PixKey,
-            IsActive = true,
+            PixKey = settings.ChargeEnabled || string.IsNullOrWhiteSpace(request.PixKey)
+                ? settings.PixKey
+                : request.PixKey,
+            PaymentReceiptPhoneNumber = settings.ReceiptPhoneNumber,
+            PaymentAmount = requiresPayment
+                ? settings.BatchPrice * (ticketCount / settings.TicketsPerBatch)
+                : null,
+            RequiresPayment = requiresPayment,
+            PaymentApprovedAt = requiresPayment ? null : now,
+            IsActive = !requiresPayment,
             ExpiresAt = claimEndsAt
         };
 
         await _context.Promotions.AddAsync(promotion, ct);
         await _context.SaveChangesAsync(ct);
 
-        try
+        if (requiresPayment)
         {
-            await _notificationService.SendPushToPromotionSubscribersAsync(
-                new PushNotificationDto(
-                    $"Nova promoção em {restaurant.Name}",
-                    $"{promotion.Title}. Abra o app e pegue seu ticket antes que acabem.",
-                    "/feed",
-                    new Dictionary<string, string>
-                    {
-                        ["promotionId"] = promotion.Id.ToString(),
-                        ["restaurantId"] = restaurant.Id.ToString(),
-                        ["type"] = "promotion_created"
-                    }),
-                ct);
+            try
+            {
+                await _notificationService.SendPushToRestaurantOwnerAsync(
+                    restaurant.Id,
+                    new PushNotificationDto(
+                        "Pagamento necessário para sua promoção",
+                        $"Envie R$ {promotion.PaymentAmount:0.00} via Pix para {promotion.PixKey}. Envie o comprovante para {promotion.PaymentReceiptPhoneNumber}. A análise pode levar até 48 horas.",
+                        "/restaurant/panel",
+                        new Dictionary<string, string>
+                        {
+                            ["promotionId"] = promotion.Id.ToString(),
+                            ["type"] = "promotion_payment_pending"
+                        }),
+                    ct);
+            }
+            catch
+            {
+                // O aviso também fica visível no painel do restaurante.
+            }
         }
-        catch
+        else
         {
-            // Notificação não pode impedir a publicação da promoção.
+            try
+            {
+                await _notificationService.SendPushToPromotionSubscribersAsync(
+                    new PushNotificationDto(
+                        $"Nova promoção em {restaurant.Name}",
+                        $"{promotion.Title}. Abra o app e pegue seu ticket antes que acabem.",
+                        "/feed",
+                        new Dictionary<string, string>
+                        {
+                            ["promotionId"] = promotion.Id.ToString(),
+                            ["restaurantId"] = restaurant.Id.ToString(),
+                            ["type"] = "promotion_created"
+                        }),
+                    ct);
+            }
+            catch
+            {
+                // Notificação não pode impedir a publicação da promoção.
+            }
         }
 
-        return await MapAsync(promotion, now, ct);
+        return await MapAsync(promotion, now, ct, includePaymentDetails: true);
     }
 
     public async Task<PromotionDto> UpdateAsync(Guid ownerId, Guid promotionId, UpdatePromotionRequest request, CancellationToken ct = default)
@@ -193,12 +318,23 @@ public class PromotionService : IPromotionService
         if (request.ClaimStartsAt.HasValue) promotion.ClaimStartsAt = request.ClaimStartsAt.Value.ToUniversalTime();
         if (request.ClaimEndsAt.HasValue) promotion.ClaimEndsAt = request.ClaimEndsAt.Value.ToUniversalTime();
         else if (request.ClaimStartsAt.HasValue) promotion.ClaimEndsAt = promotion.ClaimStartsAt.AddDays(settings.ClaimWindowDays);
-        if (request.PixKey != null) promotion.PixKey = request.PixKey;
+        if (request.PixKey != null && !promotion.RequiresPayment)
+            promotion.PixKey = request.PixKey;
+        if (request.IsActive == true && promotion.RequiresPayment && !promotion.PaymentApprovedAt.HasValue)
+            throw new ConflictException("A promoção só pode ser ativada após a confirmação do pagamento pelo administrador.");
         if (request.IsActive.HasValue) promotion.IsActive = request.IsActive.Value;
+        if (promotion.RequiresPayment && promotion.ClaimStartsAt < promotion.CreatedAt.AddHours(48))
+        {
+            var duration = promotion.ClaimEndsAt - promotion.ClaimStartsAt;
+            promotion.ClaimStartsAt = promotion.CreatedAt.AddHours(48);
+            promotion.ClaimEndsAt = promotion.ClaimStartsAt.Add(duration);
+        }
+        if (promotion.ClaimEndsAt <= promotion.ClaimStartsAt)
+            throw new AppException("O término da promoção deve ser posterior ao início mínimo de 48 horas.", 400);
 
         promotion.ExpiresAt = promotion.ClaimEndsAt;
         await _context.SaveChangesAsync(ct);
-        return await MapAsync(promotion, DateTime.UtcNow, ct);
+        return await MapAsync(promotion, DateTime.UtcNow, ct, includePaymentDetails: true);
     }
 
     public async Task DeleteAsync(Guid ownerId, Guid promotionId, CancellationToken ct = default)
@@ -209,6 +345,12 @@ public class PromotionService : IPromotionService
             ?? throw new NotFoundException("Promoção não encontrada.");
 
         promotion.IsActive = false;
+        if (promotion.RequiresPayment && !promotion.PaymentApprovedAt.HasValue)
+        {
+            _context.Promotions.Remove(promotion);
+            await _context.SaveChangesAsync(ct);
+            return;
+        }
         await _context.SaveChangesAsync(ct);
     }
 
@@ -225,7 +367,9 @@ public class PromotionService : IPromotionService
             .FirstOrDefaultAsync(p => p.Id == promotionId, ct)
             ?? throw new NotFoundException("Promoção não encontrada.");
 
-        if (!promotion.IsActive || promotion.ClaimStartsAt > now || promotion.ClaimEndsAt < now)
+        if (!promotion.IsActive ||
+            (promotion.RequiresPayment && !promotion.PaymentApprovedAt.HasValue) ||
+            promotion.ClaimStartsAt > now || promotion.ClaimEndsAt < now)
             throw new AppException("Esta promoção não está disponível para retirada no momento.", 400);
 
         if (promotion.RemainingTickets <= 0)
@@ -434,17 +578,25 @@ public class PromotionService : IPromotionService
     }
 
     private static PromotionSettingsDto Map(PromotionSettings settings)
-        => new(settings.BatchPrice, settings.TicketsPerBatch, settings.TicketValidityDays, settings.ClaimWindowDays, settings.PixKey, settings.ReceiptPhoneNumber, settings.UpdatedAt);
+        => new(settings.BatchPrice, settings.TicketsPerBatch, settings.TicketValidityDays, settings.ClaimWindowDays, settings.PixKey, settings.ReceiptPhoneNumber, settings.UpdatedAt, settings.ChargeEnabled);
 
-    private async Task<List<PromotionDto>> MapManyAsync(IReadOnlyCollection<Promotion> promotions, DateTime now, CancellationToken ct)
+    private async Task<List<PromotionDto>> MapManyAsync(
+        IReadOnlyCollection<Promotion> promotions,
+        DateTime now,
+        CancellationToken ct,
+        bool includePaymentDetails = false)
     {
         var result = new List<PromotionDto>(promotions.Count);
         foreach (var promotion in promotions)
-            result.Add(await MapAsync(promotion, now, ct));
+            result.Add(await MapAsync(promotion, now, ct, includePaymentDetails));
         return result;
     }
 
-    private async Task<PromotionDto> MapAsync(Promotion promotion, DateTime now, CancellationToken ct)
+    private async Task<PromotionDto> MapAsync(
+        Promotion promotion,
+        DateTime now,
+        CancellationToken ct,
+        bool includePaymentDetails = false)
     {
         var targetDishIds = ParseTargetDishIds(promotion.TargetDishIdsJson);
         var targetDishNames = targetDishIds.Count == 0
@@ -473,9 +625,13 @@ public class PromotionService : IPromotionService
             promotion.ClaimStartsAt,
             promotion.ClaimEndsAt,
             promotion.TicketValidityDays,
-            promotion.PixKey,
+            includePaymentDetails || !promotion.RequiresPayment ? promotion.PixKey : null,
             promotion.IsActive && promotion.ClaimStartsAt <= now && promotion.ClaimEndsAt >= now && promotion.RemainingTickets > 0,
-            promotion.CreatedAt);
+            promotion.CreatedAt,
+            promotion.RequiresPayment,
+            promotion.PaymentApprovedAt,
+            includePaymentDetails ? promotion.PaymentAmount : null,
+            includePaymentDetails ? promotion.PaymentReceiptPhoneNumber : null);
     }
 
     private static List<Guid> ParseTargetDishIds(string? json)

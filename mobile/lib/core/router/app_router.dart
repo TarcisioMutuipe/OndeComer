@@ -14,6 +14,7 @@ import '../../features/restaurant/presentation/screens/restaurant_form_screen.da
 import '../../features/restaurant/presentation/screens/restaurant_detail_screen.dart';
 import '../../features/restaurant/presentation/screens/dish_detail_screen.dart';
 import '../../features/restaurant/presentation/screens/menu_screen.dart';
+import '../../features/restaurant/presentation/screens/restaurant_menu_qr_screen.dart';
 import '../../features/restaurant/presentation/screens/dish_form_screen.dart';
 import '../../features/restaurant/presentation/screens/metrics_dashboard_screen.dart';
 import '../../features/reviews/presentation/screens/moderation_screen.dart';
@@ -52,10 +53,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isSplash = state.matchedLocation == AppRoutes.splash;
       final isAuth = state.matchedLocation == AppRoutes.login ||
           state.matchedLocation == AppRoutes.register;
+      final isPublicMenu = state.matchedLocation.startsWith('/restaurant/') &&
+          state.matchedLocation.endsWith('/menu');
+      final isAdminRoute = state.matchedLocation == AppRoutes.admin ||
+          state.matchedLocation.startsWith('${AppRoutes.admin}/');
+      final isAdmin = authState.user?.profileType == 'Admin';
 
       if (isSplash) return null;
-      if (!isLoggedIn && !isAuth) return AppRoutes.login;
-      if (isLoggedIn && isAuth) return AppRoutes.home;
+      if (!isLoggedIn && !isAuth && !isPublicMenu) return AppRoutes.login;
+      if (isLoggedIn && isAuth)
+        return isAdmin ? AppRoutes.admin : AppRoutes.home;
+      if (isAdmin && !isAdminRoute && !isPublicMenu) return AppRoutes.admin;
+      if (isAdminRoute && !isAdmin) return AppRoutes.home;
       return null;
     },
     routes: [
@@ -141,12 +150,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.restaurantForm,
         builder: (context, state) => RestaurantFormScreen(
           restaurant: state.extra as RestaurantModel?,
+          isAdmin: state.uri.queryParameters['admin'] == 'true',
+        ),
+      ),
+      GoRoute(
+        path: '/restaurant/:restaurantId/menu/qr',
+        builder: (context, state) => RestaurantMenuQrScreen(
+          restaurantId: state.pathParameters['restaurantId']!,
         ),
       ),
       GoRoute(
         path: '/restaurant/:restaurantId/menu',
         builder: (context, state) => MenuScreen(
           restaurantId: state.pathParameters['restaurantId']!,
+          initialCategory: state.uri.queryParameters['categoria'],
+          initialSubcategory: state.uri.queryParameters['subcategoria'],
+          focusDishId: state.uri.queryParameters['prato'],
         ),
       ),
       GoRoute(

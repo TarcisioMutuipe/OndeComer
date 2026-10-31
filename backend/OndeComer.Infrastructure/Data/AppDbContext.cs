@@ -85,8 +85,10 @@ public class AppDbContext : DbContext
             entity.HasKey(d => d.Id);
             entity.Property(d => d.Name).HasMaxLength(200).IsRequired();
             entity.Property(d => d.Category).HasMaxLength(100).IsRequired();
+            entity.Property(d => d.Subcategory).HasMaxLength(100);
             entity.Property(d => d.Description).HasMaxLength(1000);
             entity.Property(d => d.ImageUrl).HasMaxLength(500);
+            entity.Property(d => d.ShowInFeed).HasDefaultValue(true);
             entity.Property(d => d.Price).HasPrecision(10, 2);
             entity.Property(d => d.RatingAverage).HasPrecision(3, 2);
             entity.HasOne(d => d.Restaurant)
@@ -110,6 +112,8 @@ public class AppDbContext : DbContext
                   entity.Property(p => p.ClaimStartsAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
                   entity.Property(p => p.ClaimEndsAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
                   entity.Property(p => p.TicketValidityDays).HasDefaultValue(7);
+                  entity.Property(p => p.PaymentReceiptPhoneNumber).HasMaxLength(30);
+                  entity.Property(p => p.PaymentAmount).HasPrecision(10, 2);
             entity.HasOne(p => p.Restaurant)
                   .WithMany()
                   .HasForeignKey(p => p.RestaurantId)
@@ -140,6 +144,7 @@ public class AppDbContext : DbContext
                   entity.Property(s => s.BatchPrice).HasPrecision(10, 2);
                   entity.Property(s => s.PixKey).HasMaxLength(200);
                   entity.Property(s => s.ReceiptPhoneNumber).HasMaxLength(30);
+                  entity.Property(s => s.ChargeEnabled).HasDefaultValue(false);
             });
 
         modelBuilder.Entity<UploadedImage>(entity =>

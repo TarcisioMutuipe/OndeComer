@@ -35,6 +35,10 @@ mixin _$PromotionModel {
   DateTime get claimEndsAt => throw _privateConstructorUsedError;
   int get ticketValidityDays => throw _privateConstructorUsedError;
   bool get canClaim => throw _privateConstructorUsedError;
+  bool get requiresPayment => throw _privateConstructorUsedError;
+  DateTime? get paymentApprovedAt => throw _privateConstructorUsedError;
+  double? get paymentAmount => throw _privateConstructorUsedError;
+  String? get paymentReceiptPhoneNumber => throw _privateConstructorUsedError;
   String? get pixKey => throw _privateConstructorUsedError;
   List<String>? get targetDishNames => throw _privateConstructorUsedError;
   DateTime? get expiresAt => throw _privateConstructorUsedError;
@@ -72,6 +76,10 @@ abstract class $PromotionModelCopyWith<$Res> {
       DateTime claimEndsAt,
       int ticketValidityDays,
       bool canClaim,
+      bool requiresPayment,
+      DateTime? paymentApprovedAt,
+      double? paymentAmount,
+      String? paymentReceiptPhoneNumber,
       String? pixKey,
       List<String>? targetDishNames,
       DateTime? expiresAt,
@@ -108,6 +116,10 @@ class _$PromotionModelCopyWithImpl<$Res, $Val extends PromotionModel>
     Object? claimEndsAt = null,
     Object? ticketValidityDays = null,
     Object? canClaim = null,
+    Object? requiresPayment = null,
+    Object? paymentApprovedAt = freezed,
+    Object? paymentAmount = freezed,
+    Object? paymentReceiptPhoneNumber = freezed,
     Object? pixKey = freezed,
     Object? targetDishNames = freezed,
     Object? expiresAt = freezed,
@@ -174,6 +186,22 @@ class _$PromotionModelCopyWithImpl<$Res, $Val extends PromotionModel>
           ? _value.canClaim
           : canClaim // ignore: cast_nullable_to_non_nullable
               as bool,
+      requiresPayment: null == requiresPayment
+          ? _value.requiresPayment
+          : requiresPayment // ignore: cast_nullable_to_non_nullable
+              as bool,
+      paymentApprovedAt: freezed == paymentApprovedAt
+          ? _value.paymentApprovedAt
+          : paymentApprovedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      paymentAmount: freezed == paymentAmount
+          ? _value.paymentAmount
+          : paymentAmount // ignore: cast_nullable_to_non_nullable
+              as double?,
+      paymentReceiptPhoneNumber: freezed == paymentReceiptPhoneNumber
+          ? _value.paymentReceiptPhoneNumber
+          : paymentReceiptPhoneNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
       pixKey: freezed == pixKey
           ? _value.pixKey
           : pixKey // ignore: cast_nullable_to_non_nullable
@@ -218,6 +246,10 @@ abstract class _$$PromotionModelImplCopyWith<$Res>
       DateTime claimEndsAt,
       int ticketValidityDays,
       bool canClaim,
+      bool requiresPayment,
+      DateTime? paymentApprovedAt,
+      double? paymentAmount,
+      String? paymentReceiptPhoneNumber,
       String? pixKey,
       List<String>? targetDishNames,
       DateTime? expiresAt,
@@ -252,6 +284,10 @@ class __$$PromotionModelImplCopyWithImpl<$Res>
     Object? claimEndsAt = null,
     Object? ticketValidityDays = null,
     Object? canClaim = null,
+    Object? requiresPayment = null,
+    Object? paymentApprovedAt = freezed,
+    Object? paymentAmount = freezed,
+    Object? paymentReceiptPhoneNumber = freezed,
     Object? pixKey = freezed,
     Object? targetDishNames = freezed,
     Object? expiresAt = freezed,
@@ -318,6 +354,22 @@ class __$$PromotionModelImplCopyWithImpl<$Res>
           ? _value.canClaim
           : canClaim // ignore: cast_nullable_to_non_nullable
               as bool,
+      requiresPayment: null == requiresPayment
+          ? _value.requiresPayment
+          : requiresPayment // ignore: cast_nullable_to_non_nullable
+              as bool,
+      paymentApprovedAt: freezed == paymentApprovedAt
+          ? _value.paymentApprovedAt
+          : paymentApprovedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      paymentAmount: freezed == paymentAmount
+          ? _value.paymentAmount
+          : paymentAmount // ignore: cast_nullable_to_non_nullable
+              as double?,
+      paymentReceiptPhoneNumber: freezed == paymentReceiptPhoneNumber
+          ? _value.paymentReceiptPhoneNumber
+          : paymentReceiptPhoneNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
       pixKey: freezed == pixKey
           ? _value.pixKey
           : pixKey // ignore: cast_nullable_to_non_nullable
@@ -357,6 +409,10 @@ class _$PromotionModelImpl implements _PromotionModel {
       required this.claimEndsAt,
       required this.ticketValidityDays,
       required this.canClaim,
+      this.requiresPayment = false,
+      this.paymentApprovedAt,
+      this.paymentAmount,
+      this.paymentReceiptPhoneNumber,
       this.pixKey,
       final List<String>? targetDishNames,
       this.expiresAt,
@@ -397,6 +453,15 @@ class _$PromotionModelImpl implements _PromotionModel {
   @override
   final bool canClaim;
   @override
+  @JsonKey()
+  final bool requiresPayment;
+  @override
+  final DateTime? paymentApprovedAt;
+  @override
+  final double? paymentAmount;
+  @override
+  final String? paymentReceiptPhoneNumber;
+  @override
   final String? pixKey;
   final List<String>? _targetDishNames;
   @override
@@ -415,7 +480,7 @@ class _$PromotionModelImpl implements _PromotionModel {
 
   @override
   String toString() {
-    return 'PromotionModel(id: $id, restaurantId: $restaurantId, restaurantName: $restaurantName, restaurantLogoUrl: $restaurantLogoUrl, title: $title, description: $description, imageUrl: $imageUrl, discountPercent: $discountPercent, totalTickets: $totalTickets, remainingTickets: $remainingTickets, scope: $scope, claimStartsAt: $claimStartsAt, claimEndsAt: $claimEndsAt, ticketValidityDays: $ticketValidityDays, canClaim: $canClaim, pixKey: $pixKey, targetDishNames: $targetDishNames, expiresAt: $expiresAt, createdAt: $createdAt)';
+    return 'PromotionModel(id: $id, restaurantId: $restaurantId, restaurantName: $restaurantName, restaurantLogoUrl: $restaurantLogoUrl, title: $title, description: $description, imageUrl: $imageUrl, discountPercent: $discountPercent, totalTickets: $totalTickets, remainingTickets: $remainingTickets, scope: $scope, claimStartsAt: $claimStartsAt, claimEndsAt: $claimEndsAt, ticketValidityDays: $ticketValidityDays, canClaim: $canClaim, requiresPayment: $requiresPayment, paymentApprovedAt: $paymentApprovedAt, paymentAmount: $paymentAmount, paymentReceiptPhoneNumber: $paymentReceiptPhoneNumber, pixKey: $pixKey, targetDishNames: $targetDishNames, expiresAt: $expiresAt, createdAt: $createdAt)';
   }
 
   @override
@@ -450,6 +515,15 @@ class _$PromotionModelImpl implements _PromotionModel {
                 other.ticketValidityDays == ticketValidityDays) &&
             (identical(other.canClaim, canClaim) ||
                 other.canClaim == canClaim) &&
+            (identical(other.requiresPayment, requiresPayment) ||
+                other.requiresPayment == requiresPayment) &&
+            (identical(other.paymentApprovedAt, paymentApprovedAt) ||
+                other.paymentApprovedAt == paymentApprovedAt) &&
+            (identical(other.paymentAmount, paymentAmount) ||
+                other.paymentAmount == paymentAmount) &&
+            (identical(other.paymentReceiptPhoneNumber,
+                    paymentReceiptPhoneNumber) ||
+                other.paymentReceiptPhoneNumber == paymentReceiptPhoneNumber) &&
             (identical(other.pixKey, pixKey) || other.pixKey == pixKey) &&
             const DeepCollectionEquality()
                 .equals(other._targetDishNames, _targetDishNames) &&
@@ -478,6 +552,10 @@ class _$PromotionModelImpl implements _PromotionModel {
         claimEndsAt,
         ticketValidityDays,
         canClaim,
+        requiresPayment,
+        paymentApprovedAt,
+        paymentAmount,
+        paymentReceiptPhoneNumber,
         pixKey,
         const DeepCollectionEquality().hash(_targetDishNames),
         expiresAt,
@@ -518,6 +596,10 @@ abstract class _PromotionModel implements PromotionModel {
       required final DateTime claimEndsAt,
       required final int ticketValidityDays,
       required final bool canClaim,
+      final bool requiresPayment,
+      final DateTime? paymentApprovedAt,
+      final double? paymentAmount,
+      final String? paymentReceiptPhoneNumber,
       final String? pixKey,
       final List<String>? targetDishNames,
       final DateTime? expiresAt,
@@ -556,6 +638,14 @@ abstract class _PromotionModel implements PromotionModel {
   int get ticketValidityDays;
   @override
   bool get canClaim;
+  @override
+  bool get requiresPayment;
+  @override
+  DateTime? get paymentApprovedAt;
+  @override
+  double? get paymentAmount;
+  @override
+  String? get paymentReceiptPhoneNumber;
   @override
   String? get pixKey;
   @override

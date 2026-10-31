@@ -10,6 +10,7 @@ class AdminDashboardModel {
   final int activeCampaigns;
   final int usersToday;
   final int usersThisWeek;
+  final List<AdminFollowedRestaurantModel> mostFollowedRestaurants;
 
   AdminDashboardModel({
     required this.totalUsers,
@@ -23,6 +24,7 @@ class AdminDashboardModel {
     required this.activeCampaigns,
     required this.usersToday,
     required this.usersThisWeek,
+    required this.mostFollowedRestaurants,
   });
 
   factory AdminDashboardModel.fromJson(Map<String, dynamic> json) {
@@ -38,8 +40,31 @@ class AdminDashboardModel {
       activeCampaigns: json['activeCampaigns'] as int,
       usersToday: json['usersToday'] as int,
       usersThisWeek: json['usersThisWeek'] as int,
+      mostFollowedRestaurants: (json['mostFollowedRestaurants'] as List? ?? [])
+          .map((item) => AdminFollowedRestaurantModel.fromJson(
+              item as Map<String, dynamic>))
+          .toList(),
     );
   }
+}
+
+class AdminFollowedRestaurantModel {
+  final String restaurantId;
+  final String restaurantName;
+  final int favoriteCount;
+
+  const AdminFollowedRestaurantModel({
+    required this.restaurantId,
+    required this.restaurantName,
+    required this.favoriteCount,
+  });
+
+  factory AdminFollowedRestaurantModel.fromJson(Map<String, dynamic> json) =>
+      AdminFollowedRestaurantModel(
+        restaurantId: json['restaurantId'] as String,
+        restaurantName: json['restaurantName'] as String,
+        favoriteCount: json['favoriteCount'] as int,
+      );
 }
 
 class AdminUserModel {
@@ -116,6 +141,7 @@ class PromotionSettingsModel {
   final int claimWindowDays;
   final String? pixKey;
   final String? receiptPhoneNumber;
+  final bool chargeEnabled;
   final DateTime updatedAt;
 
   PromotionSettingsModel({
@@ -126,6 +152,7 @@ class PromotionSettingsModel {
     required this.updatedAt,
     this.pixKey,
     this.receiptPhoneNumber,
+    this.chargeEnabled = false,
   });
 
   factory PromotionSettingsModel.fromJson(Map<String, dynamic> json) {
@@ -136,6 +163,7 @@ class PromotionSettingsModel {
       claimWindowDays: json['claimWindowDays'] as int,
       pixKey: json['pixKey'] as String?,
       receiptPhoneNumber: json['receiptPhoneNumber'] as String?,
+      chargeEnabled: json['chargeEnabled'] as bool? ?? false,
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
   }
@@ -147,5 +175,46 @@ class PromotionSettingsModel {
         'claimWindowDays': claimWindowDays,
         'pixKey': pixKey,
         'receiptPhoneNumber': receiptPhoneNumber,
+        'chargeEnabled': chargeEnabled,
       };
+}
+
+class PendingPromotionPaymentModel {
+  final String promotionId;
+  final String restaurantId;
+  final String restaurantName;
+  final String title;
+  final int totalTickets;
+  final double? paymentAmount;
+  final String? pixKey;
+  final String? receiptPhoneNumber;
+  final DateTime createdAt;
+  final DateTime claimStartsAt;
+
+  const PendingPromotionPaymentModel({
+    required this.promotionId,
+    required this.restaurantId,
+    required this.restaurantName,
+    required this.title,
+    required this.totalTickets,
+    required this.paymentAmount,
+    required this.pixKey,
+    required this.receiptPhoneNumber,
+    required this.createdAt,
+    required this.claimStartsAt,
+  });
+
+  factory PendingPromotionPaymentModel.fromJson(Map<String, dynamic> json) =>
+      PendingPromotionPaymentModel(
+        promotionId: json['promotionId'] as String,
+        restaurantId: json['restaurantId'] as String,
+        restaurantName: json['restaurantName'] as String,
+        title: json['title'] as String,
+        totalTickets: json['totalTickets'] as int,
+        paymentAmount: (json['paymentAmount'] as num?)?.toDouble(),
+        pixKey: json['pixKey'] as String?,
+        receiptPhoneNumber: json['receiptPhoneNumber'] as String?,
+        createdAt: DateTime.parse(json['createdAt'] as String),
+        claimStartsAt: DateTime.parse(json['claimStartsAt'] as String),
+      );
 }

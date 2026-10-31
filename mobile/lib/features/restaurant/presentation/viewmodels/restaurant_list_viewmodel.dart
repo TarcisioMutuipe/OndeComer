@@ -42,14 +42,16 @@ class RestaurantListState {
     String? category,
     int? page,
     bool? hasMore,
+    bool clearSearch = false,
+    bool clearCategory = false,
   }) =>
       RestaurantListState(
         restaurants: restaurants ?? this.restaurants,
         isLoading: isLoading ?? this.isLoading,
         isLoadingMore: isLoadingMore ?? this.isLoadingMore,
         error: error,
-        search: search ?? this.search,
-        category: category ?? this.category,
+        search: clearSearch ? null : (search ?? this.search),
+        category: clearCategory ? null : (category ?? this.category),
         page: page ?? this.page,
         hasMore: hasMore ?? this.hasMore,
       );
@@ -101,14 +103,26 @@ class RestaurantListViewModel extends StateNotifier<RestaurantListState> {
   }
 
   void setSearch(String? search) {
-    state =
-        state.copyWith(search: search, restaurants: [], page: 1, hasMore: true);
+    final isClear = search == null || search.trim().isEmpty;
+    state = state.copyWith(
+      search: isClear ? null : search,
+      clearSearch: isClear,
+      restaurants: [],
+      page: 1,
+      hasMore: true,
+    );
     load(refresh: true);
   }
 
   void setCategory(String? category) {
+    final isClear = category == null || category.trim().isEmpty;
     state = state.copyWith(
-        category: category, restaurants: [], page: 1, hasMore: true);
+      category: isClear ? null : category,
+      clearCategory: isClear,
+      restaurants: [],
+      page: 1,
+      hasMore: true,
+    );
     load(refresh: true);
   }
 }

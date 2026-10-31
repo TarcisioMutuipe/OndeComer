@@ -48,6 +48,7 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IPromotionTicketLifecycleService, PromotionTicketLifecycleService>();
         services.AddScoped<IPromotionService, PromotionService>();
+        services.AddHostedService<InactiveDishCleanupHostedService>();
         services.AddScoped<ICheckInRepository, CheckInRepository>();
         services.AddScoped<ICheckInService, CheckInService>();
         services.AddScoped<ILoyaltyRepository, LoyaltyRepository>();

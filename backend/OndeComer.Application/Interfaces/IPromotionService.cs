@@ -9,8 +9,10 @@ public interface IPromotionService
     Task<PromotionSummaryDto> GetSummaryAsync(CancellationToken ct = default);
     Task<PromotionSettingsDto> GetSettingsAsync(CancellationToken ct = default);
     Task<PromotionSettingsDto> UpdateSettingsAsync(UpdatePromotionSettingsRequest request, CancellationToken ct = default);
+    Task<IReadOnlyList<PendingPromotionPaymentDto>> GetPendingPaymentsAsync(CancellationToken ct = default);
+    Task<PromotionDto> ApprovePaymentAsync(Guid promotionId, CancellationToken ct = default);
     Task<PagedResult<PromotionDto>> GetFeedAsync(int page, int pageSize, CancellationToken ct = default);
-    Task<IEnumerable<PromotionDto>> GetByRestaurantAsync(Guid restaurantId, CancellationToken ct = default);
+    Task<IEnumerable<PromotionDto>> GetByRestaurantAsync(Guid restaurantId, Guid requesterId, CancellationToken ct = default);
     Task<PromotionDto> CreateAsync(Guid ownerId, CreatePromotionRequest request, CancellationToken ct = default);
     Task<PromotionDto> UpdateAsync(Guid ownerId, Guid promotionId, UpdatePromotionRequest request, CancellationToken ct = default);
     Task DeleteAsync(Guid ownerId, Guid promotionId, CancellationToken ct = default);

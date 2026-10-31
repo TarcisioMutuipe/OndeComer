@@ -1,11 +1,15 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 
 final String _baseUrl = const String.fromEnvironment(
   'API_BASE_URL',
   defaultValue: '',
 ).isNotEmpty
     ? const String.fromEnvironment('API_BASE_URL')
-    : kIsWeb
+    : (kIsWeb ||
+            defaultTargetPlatform == TargetPlatform.windows ||
+            defaultTargetPlatform == TargetPlatform.macOS ||
+            defaultTargetPlatform == TargetPlatform.linux)
         ? 'http://localhost:5000'
         : 'http://10.0.2.2:5000';
 
@@ -86,6 +90,7 @@ class ApiConstants {
 
   // Dishes
   static const String dishesBase = '$apiVersion/dishes';
+  static const String dishFeed = '$dishesBase/feed';
   static String createDish(String restaurantId) => '$dishesBase/$restaurantId';
   static String dishById(String id) => '$dishesBase/$id';
 

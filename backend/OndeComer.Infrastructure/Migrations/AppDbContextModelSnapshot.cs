@@ -165,6 +165,9 @@ namespace OndeComer.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("DeactivatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
@@ -194,6 +197,15 @@ namespace OndeComer.Infrastructure.Migrations
 
                     b.Property<Guid>("RestaurantId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("ShowInFeed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Subcategory")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -517,6 +529,16 @@ namespace OndeComer.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("ClaimEndsAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime>("ClaimStartsAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -538,19 +560,152 @@ namespace OndeComer.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<decimal?>("PaymentAmount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<DateTime?>("PaymentApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentReceiptPhoneNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("PixKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("RemainingTickets")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(10);
+
+                    b.Property<bool>("RequiresPayment")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("RestaurantId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("TargetDishIdsJson")
+                        .HasColumnType("text");
+
+                    b.Property<int>("TicketValidityDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(7);
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
+                    b.Property<int>("TotalTickets")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(10);
+
                     b.HasKey("Id");
 
                     b.HasIndex("RestaurantId");
 
                     b.ToTable("Promotions");
+                });
+
+            modelBuilder.Entity("OndeComer.Domain.Entities.PromotionSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("BatchPrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<bool>("ChargeEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("ClaimWindowDays")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PixKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ReceiptPhoneNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<int>("TicketValidityDays")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TicketsPerBatch")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PromotionSettings");
+                });
+
+            modelBuilder.Entity("OndeComer.Domain.Entities.PromotionTicket", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ClaimedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ExpirationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("QrCodeToken")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("RedeemedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ReminderSentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PromotionId");
+
+                    b.HasIndex("QrCodeToken")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PromotionTickets");
                 });
 
             modelBuilder.Entity("OndeComer.Domain.Entities.RefreshToken", b =>
@@ -1084,6 +1239,25 @@ namespace OndeComer.Infrastructure.Migrations
                     b.Navigation("Restaurant");
                 });
 
+            modelBuilder.Entity("OndeComer.Domain.Entities.PromotionTicket", b =>
+                {
+                    b.HasOne("OndeComer.Domain.Entities.Promotion", "Promotion")
+                        .WithMany("Tickets")
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OndeComer.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Promotion");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("OndeComer.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("OndeComer.Domain.Entities.User", "User")
@@ -1178,6 +1352,11 @@ namespace OndeComer.Infrastructure.Migrations
                     b.Navigation("Restaurant");
 
                     b.Navigation("Wishlist");
+                });
+
+            modelBuilder.Entity("OndeComer.Domain.Entities.Promotion", b =>
+                {
+                    b.Navigation("Tickets");
                 });
 
             modelBuilder.Entity("OndeComer.Domain.Entities.Restaurant", b =>

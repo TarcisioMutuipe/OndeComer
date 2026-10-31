@@ -8,5 +8,6 @@ public record UpdatePromotionSettingsRequest(
     [Range(1, 365)] int TicketValidityDays,
     [Range(1, 30)] int ClaimWindowDays,
     [MaxLength(200)] string? PixKey,
-    [MaxLength(30)] string? ReceiptPhoneNumber
+    [MaxLength(30)] string? ReceiptPhoneNumber,
+    bool ChargeEnabled = false
 );

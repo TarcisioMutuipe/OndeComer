@@ -10,5 +10,7 @@ public record UpdateDishRequest(
     [MaxLength(500)] string? ImageUrl,
     DateTime? AvailabilityStart,
     DateTime? AvailabilityEnd,
-    bool? IsActive
+    bool? IsActive,
+    string? Subcategory,
+    bool? ShowInFeed
 );

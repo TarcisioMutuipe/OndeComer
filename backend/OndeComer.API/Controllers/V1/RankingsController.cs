@@ -64,7 +64,10 @@ public class RankingsController : ControllerBase
         var since = GetPeriodStart(period);
 
         var topDishes = await _context.Dishes
-            .Where(d => d.IsActive && d.RatingCount > 0)
+            .Where(d => d.IsActive && d.ShowInFeed && d.RatingCount > 0 &&
+                !d.Category.ToLower().Contains("bebid") &&
+                !d.Category.ToLower().Contains("vinho") &&
+                !d.Category.ToLower().Contains("drink"))
             .Select(d => new
             {
                 d.Id,
@@ -99,7 +102,10 @@ public class RankingsController : ControllerBase
         var since = DateTime.UtcNow.AddDays(-7);
 
         var trending = await _context.Dishes
-            .Where(d => d.IsActive && d.RatingCount > 0)
+            .Where(d => d.IsActive && d.ShowInFeed && d.RatingCount > 0 &&
+                !d.Category.ToLower().Contains("bebid") &&
+                !d.Category.ToLower().Contains("vinho") &&
+                !d.Category.ToLower().Contains("drink"))
             .Select(d => new
             {
                 d.Id,

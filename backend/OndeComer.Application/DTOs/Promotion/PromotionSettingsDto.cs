@@ -7,5 +7,6 @@ public record PromotionSettingsDto(
     int ClaimWindowDays,
     string? PixKey,
     string? ReceiptPhoneNumber,
-    DateTime UpdatedAt
+    DateTime UpdatedAt,
+    bool ChargeEnabled
 );

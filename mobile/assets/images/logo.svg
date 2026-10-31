@@ -1,25 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 110" width="360" height="110">
-  <!-- Location pin with bite mark -->
-  <g transform="translate(10, 0)">
-    <!-- Pin body -->
-    <path d="M50,8 C30,8 12,24 12,46 C12,70 50,105 50,105 C50,105 88,70 88,46 C88,24 70,8 50,8 Z" fill="#FFA000"/>
-    <!-- Bite mark (top-right arc removed) -->
-    <path d="M65,8 C68,12 72,10 74,14 C76,18 73,22 69,20 C65,18 64,14 65,8 Z" fill="#FAFAFA"/>
-    <path d="M70,4 C74,6 77,10 76,14 C78,12 79,8 77,5 C75,3 72,2 70,4 Z" fill="#FAFAFA"/>
-    <!-- Inner circle (darker yellow) -->
-    <circle cx="50" cy="42" r="26" fill="#FF8F00"/>
-    <!-- Fork inside circle -->
-    <line x1="40" y1="28" x2="40" y2="40" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
-    <line x1="46" y1="28" x2="46" y2="40" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
-    <line x1="52" y1="28" x2="52" y2="40" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
-    <path d="M40,40 Q46,46 52,40" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
-    <line x1="46" y1="44" x2="46" y2="58" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
-    <!-- Spoon inside circle -->
-    <ellipse cx="58" cy="33" rx="4" ry="6" fill="none" stroke="white" stroke-width="2.8"/>
-    <line x1="58" y1="39" x2="58" y2="58" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
-  </g>
-  <!-- Text: ONDE COMER (bold black) -->
-  <text x="108" y="45" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-size="34" font-weight="900" fill="#1A1A1A" letter-spacing="0.5">ONDE COMER</text>
-  <!-- Text: EM SALVADOR (gray, slightly spaced) -->
-  <text x="108" y="78" font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="700" fill="#9E9E9E" letter-spacing="2">EM SALVADOR</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 150" width="440" height="150">
+  <path d="M54 9C28 9 8 29 8 55c0 31 46 86 46 86s46-55 46-86C100 29 80 9 54 9Z" fill="#FFC107"/>
+  <circle cx="54" cy="54" r="21" fill="#FAFAFA"/>
+  <text x="126" y="61" font-family="Arial Black, Arial, sans-serif" font-size="43" font-weight="900" fill="#1A1A1A">ONDE</text>
+  <text x="126" y="105" font-family="Arial Black, Arial, sans-serif" font-size="43" font-weight="900" fill="#1A1A1A">COMER</text>
+  <text x="128" y="134" font-family="Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="2" fill="#777777">EM SALVADOR</text>
 </svg>

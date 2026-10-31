@@ -7,7 +7,9 @@ public record CreateDishRequest(
     [MaxLength(1000)] string? Description,
     [Range(0.01, 99999.99)] decimal Price,
     [Required, MaxLength(100)] string Category,
+    [MaxLength(100)] string? Subcategory,
     [MaxLength(500)] string? ImageUrl,
     DateTime? AvailabilityStart,
-    DateTime? AvailabilityEnd
+    DateTime? AvailabilityEnd,
+    bool ShowInFeed = true
 );

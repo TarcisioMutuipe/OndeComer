@@ -99,6 +99,8 @@ class AppTheme {
             borderSide: const BorderSide(color: error, width: 2),
           ),
           labelStyle: const TextStyle(color: textSecondary),
+          floatingLabelStyle: const TextStyle(
+              color: primaryYellowDark, fontWeight: FontWeight.w600),
           hintStyle: const TextStyle(color: textSecondary),
         ),
         cardTheme: CardThemeData(
@@ -217,6 +219,8 @@ class AppTheme {
             borderSide: const BorderSide(color: error, width: 2),
           ),
           labelStyle: const TextStyle(color: textSecondaryDark),
+          floatingLabelStyle: const TextStyle(
+              color: primaryYellow, fontWeight: FontWeight.w600),
           hintStyle: const TextStyle(color: textSecondaryDark),
         ),
         cardTheme: CardThemeData(

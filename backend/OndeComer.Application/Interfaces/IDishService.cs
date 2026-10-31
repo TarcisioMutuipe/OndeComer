@@ -9,4 +9,6 @@ public interface IDishService
     Task DeleteAsync(Guid dishId, Guid requesterId, CancellationToken ct = default);
     Task<IEnumerable<DishDto>> GetByRestaurantAsync(Guid restaurantId, bool onlyAvailable = false, CancellationToken ct = default);
     Task<DishDto?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<IEnumerable<DishFeedDto>> GetFeedAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<int> DeleteExpiredInactiveAsync(CancellationToken ct = default);
 }

@@ -9,5 +9,6 @@ public class PromotionSettings
     public int ClaimWindowDays { get; set; } = 2;
     public string? PixKey { get; set; }
     public string? ReceiptPhoneNumber { get; set; }
+    public bool ChargeEnabled { get; set; }
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

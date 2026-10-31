@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../restaurant/data/models/restaurant_model.dart';
+import '../../data/datasources/admin_restaurant_datasource.dart';
 import '../../presentation/viewmodels/admin_restaurant_viewmodel.dart';
 import '../viewmodels/admin_promotion_tickets_viewmodel.dart';
 import '../../data/models/promotion_ticket_admin_models.dart';
@@ -25,7 +25,8 @@ class _AdminPromotionTicketsScreenState
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => ref.read(adminRestaurantProvider.notifier).loadRestaurants());
+    Future.microtask(
+        () => ref.read(adminRestaurantProvider.notifier).loadRestaurants());
   }
 
   Future<void> _pickFromDate() async {
@@ -79,7 +80,9 @@ class _AdminPromotionTicketsScreenState
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.read(adminPromotionTicketsProvider.notifier).load(refresh: true),
+            onPressed: () => ref
+                .read(adminPromotionTicketsProvider.notifier)
+                .load(refresh: true),
           ),
         ],
       ),
@@ -95,7 +98,8 @@ class _AdminPromotionTicketsScreenState
                 status: _status,
                 from: _from,
                 to: _to,
-                onRestaurantChanged: (value) => setState(() => _restaurantId = value),
+                onRestaurantChanged: (value) =>
+                    setState(() => _restaurantId = value),
                 onStatusChanged: (value) => setState(() => _status = value),
                 onFromTap: _pickFromDate,
                 onToTap: _pickToDate,
@@ -104,7 +108,9 @@ class _AdminPromotionTicketsScreenState
               ),
               Expanded(
                 child: RefreshIndicator(
-                  onRefresh: () => ref.read(adminPromotionTicketsProvider.notifier).load(refresh: true),
+                  onRefresh: () => ref
+                      .read(adminPromotionTicketsProvider.notifier)
+                      .load(refresh: true),
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     children: [
@@ -121,7 +127,8 @@ class _AdminPromotionTicketsScreenState
                             color: Colors.red.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: Text(state.error!, style: const TextStyle(color: AppTheme.error)),
+                          child: Text(state.error!,
+                              style: const TextStyle(color: AppTheme.error)),
                         ),
                       ],
                       if (state.tickets.isEmpty)
@@ -149,7 +156,7 @@ class _AdminPromotionTicketsScreenState
 }
 
 class _FilterPanel extends StatelessWidget {
-  final AsyncValue<List<RestaurantModel>> restaurantsAsync;
+  final AsyncValue<List<AdminRestaurantEntry>> restaurantsAsync;
   final String? restaurantId;
   final String? status;
   final DateTime? from;
@@ -184,7 +191,8 @@ class _FilterPanel extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Filtros', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const Text('Filtros',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             const SizedBox(height: 12),
             restaurantsAsync.when(
               loading: () => const LinearProgressIndicator(),
@@ -193,11 +201,12 @@ class _FilterPanel extends StatelessWidget {
                 value: restaurantId,
                 decoration: const InputDecoration(labelText: 'Restaurante'),
                 items: [
-                  const DropdownMenuItem<String?>(value: null, child: Text('Todos')),
+                  const DropdownMenuItem<String?>(
+                      value: null, child: Text('Todos')),
                   ...restaurants.map(
-                    (restaurant) => DropdownMenuItem<String?>(
-                      value: restaurant.id,
-                      child: Text(restaurant.name),
+                    (entry) => DropdownMenuItem<String?>(
+                      value: entry.restaurant.id,
+                      child: Text(entry.restaurant.name),
                     ),
                   ),
                 ],
@@ -210,10 +219,14 @@ class _FilterPanel extends StatelessWidget {
               decoration: const InputDecoration(labelText: 'Status'),
               items: const [
                 DropdownMenuItem<String?>(value: null, child: Text('Todos')),
-                DropdownMenuItem<String?>(value: 'Claimed', child: Text('Ativos')),
-                DropdownMenuItem<String?>(value: 'Redeemed', child: Text('Consumidos')),
-                DropdownMenuItem<String?>(value: 'Expired', child: Text('Expirados')),
-                DropdownMenuItem<String?>(value: 'Cancelled', child: Text('Cancelados')),
+                DropdownMenuItem<String?>(
+                    value: 'Claimed', child: Text('Resgatados (Ativos)')),
+                DropdownMenuItem<String?>(
+                    value: 'Redeemed', child: Text('Utilizados')),
+                DropdownMenuItem<String?>(
+                    value: 'Expired', child: Text('Expirados')),
+                DropdownMenuItem<String?>(
+                    value: 'Cancelled', child: Text('Cancelados')),
               ],
               onChanged: onStatusChanged,
             ),
@@ -224,7 +237,8 @@ class _FilterPanel extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: onFromTap,
                     icon: const Icon(Icons.date_range),
-                    label: Text(from == null ? 'Data inicial' : _formatDate(from!)),
+                    label: Text(
+                        from == null ? 'Data inicial' : _formatDate(from!)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -320,9 +334,16 @@ class _SummaryCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(item.value.toString(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: item.color)),
+          Text(item.value.toString(),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: item.color)),
           const SizedBox(height: 4),
-          Text(item.label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+          Text(item.label,
+              textAlign: TextAlign.center,
+              style:
+                  const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
         ],
       ),
     );
@@ -336,13 +357,24 @@ class _AdminTicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusColor = _colorForStatus(ticket.status);
+    final cardBg = isDark ? AppTheme.surfaceDark : AppTheme.white;
+    final textColor = isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary;
+    final subtextColor =
+        isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondary;
+    final borderColor = isDark ? AppTheme.dividerDark : AppTheme.divider;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [BoxShadow(color: Color(0x0A000000), blurRadius: 10, offset: Offset(0, 2))],
+        border: Border.all(color: borderColor),
+        boxShadow: const [
+          BoxShadow(
+              color: Color(0x0A000000), blurRadius: 10, offset: Offset(0, 2))
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,46 +385,115 @@ class _AdminTicketCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(ticket.promotionTitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    Text(
+                      ticket.promotionTitle,
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: textColor),
+                    ),
                     const SizedBox(height: 4),
-                    Text('${ticket.restaurantName} • ${ticket.userName}', style: const TextStyle(color: AppTheme.textSecondary)),
-                    Text(ticket.userEmail, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                    Text(
+                      '${ticket.restaurantName} • ${ticket.userName}',
+                      style: TextStyle(color: subtextColor),
+                    ),
+                    Text(
+                      ticket.userEmail,
+                      style: TextStyle(color: subtextColor, fontSize: 12),
+                    ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
+                  color: statusColor.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Text(ticket.status.toUpperCase(), style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w700)),
+                child: Text(
+                  _statusLabel(ticket.status).toUpperCase(),
+                  style: TextStyle(
+                      color: statusColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Text('Pego em ${_formatDateTime(ticket.claimedAt)}'),
-          Text('Expira em ${_formatDateTime(ticket.expiresAt)}'),
-          if (ticket.redeemedAt != null) Text('Consumido em ${_formatDateTime(ticket.redeemedAt!)}'),
+          Text(
+            'Resgatado em ${_formatDateTime(ticket.claimedAt)}',
+            style: TextStyle(color: textColor),
+          ),
+          Text(
+            'Expira em ${_formatDateTime(ticket.expiresAt)}',
+            style: TextStyle(color: textColor),
+          ),
+          if (ticket.redeemedAt != null)
+            Text(
+              'Utilizado em ${_formatDateTime(ticket.redeemedAt!)}',
+              style: TextStyle(color: textColor),
+            ),
           if (ticket.expirationReason != null) ...[
             const SizedBox(height: 6),
-            Text('Motivo: ${ticket.expirationReason}', style: const TextStyle(color: AppTheme.textSecondary)),
+            Text(
+              'Motivo: ${ticket.expirationReason}',
+              style: TextStyle(color: subtextColor),
+            ),
           ],
           const SizedBox(height: 6),
-          Text('Expirações do usuário: ${ticket.userExpiredTickets}'),
+          Text(
+            'Expirações do usuário: ${ticket.userExpiredTickets}',
+            style: TextStyle(color: textColor),
+          ),
           if (ticket.userOnCooldown && ticket.cooldownUntil != null)
-            Text('Cooldown até ${_formatDateTime(ticket.cooldownUntil!)}', style: const TextStyle(color: AppTheme.error)),
+            Text(
+              'Cooldown até ${_formatDateTime(ticket.cooldownUntil!)}',
+              style: const TextStyle(color: AppTheme.error),
+            ),
           const SizedBox(height: 12),
-          SelectableText(ticket.qrCodeToken, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+          SelectableText(
+            ticket.qrCodeToken,
+            style: TextStyle(
+                fontFamily: 'monospace', fontSize: 12, color: textColor),
+          ),
           const SizedBox(height: 8),
           OutlinedButton.icon(
-            onPressed: () => Clipboard.setData(ClipboardData(text: ticket.qrCodeToken)),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: textColor,
+              side: BorderSide(color: borderColor),
+            ),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: ticket.qrCodeToken));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Token copiado com sucesso!'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
             icon: const Icon(Icons.copy, size: 16),
             label: const Text('Copiar token'),
           ),
         ],
       ),
     );
+  }
+
+  String _statusLabel(String status) {
+    switch (status.toLowerCase()) {
+      case 'claimed':
+        return 'Resgatado';
+      case 'redeemed':
+        return 'Utilizado';
+      case 'expired':
+        return 'Expirado';
+      case 'cancelled':
+        return 'Cancelado';
+      default:
+        return status;
+    }
   }
 
   Color _colorForStatus(String status) {
@@ -403,6 +504,8 @@ class _AdminTicketCard extends StatelessWidget {
         return Colors.red;
       case 'cancelled':
         return Colors.orange;
+      case 'claimed':
+        return AppTheme.primaryYellowDark;
       default:
         return Colors.blue;
     }
@@ -424,17 +527,22 @@ class _EmptyTicketsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppTheme.white,
+        color: isDark ? AppTheme.surfaceDark : AppTheme.white,
         borderRadius: BorderRadius.circular(16),
+        border:
+            Border.all(color: isDark ? AppTheme.dividerDark : AppTheme.divider),
       ),
-      child: const Text(
+      child: Text(
         'Nenhum ticket encontrado com os filtros atuais.',
         textAlign: TextAlign.center,
-        style: TextStyle(color: AppTheme.textSecondary),
+        style: TextStyle(
+            color:
+                isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondary),
       ),
     );
   }

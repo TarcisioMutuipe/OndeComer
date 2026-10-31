@@ -19,6 +19,10 @@ public class Promotion
     public DateTime ClaimEndsAt { get; set; } = DateTime.UtcNow.AddDays(2);
     public int TicketValidityDays { get; set; } = 7;
     public string? PixKey { get; set; }
+    public string? PaymentReceiptPhoneNumber { get; set; }
+    public decimal? PaymentAmount { get; set; }
+    public bool RequiresPayment { get; set; }
+    public DateTime? PaymentApprovedAt { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ExpiresAt { get; set; }

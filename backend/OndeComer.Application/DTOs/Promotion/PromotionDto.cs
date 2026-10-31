@@ -22,5 +22,9 @@ public record PromotionDto(
     int TicketValidityDays,
     string? PixKey,
     bool CanClaim,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    bool RequiresPayment,
+    DateTime? PaymentApprovedAt,
+    decimal? PaymentAmount,
+    string? PaymentReceiptPhoneNumber
 );

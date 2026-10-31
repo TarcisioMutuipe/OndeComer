@@ -20,6 +20,12 @@ class HomeScreen extends ConsumerWidget {
       });
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    if (user?.profileType == 'Admin') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.go(AppRoutes.admin);
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return MainScaffold(child: const RestaurantListScreen());
   }

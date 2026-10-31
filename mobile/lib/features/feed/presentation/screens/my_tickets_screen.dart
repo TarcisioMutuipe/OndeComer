@@ -127,6 +127,21 @@ class MyTicketsScreen extends ConsumerWidget {
   }
 }
 
+String formatTicketStatus(String status) {
+  switch (status.toLowerCase()) {
+    case 'claimed':
+      return 'Resgatado';
+    case 'redeemed':
+      return 'Utilizado';
+    case 'expired':
+      return 'Expirado';
+    case 'cancelled':
+      return 'Cancelado';
+    default:
+      return status;
+  }
+}
+
 Color _ticketStatusColor(String status) {
   switch (status.toLowerCase()) {
     case 'redeemed':
@@ -135,6 +150,7 @@ Color _ticketStatusColor(String status) {
       return AppTheme.error;
     case 'cancelled':
       return Colors.orange;
+    case 'claimed':
     default:
       return AppTheme.primaryYellowDark;
   }
@@ -264,6 +280,7 @@ class _TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusColor = _ticketStatusColor(ticket.status);
     final remaining = ticket.expiresAt.difference(DateTime.now().toUtc());
     final countdown = ticket.isClaimed
@@ -275,12 +292,17 @@ class _TicketCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white,
+        color: isDark ? AppTheme.surfaceDark : AppTheme.white,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x0A000000), blurRadius: 10, offset: Offset(0, 2)),
-        ],
+        border: Border.all(
+          color: isDark ? AppTheme.dividerDark : AppTheme.divider,
+        ),
+        boxShadow: isDark
+            ? null
+            : const [
+                BoxShadow(
+                    color: Color(0x0A000000), blurRadius: 10, offset: Offset(0, 2)),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,12 +314,21 @@ class _TicketCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(ticket.promotionTitle,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w700)),
+                    Text(
+                      ticket.promotionTitle,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(ticket.restaurantName,
-                        style: const TextStyle(color: AppTheme.textSecondary)),
+                    Text(
+                      ticket.restaurantName,
+                      style: TextStyle(
+                        color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondary,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -308,21 +339,32 @@ class _TicketCard extends StatelessWidget {
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Text(ticket.status.toUpperCase(),
-                    style: TextStyle(
-                        color: statusColor,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700)),
+                child: Text(
+                  formatTicketStatus(ticket.status).toUpperCase(),
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Text('Pego em ${_ticketDateTime(ticket.claimedAt)}',
-              style:
-                  const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
-          Text('Válido até ${_ticketDateTime(ticket.expiresAt)}',
-              style:
-                  const TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+          Text(
+            'Resgatado em ${_ticketDateTime(ticket.claimedAt)}',
+            style: TextStyle(
+              color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondary,
+              fontSize: 13,
+            ),
+          ),
+          Text(
+            'Válido até ${_ticketDateTime(ticket.expiresAt)}',
+            style: TextStyle(
+              color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondary,
+              fontSize: 13,
+            ),
+          ),
           const SizedBox(height: 8),
           Text(
             ticket.isClaimed
@@ -330,37 +372,80 @@ class _TicketCard extends StatelessWidget {
                 : ticket.isRedeemed
                     ? 'Este ticket já foi consumido.'
                     : 'Este ticket expirou e não pode mais ser usado.',
-            style: const TextStyle(fontSize: 13),
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary,
+            ),
           ),
           if (ticket.discountPercent != null) ...[
             const SizedBox(height: 8),
-            Text('Desconto: ${ticket.discountPercent!.toStringAsFixed(0)}%',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              'Desconto: ${ticket.discountPercent!.toStringAsFixed(0)}%',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary,
+              ),
+            ),
           ],
           const SizedBox(height: 12),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              QrImageView(
-                data: ticket.qrCodeToken,
-                size: 110,
-                backgroundColor: Colors.white,
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: QrImageView(
+                  data: ticket.qrCodeToken,
+                  size: 100,
+                  backgroundColor: Colors.white,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Token do QR',
-                        style: TextStyle(fontWeight: FontWeight.w700)),
+                    Text(
+                      'Token do QR',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    SelectableText(ticket.qrCodeToken,
-                        style: const TextStyle(
-                            fontFamily: 'monospace', fontSize: 12)),
+                    SelectableText(
+                      ticket.qrCodeToken,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
-                      onPressed: () => Clipboard.setData(
-                          ClipboardData(text: ticket.qrCodeToken)),
+                      onPressed: () {
+                        Clipboard.setData(
+                            ClipboardData(text: ticket.qrCodeToken));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Token copiado com sucesso!'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: isDark
+                            ? AppTheme.textPrimaryDark
+                            : AppTheme.textPrimary,
+                        side: BorderSide(
+                          color: isDark
+                              ? AppTheme.dividerDark
+                              : AppTheme.divider,
+                        ),
+                      ),
                       icon: const Icon(Icons.copy, size: 16),
                       label: const Text('Copiar token'),
                     ),
@@ -389,15 +474,21 @@ class _EmptySectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.white,
+        color: isDark ? AppTheme.surfaceDark : AppTheme.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.divider),
+        border: Border.all(
+            color: isDark ? AppTheme.dividerDark : AppTheme.divider),
       ),
-      child: Text(label, style: const TextStyle(color: AppTheme.textSecondary)),
+      child: Text(label,
+          style: TextStyle(
+              color: isDark
+                  ? AppTheme.textSecondaryDark
+                  : AppTheme.textSecondary)),
     );
   }
 }

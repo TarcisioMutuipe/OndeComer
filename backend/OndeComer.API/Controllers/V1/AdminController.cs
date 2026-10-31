@@ -75,6 +75,17 @@ public class AdminController : ControllerBase
         [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         => Ok(await _adminService.GetRestaurantsAsync(search, category, page, pageSize));
 
+    [HttpPost("restaurants")]
+    public async Task<ActionResult<AdminRestaurantDto>> CreateRestaurant([FromBody] CreateRestaurantRequest request)
+    {
+        var restaurant = await _adminService.CreateRestaurantAsync(GetCurrentUserId(), request);
+        return CreatedAtAction(nameof(GetRestaurant), new { restaurantId = restaurant.Id }, restaurant);
+    }
+
+    [HttpGet("restaurants/{restaurantId:guid}")]
+    public async Task<ActionResult<AdminRestaurantDto>> GetRestaurant(Guid restaurantId)
+        => Ok(await _adminService.GetRestaurantByIdAsync(restaurantId));
+
     [HttpPut("restaurants/{restaurantId:guid}")]
     public async Task<ActionResult<AdminRestaurantDto>> UpdateRestaurant(Guid restaurantId, [FromBody] AdminUpdateRestaurantRequest request)
         => Ok(await _adminService.UpdateRestaurantAsync(restaurantId, request));
@@ -142,6 +153,14 @@ public class AdminController : ControllerBase
     [HttpPut("promotions/settings")]
     public async Task<ActionResult<PromotionSettingsDto>> UpdatePromotionSettings([FromBody] UpdatePromotionSettingsRequest request, CancellationToken ct)
         => Ok(await _promotionService.UpdateSettingsAsync(request, ct));
+
+    [HttpGet("promotions/pending-payment")]
+    public async Task<ActionResult<IReadOnlyList<PendingPromotionPaymentDto>>> GetPendingPromotionPayments(CancellationToken ct)
+        => Ok(await _promotionService.GetPendingPaymentsAsync(ct));
+
+    [HttpPost("promotions/{promotionId:guid}/approve-payment")]
+    public async Task<ActionResult<PromotionDto>> ApprovePromotionPayment(Guid promotionId, CancellationToken ct)
+        => Ok(await _promotionService.ApprovePaymentAsync(promotionId, ct));
 
     [HttpGet("promotions/summary")]
     public async Task<ActionResult<PromotionSummaryDto>> GetPromotionSummary(CancellationToken ct)

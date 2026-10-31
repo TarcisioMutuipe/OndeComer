@@ -1,4 +1,5 @@
 using OndeComer.Application.DTOs.Admin;
+using OndeComer.Application.DTOs.Restaurant;
 
 namespace OndeComer.Application.Interfaces;
 
@@ -9,6 +10,8 @@ public interface IAdminService
     Task<AdminUserDto> UpdateUserAsync(Guid userId, AdminUpdateUserRequest request);
     Task DeleteUserAsync(Guid userId);
     Task<IEnumerable<AdminRestaurantDto>> GetRestaurantsAsync(string? search, string? category, int page, int pageSize);
+    Task<AdminRestaurantDto> CreateRestaurantAsync(Guid ownerId, CreateRestaurantRequest request);
+    Task<AdminRestaurantDto> GetRestaurantByIdAsync(Guid restaurantId);
     Task<AdminRestaurantDto> UpdateRestaurantAsync(Guid restaurantId, AdminUpdateRestaurantRequest request);
     Task DeleteRestaurantAsync(Guid restaurantId);
     Task<byte[]> ExportUserDataAsync(Guid userId, string format);

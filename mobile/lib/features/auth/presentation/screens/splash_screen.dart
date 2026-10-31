@@ -35,22 +35,23 @@ class SplashScreen extends ConsumerWidget {
     });
 
     return Scaffold(
-      backgroundColor: AppTheme.primaryYellow,
+      backgroundColor: AppTheme.background,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SvgPicture.asset(
               'assets/images/logo.svg',
-              height: 100,
+              width: 300,
+              height: 110,
               placeholderBuilder: (_) => const Icon(
                 Icons.restaurant_menu,
-                size: 80,
-                color: Colors.white,
+                size: 64,
+                color: AppTheme.primaryYellowDark,
               ),
             ),
             const SizedBox(height: 48),
-            const CircularProgressIndicator(color: Colors.white),
+            const CircularProgressIndicator(color: AppTheme.primaryYellowDark),
           ],
         ),
       ),

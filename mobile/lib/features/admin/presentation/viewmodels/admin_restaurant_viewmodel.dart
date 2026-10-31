@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:onde_comer_em_salvador/features/admin/data/datasources/admin_restaurant_datasource.dart';
-import 'package:onde_comer_em_salvador/features/restaurant/data/models/restaurant_model.dart';
 import 'package:onde_comer_em_salvador/core/network/dio_client.dart';
 
 final adminRestaurantDataSourceProvider = Provider((ref) {
@@ -10,7 +9,7 @@ final adminRestaurantDataSourceProvider = Provider((ref) {
 
 /// StateNotifier para gerenciar restaurantes do admin
 class AdminRestaurantNotifier
-    extends StateNotifier<AsyncValue<List<RestaurantModel>>> {
+  extends StateNotifier<AsyncValue<List<AdminRestaurantEntry>>> {
   final AdminRestaurantDataSource dataSource;
   final Ref ref;
 
@@ -32,20 +31,24 @@ class AdminRestaurantNotifier
       final updated = await dataSource.updateRestaurant(id, data);
       state = AsyncValue.data([
         ...?state.whenData((restaurants) => restaurants).value,
-      ].map((r) => r.id == id ? updated : r).toList());
+      ].map((entry) => entry.restaurant.id == id
+          ? entry.copyWith(restaurant: updated)
+          : entry).toList());
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
   }
 
-  Future<void> deleteRestaurant(String id) async {
+  Future<bool> deleteRestaurant(String id) async {
     try {
       await dataSource.deleteRestaurant(id);
       state = AsyncValue.data([
         ...?state.whenData((restaurants) => restaurants).value,
-      ].where((r) => r.id != id).toList());
+      ].where((entry) => entry.restaurant.id != id).toList());
+      return true;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+      return false;
     }
   }
 
@@ -54,7 +57,9 @@ class AdminRestaurantNotifier
       final updated = await dataSource.addYouTubeUrl(restaurantId, url);
       state = AsyncValue.data([
         ...?state.whenData((restaurants) => restaurants).value,
-      ].map((r) => r.id == restaurantId ? updated : r).toList());
+      ].map((entry) => entry.restaurant.id == restaurantId
+          ? entry.copyWith(restaurant: updated)
+          : entry).toList());
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -62,7 +67,7 @@ class AdminRestaurantNotifier
 }
 
 final adminRestaurantProvider = StateNotifierProvider<AdminRestaurantNotifier,
-    AsyncValue<List<RestaurantModel>>>((ref) {
+  AsyncValue<List<AdminRestaurantEntry>>>((ref) {
   final dataSource = ref.watch(adminRestaurantDataSourceProvider);
   return AdminRestaurantNotifier(dataSource: dataSource, ref: ref);
 });

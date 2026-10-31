@@ -99,4 +99,70 @@ public class ImageService : IImageService
             record.Id, record.RelativePath, fullUrl,
             record.FileSizeBytes, record.EntityType, record.EntityId, record.CreatedAt);
     }
+
+    public async Task AssociateDishImageAsync(Guid dishId, string? imageUrl, CancellationToken ct = default)
+    {
+        var relativePath = GetUploadRelativePath(imageUrl);
+        if (relativePath is null) return;
+
+        var image = await _uow.UploadedImages.GetByRelativePathAsync(relativePath, ct);
+        if (image is null || image.EntityType != "Dish") return;
+        image.EntityId = dishId;
+    }
+
+    public async Task<IReadOnlyList<string>> PrepareDishImagesForDeletionAsync(
+        Guid dishId, string? imageUrl, CancellationToken ct = default)
+    {
+        var images = (await _uow.UploadedImages.GetByEntityAsync("Dish", dishId, ct)).ToList();
+        var relativePath = GetUploadRelativePath(imageUrl);
+        if (relativePath is not null)
+        {
+            var linkedImage = await _uow.UploadedImages.GetByRelativePathAsync(relativePath, ct);
+            if (linkedImage is not null && images.All(image => image.Id != linkedImage.Id))
+                images.Add(linkedImage);
+        }
+
+        var relativePaths = images.Select(image => image.RelativePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var image in images)
+        {
+            _uow.UploadedImages.Delete(image);
+        }
+
+        if (relativePath is not null) relativePaths.Add(relativePath);
+        return relativePaths.ToList();
+    }
+
+    public void DeleteStoredImages(IEnumerable<string> relativePaths)
+    {
+        foreach (var relativePath in relativePaths)
+            DeleteStoredImage(relativePath);
+    }
+
+    private static string? GetUploadRelativePath(string? imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl)) return null;
+        var path = Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri)
+            ? uri.AbsolutePath
+            : imageUrl;
+        path = Uri.UnescapeDataString(path).TrimStart('/').Replace('\\', '/');
+        return path.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase) ? path : null;
+    }
+
+    private void DeleteStoredImage(string relativePath)
+    {
+        const string prefix = "uploads/";
+        if (!relativePath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return;
+
+        var uploadsRoot = Path.GetFullPath(_uploadsBasePath) + Path.DirectorySeparatorChar;
+        var fullPath = Path.GetFullPath(Path.Combine(
+            _uploadsBasePath,
+            relativePath[prefix.Length..].Replace('/', Path.DirectorySeparatorChar)));
+        if (!fullPath.StartsWith(uploadsRoot, StringComparison.OrdinalIgnoreCase)) return;
+
+        File.Delete(fullPath);
+        var thumbnailPath = Path.Combine(
+            Path.GetDirectoryName(fullPath)!,
+            $"{Path.GetFileNameWithoutExtension(fullPath)}_thumb.jpg");
+        File.Delete(thumbnailPath);
+    }
 }

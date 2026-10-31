@@ -129,6 +129,8 @@ class _PromotionTile extends StatelessWidget {
     final diff =
         promotion.expiresAt?.toUtc().difference(DateTime.now().toUtc());
     final expiredSoon = diff != null && !diff.isNegative && diff.inHours < 24;
+    final paymentPending =
+        promotion.requiresPayment && promotion.paymentApprovedAt == null;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -152,6 +154,43 @@ class _PromotionTile extends StatelessWidget {
                       ? Colors.red.shade600
                       : AppTheme.textSecondary,
                 ),
+              ),
+            if (paymentPending)
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Aguardando confirmação do pagamento',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    if (promotion.paymentAmount != null)
+                      Text(
+                          'Envie R\$ ${promotion.paymentAmount!.toStringAsFixed(2)} via Pix.'),
+                    if (promotion.pixKey != null)
+                      SelectableText('Chave Pix: ${promotion.pixKey}'),
+                    if (promotion.paymentReceiptPhoneNumber != null)
+                      SelectableText(
+                          'Envie o comprovante para ${promotion.paymentReceiptPhoneNumber}.'),
+                    const Text(
+                      'A promoção será liberada após a conferência e nunca antes de 48 horas da solicitação.',
+                      style: TextStyle(
+                          color: AppTheme.textSecondary, fontSize: 12),
+                    ),
+                  ],
+                ),
+              )
+            else if (promotion.requiresPayment &&
+                promotion.claimStartsAt.isAfter(DateTime.now()))
+              Text(
+                'Pagamento aprovado. Disponível em ${DateFormat('dd/MM/yyyy HH:mm').format(promotion.claimStartsAt.toLocal())}.',
+                style: const TextStyle(color: Colors.green),
               ),
           ],
         ),

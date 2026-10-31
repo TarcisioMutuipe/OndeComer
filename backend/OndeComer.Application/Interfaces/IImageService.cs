@@ -13,4 +13,8 @@ public interface IImageService
         Guid uploadedByUserId,
         string requestBaseUrl,
         CancellationToken ct = default);
+    Task AssociateDishImageAsync(Guid dishId, string? imageUrl, CancellationToken ct = default);
+    Task<IReadOnlyList<string>> PrepareDishImagesForDeletionAsync(
+        Guid dishId, string? imageUrl, CancellationToken ct = default);
+    void DeleteStoredImages(IEnumerable<string> relativePaths);
 }

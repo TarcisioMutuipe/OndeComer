@@ -16,20 +16,24 @@ class AdminDishDataSource {
   }) async {
     try {
       final response = await dio.get(
-        '${ApiConstants.adminBase}/dishes',
-        queryParameters: {
-          'restaurantId': restaurantId,
-          'page': page,
-          'pageSize': pageSize,
-          if (search != null) 'search': search,
-        },
+        ApiConstants.restaurantDishes(restaurantId, onlyAvailable: false),
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['data'] ?? [];
-        return data
+        final raw = response.data;
+        final List<dynamic> data = raw is List
+            ? raw
+            : (raw is Map && raw['data'] is List ? raw['data'] : []);
+        final dishes = data
             .map((json) => DishModel.fromJson(json as Map<String, dynamic>))
             .toList();
+        final filtered = search == null || search.isEmpty
+            ? dishes
+            : dishes
+                .where((dish) =>
+                    dish.name.toLowerCase().contains(search.toLowerCase()))
+                .toList();
+        return filtered.skip((page - 1) * pageSize).take(pageSize).toList();
       }
       throw Exception('Erro ao carregar pratos');
     } catch (e) {
@@ -41,11 +45,15 @@ class AdminDishDataSource {
   Future<DishModel> getDishDetails(String dishId) async {
     try {
       final response = await dio.get(
-        '${ApiConstants.adminBase}/dishes/$dishId',
+        ApiConstants.dishById(dishId),
       );
 
       if (response.statusCode == 200) {
-        return DishModel.fromJson(response.data['data']);
+        final raw = response.data;
+        final map = raw is Map && raw['data'] is Map
+            ? raw['data'] as Map<String, dynamic>
+            : raw as Map<String, dynamic>;
+        return DishModel.fromJson(map);
       }
       throw Exception('Erro ao carregar prato');
     } catch (e) {
@@ -56,13 +64,24 @@ class AdminDishDataSource {
   /// Criar novo prato
   Future<DishModel> createDish(Map<String, dynamic> data) async {
     try {
+      final restaurantId = data['restaurantId']?.toString();
+      if (restaurantId == null || restaurantId.isEmpty) {
+        throw ArgumentError('restaurantId é obrigatório para criar um prato.');
+      }
+      final request = Map<String, dynamic>.from(data)
+        ..remove('restaurantId')
+        ..remove('isAvailable');
       final response = await dio.post(
-        '${ApiConstants.adminBase}/dishes',
-        data: data,
+        ApiConstants.createDish(restaurantId),
+        data: request,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return DishModel.fromJson(response.data['data']);
+        final raw = response.data;
+        final map = raw is Map && raw['data'] is Map
+            ? raw['data'] as Map<String, dynamic>
+            : raw as Map<String, dynamic>;
+        return DishModel.fromJson(map);
       }
       throw Exception('Erro ao criar prato');
     } catch (e) {
@@ -108,14 +127,8 @@ class AdminDishDataSource {
   /// Ativar/Desativar prato
   Future<DishModel> toggleDishAvailability(String dishId) async {
     try {
-      final response = await dio.put(
-        '${ApiConstants.adminBase}/dishes/$dishId/toggle-availability',
-      );
-
-      if (response.statusCode == 200) {
-        return DishModel.fromJson(response.data['data']);
-      }
-      throw Exception('Erro ao alternar disponibilidade do prato');
+      final dish = await getDishDetails(dishId);
+      return updateDish(dishId, {'isActive': !dish.isActive});
     } catch (e) {
       rethrow;
     }

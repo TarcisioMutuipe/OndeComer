@@ -11,7 +11,14 @@ public record AdminDashboardDto(
     int FlaggedModerations,
     int ActiveCampaigns,
     int UsersToday,
-    int UsersThisWeek
+    int UsersThisWeek,
+    IReadOnlyList<AdminMostFollowedRestaurantDto> MostFollowedRestaurants
+);
+
+public record AdminMostFollowedRestaurantDto(
+    Guid RestaurantId,
+    string RestaurantName,
+    int FavoriteCount
 );
 
 public record AdminUserDto(
@@ -40,7 +47,19 @@ public record AdminRestaurantDto(
     string City,
     bool IsActive,
     int DishCount,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    string? Description = null,
+    string? Address = null,
+    double? Latitude = null,
+    double? Longitude = null,
+    string? LogoUrl = null,
+    string? CoverUrl = null,
+    string? InstagramUrl = null,
+    string? YouTubeVideoUrl = null,
+    string? OpeningHours = null,
+    Guid? OwnerUserId = null,
+    bool HasDuplicateName = false,
+    bool HasAdminAndUserDuplicate = false
 );
 
 public record AdminUpdateRestaurantRequest(

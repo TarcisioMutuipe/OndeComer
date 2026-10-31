@@ -1,5 +1,3 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'pending_operation.dart';
 
 class PendingOperationAdapter extends TypeAdapter<PendingOperation> {
@@ -8,10 +6,12 @@ class PendingOperationAdapter extends TypeAdapter<PendingOperation> {
 
   @override
   PendingOperation read(BinaryReader reader) {
-    final numOfFields = reader.readByte();
+    final fieldCount = reader.readByte();
     final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+      for (var index = 0; index < fieldCount; index++)
+        reader.readByte(): reader.read(),
     };
+
     return PendingOperation(
       clientId: fields[0] as String,
       operationType: fields[1] as String,
@@ -42,14 +42,4 @@ class PendingOperationAdapter extends TypeAdapter<PendingOperation> {
       ..writeByte(6)
       ..write(obj.timestamp);
   }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PendingOperationAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
 }

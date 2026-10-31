@@ -9,6 +9,7 @@ import '../../../../core/router/app_router.dart';
 import '../../data/datasources/feed_remote_datasource.dart';
 import '../../presentation/viewmodels/feed_viewmodel.dart';
 import '../../data/models/promotion_model.dart';
+import '../../data/models/dish_feed_post_model.dart';
 import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
 import '../../../restaurant/presentation/viewmodels/restaurant_viewmodel.dart';
 import '../../../restaurant/data/models/restaurant_model.dart';
@@ -53,7 +54,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         backgroundColor: AppTheme.white,
-        title: const Text('Ofertas & Tickets'),
+        title: const Text('Feed Gastronômico'),
         actions: [
           if (isRestaurant) ...[
             IconButton(
@@ -95,7 +96,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       return ListView.builder(
           itemCount: 5, itemBuilder: (_, __) => const FeedSkeletonCard());
     }
-    if (state.error != null && state.promotions.isEmpty) {
+    final isFeedEmpty = state.promotions.isEmpty && state.dishPosts.isEmpty;
+    if (state.error != null && isFeedEmpty) {
       return Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           const Icon(Icons.wifi_off, size: 48, color: AppTheme.textSecondary),
@@ -111,7 +113,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         ]),
       );
     }
-    if (state.promotions.isEmpty) {
+    if (isFeedEmpty) {
       return ListView(
         children: [
           if (isRestaurant) _buildRestaurantOwnerHeader(context, restaurant),
@@ -123,13 +125,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 Icon(Icons.local_offer_outlined,
                     size: 64, color: AppTheme.divider),
                 SizedBox(height: 16),
-                Text('Nenhuma promoção no momento.',
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 16)),
+                Text('Nenhuma publicação no momento.',
+                    style:
+                        TextStyle(color: AppTheme.textSecondary, fontSize: 16)),
                 SizedBox(height: 8),
                 Text(
-                    'Em breve os restaurantes de Salvador\nvão publicar ofertas aqui!',
+                    'Em breve os restaurantes de Salvador\nvão publicar pratos e ofertas aqui!',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                    style:
+                        TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
               ],
             ),
           ),
@@ -138,7 +142,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
 
     final headerOffset = isRestaurant ? 1 : 0;
-    final totalCount = headerOffset + state.promotions.length + (state.isLoadingMore ? 2 : 0);
+    final feedItems = <Object>[
+      ...state.promotions,
+      ...state.dishPosts
+    ]..sort((first, second) => _createdAt(second).compareTo(_createdAt(first)));
+    final totalCount =
+        headerOffset + feedItems.length + (state.isLoadingMore ? 2 : 0);
 
     return ListView.builder(
       controller: _scrollController,
@@ -148,16 +157,40 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         if (isRestaurant && i == 0) {
           return _buildRestaurantOwnerHeader(context, restaurant);
         }
-        final promoIndex = i - headerOffset;
-        if (promoIndex >= state.promotions.length) return const FeedSkeletonCard();
-        return _PromotionCard(
-          promotion: state.promotions[promoIndex],
-          onTap: () => context.push(AppRoutes.promotionDetails,
-              extra: state.promotions[promoIndex]),
-          onClaim: () => _claimPromotion(context, state.promotions[promoIndex]),
+        final itemIndex = i - headerOffset;
+        if (itemIndex >= feedItems.length) return const FeedSkeletonCard();
+        final item = feedItems[itemIndex];
+        if (item is PromotionModel) {
+          return _PromotionCard(
+            promotion: item,
+            onTap: () => context.push(AppRoutes.promotionDetails, extra: item),
+            onClaim: () => _claimPromotion(context, item),
+          );
+        }
+        final dish = item as DishFeedPostModel;
+        return _DishPostCard(
+          post: dish,
+          onTap: () => context.push(_dishMenuLocation(dish)),
         );
       },
     );
+  }
+
+  DateTime _createdAt(Object item) => item is PromotionModel
+      ? item.createdAt
+      : (item as DishFeedPostModel).createdAt;
+
+  String _dishMenuLocation(DishFeedPostModel post) {
+    final category = _menuCategory(post.category);
+    return Uri(
+      path: '/restaurant/${post.restaurantId}/menu',
+      queryParameters: {
+        'categoria': category,
+        if (post.subcategory?.trim().isNotEmpty ?? false)
+          'subcategoria': post.subcategory!.trim(),
+        'prato': post.id,
+      },
+    ).toString();
   }
 
   Widget _buildRestaurantOwnerHeader(
@@ -255,7 +288,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(response['message'] as String? ?? 'Ticket obtido com sucesso!'),
+          content: Text(
+              response['message'] as String? ?? 'Ticket obtido com sucesso!'),
           action: SnackBarAction(
             label: 'Ver Meus Tickets',
             textColor: AppTheme.primaryYellow,
@@ -483,6 +517,137 @@ class _ExpirationBadge extends StatelessWidget {
         const SizedBox(width: 4),
         Text(label, style: TextStyle(fontSize: 11, color: color)),
       ]),
+    );
+  }
+}
+
+String _menuCategory(String category) {
+  final normalized = category.trim().toLowerCase();
+  if (normalized.contains('entrada')) return 'Entradas';
+  if (normalized.contains('principal')) return 'Menu Principal';
+  if (normalized.contains('sobremesa')) return 'Sobremesas';
+  if (normalized.contains('petisco')) return 'Petiscos';
+  if (normalized.contains('bebid') || normalized.contains('drink')) {
+    return 'Bebidas';
+  }
+  if (normalized.contains('vinho')) return 'Carta de Vinhos';
+  return 'Todos';
+}
+
+class _DishPostCard extends StatelessWidget {
+  final DishFeedPostModel post;
+  final VoidCallback onTap;
+
+  const _DishPostCard({required this.post, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = post.imageUrl;
+    final subtitle = [post.category, post.subcategory]
+        .where((value) => value != null && value.trim().isNotEmpty)
+        .join(' · ');
+
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: imageUrl == null || imageUrl.isEmpty
+                    ? Container(
+                        width: 96,
+                        height: 104,
+                        color: AppTheme.divider,
+                        child: const Icon(Icons.restaurant, size: 32),
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        width: 96,
+                        height: 104,
+                        fit: BoxFit.cover,
+                        memCacheWidth: 300,
+                        errorWidget: (_, __, ___) => Container(
+                          width: 96,
+                          height: 104,
+                          color: AppTheme.divider,
+                          child: const Icon(Icons.restaurant, size: 32),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      post.restaurantName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      post.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                    if (post.description?.trim().isNotEmpty ?? false) ...[
+                      const SizedBox(height: 5),
+                      Text(
+                        post.description!.trim(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    ],
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'R\$ ${post.price.toStringAsFixed(2).replaceAll('.', ',')}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.primaryYellowDark,
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward, size: 18),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -24,12 +24,13 @@ class _DishFormScreenState extends ConsumerState<DishFormScreen> {
   late final TextEditingController _description;
   late final TextEditingController _price;
   late final TextEditingController _category;
+  late final TextEditingController _subcategory;
   late final TextEditingController _imageUrl;
   DateTime? _availabilityStart;
   DateTime? _availabilityEnd;
   bool _isActive = true;
+  bool _showInFeed = true;
 
-  XFile? _imageXFile;
   Uint8List? _imageBytes;
   bool _uploadingImage = false;
 
@@ -41,27 +42,39 @@ class _DishFormScreenState extends ConsumerState<DishFormScreen> {
     _description = TextEditingController(text: d?.description ?? '');
     _price = TextEditingController(text: d?.price.toStringAsFixed(2) ?? '');
     _category = TextEditingController(text: d?.category ?? '');
+    _subcategory = TextEditingController(text: d?.subcategory ?? '');
     _imageUrl = TextEditingController(text: d?.imageUrl ?? '');
     _availabilityStart = d?.availabilityStart;
     _availabilityEnd = d?.availabilityEnd;
     _isActive = d?.isActive ?? true;
+    _showInFeed = d?.showInFeed ?? true;
   }
 
   @override
   void dispose() {
-    for (final c in [_name, _description, _price, _category, _imageUrl]) {
+    for (final c in [
+      _name,
+      _description,
+      _price,
+      _category,
+      _subcategory,
+      _imageUrl,
+    ]) {
       c.dispose();
     }
     super.dispose();
   }
 
   Future<void> _pickDishImage() async {
-    final xFile =
-        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 90);
+    final xFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 80,
+    );
     if (xFile == null) return;
     final bytes = await xFile.readAsBytes();
     setState(() {
-      _imageXFile = xFile;
       _imageBytes = bytes;
       _uploadingImage = true;
     });
@@ -81,7 +94,6 @@ class _DishFormScreenState extends ConsumerState<DishFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('Erro ao enviar: $e'), backgroundColor: Colors.red));
         setState(() {
-          _imageXFile = null;
           _imageBytes = null;
         });
       }
@@ -114,7 +126,10 @@ class _DishFormScreenState extends ConsumerState<DishFormScreen> {
       'description': _description.text.isEmpty ? null : _description.text,
       'price': double.tryParse(_price.text.replaceAll(',', '.')) ?? 0.0,
       'category': _category.text,
+      'subcategory':
+          _subcategory.text.trim().isEmpty ? null : _subcategory.text.trim(),
       'imageUrl': _imageUrl.text.isEmpty ? null : _imageUrl.text,
+      'showInFeed': _showInFeed && !_isMenuOnlyCategory(_category.text),
       'availabilityStart': _availabilityStart?.toIso8601String(),
       'availabilityEnd': _availabilityEnd?.toIso8601String(),
       'isActive': _isActive,
@@ -131,7 +146,7 @@ class _DishFormScreenState extends ConsumerState<DishFormScreen> {
           .updateDish(widget.dish!.id, data);
     }
 
-    if (success && mounted) context.pop();
+    if (success && mounted) context.pop(true);
   }
 
   @override
@@ -185,14 +200,53 @@ class _DishFormScreenState extends ConsumerState<DishFormScreen> {
               },
             ),
             const SizedBox(height: 12),
-            TextFormField(
-              controller: _category,
-              decoration: const InputDecoration(
-                  labelText: 'Categoria *',
-                  hintText: 'Ex: Entradas, Pratos Principais...'),
-              validator: (v) => (v == null || v.isEmpty) ? 'Obrigatório' : null,
+            DropdownButtonFormField<String>(
+              initialValue: _category.text.isEmpty ? null : _category.text,
+              decoration: const InputDecoration(labelText: 'Seção do menu *'),
+              items: [
+                ..._dishSections,
+                if (_category.text.isNotEmpty &&
+                    !_dishSections.contains(_category.text))
+                  _category.text,
+              ]
+                  .map((section) => DropdownMenuItem(
+                        value: section,
+                        child: Text(section),
+                      ))
+                  .toList(),
+              onChanged: (section) {
+                if (section != null) {
+                  setState(() {
+                    _category.text = section;
+                    if (_isMenuOnlyCategory(section)) _showInFeed = false;
+                  });
+                }
+              },
+              validator: (value) =>
+                  value == null || value.isEmpty ? 'Obrigatório' : null,
             ),
             const SizedBox(height: 12),
+            TextFormField(
+              controller: _subcategory,
+              decoration: const InputDecoration(
+                labelText: 'Subcategoria',
+                hintText: 'Ex.: Massas artesanais, Drinks da casa',
+              ),
+              maxLength: 100,
+            ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Publicar também no feed'),
+              subtitle: Text(_isMenuOnlyCategory(_category.text)
+                  ? 'Bebidas e carta de vinhos ficam somente no menu.'
+                  : 'Desative para manter este item apenas no menu.'),
+              value: _showInFeed && !_isMenuOnlyCategory(_category.text),
+              onChanged: _isMenuOnlyCategory(_category.text)
+                  ? null
+                  : (value) => setState(() => _showInFeed = value),
+            ),
+            const SizedBox(height: 8),
             // Image picker
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,8 +357,10 @@ class _DishFormScreenState extends ConsumerState<DishFormScreen> {
             ]),
             const SizedBox(height: 12),
             SwitchListTile(
-              title: const Text('Prato ativo'),
-              subtitle: const Text('Desative para ocultar do cardápio'),
+              title: const Text('Item ativo'),
+              subtitle: Text(_isActive
+                  ? 'Desative para removê-lo do menu e do feed.'
+                  : _deletionWarning(widget.dish?.deactivatedAt)),
               value: _isActive,
               onChanged: (v) => setState(() => _isActive = v),
             ),
@@ -322,4 +378,28 @@ class _DishFormScreenState extends ConsumerState<DishFormScreen> {
       ),
     );
   }
+}
+
+const _dishSections = [
+  'Entradas',
+  'Menu Principal',
+  'Petiscos',
+  'Sobremesas',
+  'Bebidas',
+  'Carta de Vinhos',
+];
+
+bool _isMenuOnlyCategory(String category) {
+  final normalized = category.trim().toLowerCase();
+  return normalized.contains('bebid') ||
+      normalized.contains('drink') ||
+      normalized.contains('vinho');
+}
+
+String _deletionWarning(DateTime? deactivatedAt) {
+  if (deactivatedAt == null) {
+    return 'Reative em até sete dias para evitar a exclusão definitiva.';
+  }
+  final deleteAt = deactivatedAt.add(const Duration(days: 7));
+  return 'Reative até ${deleteAt.day.toString().padLeft(2, '0')}/${deleteAt.month.toString().padLeft(2, '0')}/${deleteAt.year}; depois disso, o item e as imagens serão excluídos.';
 }

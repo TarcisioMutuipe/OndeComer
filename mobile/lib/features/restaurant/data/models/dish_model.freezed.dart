@@ -26,10 +26,13 @@ mixin _$DishModel {
   String? get description => throw _privateConstructorUsedError;
   double get price => throw _privateConstructorUsedError;
   String get category => throw _privateConstructorUsedError;
+  String? get subcategory => throw _privateConstructorUsedError;
   String? get imageUrl => throw _privateConstructorUsedError;
+  bool get showInFeed => throw _privateConstructorUsedError;
   DateTime? get availabilityStart => throw _privateConstructorUsedError;
   DateTime? get availabilityEnd => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
+  DateTime? get deactivatedAt => throw _privateConstructorUsedError;
   double get ratingAverage => throw _privateConstructorUsedError;
   int get ratingCount => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
@@ -57,10 +60,13 @@ abstract class $DishModelCopyWith<$Res> {
       String? description,
       double price,
       String category,
+      String? subcategory,
       String? imageUrl,
+      bool showInFeed,
       DateTime? availabilityStart,
       DateTime? availabilityEnd,
       bool isActive,
+      DateTime? deactivatedAt,
       double ratingAverage,
       int ratingCount,
       DateTime createdAt,
@@ -88,10 +94,13 @@ class _$DishModelCopyWithImpl<$Res, $Val extends DishModel>
     Object? description = freezed,
     Object? price = null,
     Object? category = null,
+    Object? subcategory = freezed,
     Object? imageUrl = freezed,
+    Object? showInFeed = null,
     Object? availabilityStart = freezed,
     Object? availabilityEnd = freezed,
     Object? isActive = null,
+    Object? deactivatedAt = freezed,
     Object? ratingAverage = null,
     Object? ratingCount = null,
     Object? createdAt = null,
@@ -122,10 +131,18 @@ class _$DishModelCopyWithImpl<$Res, $Val extends DishModel>
           ? _value.category
           : category // ignore: cast_nullable_to_non_nullable
               as String,
+      subcategory: freezed == subcategory
+          ? _value.subcategory
+          : subcategory // ignore: cast_nullable_to_non_nullable
+              as String?,
       imageUrl: freezed == imageUrl
           ? _value.imageUrl
           : imageUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      showInFeed: null == showInFeed
+          ? _value.showInFeed
+          : showInFeed // ignore: cast_nullable_to_non_nullable
+              as bool,
       availabilityStart: freezed == availabilityStart
           ? _value.availabilityStart
           : availabilityStart // ignore: cast_nullable_to_non_nullable
@@ -138,6 +155,10 @@ class _$DishModelCopyWithImpl<$Res, $Val extends DishModel>
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
               as bool,
+      deactivatedAt: freezed == deactivatedAt
+          ? _value.deactivatedAt
+          : deactivatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       ratingAverage: null == ratingAverage
           ? _value.ratingAverage
           : ratingAverage // ignore: cast_nullable_to_non_nullable
@@ -173,10 +194,13 @@ abstract class _$$DishModelImplCopyWith<$Res>
       String? description,
       double price,
       String category,
+      String? subcategory,
       String? imageUrl,
+      bool showInFeed,
       DateTime? availabilityStart,
       DateTime? availabilityEnd,
       bool isActive,
+      DateTime? deactivatedAt,
       double ratingAverage,
       int ratingCount,
       DateTime createdAt,
@@ -202,10 +226,13 @@ class __$$DishModelImplCopyWithImpl<$Res>
     Object? description = freezed,
     Object? price = null,
     Object? category = null,
+    Object? subcategory = freezed,
     Object? imageUrl = freezed,
+    Object? showInFeed = null,
     Object? availabilityStart = freezed,
     Object? availabilityEnd = freezed,
     Object? isActive = null,
+    Object? deactivatedAt = freezed,
     Object? ratingAverage = null,
     Object? ratingCount = null,
     Object? createdAt = null,
@@ -236,10 +263,18 @@ class __$$DishModelImplCopyWithImpl<$Res>
           ? _value.category
           : category // ignore: cast_nullable_to_non_nullable
               as String,
+      subcategory: freezed == subcategory
+          ? _value.subcategory
+          : subcategory // ignore: cast_nullable_to_non_nullable
+              as String?,
       imageUrl: freezed == imageUrl
           ? _value.imageUrl
           : imageUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      showInFeed: null == showInFeed
+          ? _value.showInFeed
+          : showInFeed // ignore: cast_nullable_to_non_nullable
+              as bool,
       availabilityStart: freezed == availabilityStart
           ? _value.availabilityStart
           : availabilityStart // ignore: cast_nullable_to_non_nullable
@@ -252,6 +287,10 @@ class __$$DishModelImplCopyWithImpl<$Res>
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
               as bool,
+      deactivatedAt: freezed == deactivatedAt
+          ? _value.deactivatedAt
+          : deactivatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
       ratingAverage: null == ratingAverage
           ? _value.ratingAverage
           : ratingAverage // ignore: cast_nullable_to_non_nullable
@@ -282,10 +321,13 @@ class _$DishModelImpl implements _DishModel {
       this.description,
       required this.price,
       required this.category,
+      this.subcategory,
       this.imageUrl,
+      this.showInFeed = true,
       this.availabilityStart,
       this.availabilityEnd,
       required this.isActive,
+      this.deactivatedAt,
       required this.ratingAverage,
       required this.ratingCount,
       required this.createdAt,
@@ -307,13 +349,20 @@ class _$DishModelImpl implements _DishModel {
   @override
   final String category;
   @override
+  final String? subcategory;
+  @override
   final String? imageUrl;
+  @override
+  @JsonKey()
+  final bool showInFeed;
   @override
   final DateTime? availabilityStart;
   @override
   final DateTime? availabilityEnd;
   @override
   final bool isActive;
+  @override
+  final DateTime? deactivatedAt;
   @override
   final double ratingAverage;
   @override
@@ -325,7 +374,7 @@ class _$DishModelImpl implements _DishModel {
 
   @override
   String toString() {
-    return 'DishModel(id: $id, restaurantId: $restaurantId, name: $name, description: $description, price: $price, category: $category, imageUrl: $imageUrl, availabilityStart: $availabilityStart, availabilityEnd: $availabilityEnd, isActive: $isActive, ratingAverage: $ratingAverage, ratingCount: $ratingCount, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'DishModel(id: $id, restaurantId: $restaurantId, name: $name, description: $description, price: $price, category: $category, subcategory: $subcategory, imageUrl: $imageUrl, showInFeed: $showInFeed, availabilityStart: $availabilityStart, availabilityEnd: $availabilityEnd, isActive: $isActive, deactivatedAt: $deactivatedAt, ratingAverage: $ratingAverage, ratingCount: $ratingCount, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -342,14 +391,20 @@ class _$DishModelImpl implements _DishModel {
             (identical(other.price, price) || other.price == price) &&
             (identical(other.category, category) ||
                 other.category == category) &&
+            (identical(other.subcategory, subcategory) ||
+                other.subcategory == subcategory) &&
             (identical(other.imageUrl, imageUrl) ||
                 other.imageUrl == imageUrl) &&
+            (identical(other.showInFeed, showInFeed) ||
+                other.showInFeed == showInFeed) &&
             (identical(other.availabilityStart, availabilityStart) ||
                 other.availabilityStart == availabilityStart) &&
             (identical(other.availabilityEnd, availabilityEnd) ||
                 other.availabilityEnd == availabilityEnd) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
+            (identical(other.deactivatedAt, deactivatedAt) ||
+                other.deactivatedAt == deactivatedAt) &&
             (identical(other.ratingAverage, ratingAverage) ||
                 other.ratingAverage == ratingAverage) &&
             (identical(other.ratingCount, ratingCount) ||
@@ -370,10 +425,13 @@ class _$DishModelImpl implements _DishModel {
       description,
       price,
       category,
+      subcategory,
       imageUrl,
+      showInFeed,
       availabilityStart,
       availabilityEnd,
       isActive,
+      deactivatedAt,
       ratingAverage,
       ratingCount,
       createdAt,
@@ -403,10 +461,13 @@ abstract class _DishModel implements DishModel {
       final String? description,
       required final double price,
       required final String category,
+      final String? subcategory,
       final String? imageUrl,
+      final bool showInFeed,
       final DateTime? availabilityStart,
       final DateTime? availabilityEnd,
       required final bool isActive,
+      final DateTime? deactivatedAt,
       required final double ratingAverage,
       required final int ratingCount,
       required final DateTime createdAt,
@@ -428,13 +489,19 @@ abstract class _DishModel implements DishModel {
   @override
   String get category;
   @override
+  String? get subcategory;
+  @override
   String? get imageUrl;
+  @override
+  bool get showInFeed;
   @override
   DateTime? get availabilityStart;
   @override
   DateTime? get availabilityEnd;
   @override
   bool get isActive;
+  @override
+  DateTime? get deactivatedAt;
   @override
   double get ratingAverage;
   @override

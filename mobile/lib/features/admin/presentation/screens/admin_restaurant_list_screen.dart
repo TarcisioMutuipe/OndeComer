@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:onde_comer_em_salvador/features/admin/data/datasources/admin_restaurant_datasource.dart';
 import 'package:onde_comer_em_salvador/features/admin/presentation/viewmodels/admin_restaurant_viewmodel.dart';
 import 'package:onde_comer_em_salvador/features/restaurant/data/models/restaurant_model.dart';
 
@@ -42,13 +43,8 @@ class _AdminRestaurantListScreenState
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () {
-              // TODO: Navigate to create restaurant screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Criar novo restaurante em desenvolvimento')),
-              );
-            },
+            tooltip: 'Criar restaurante',
+            onPressed: () => _openRestaurantForm(context),
           ),
         ],
       ),
@@ -104,18 +100,58 @@ class _AdminRestaurantListScreenState
                   );
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  itemCount: restaurants.length,
-                  itemBuilder: (context, index) {
-                    final restaurant = restaurants[index];
-                    return _RestaurantCard(
-                      restaurant: restaurant,
-                      onEdit: () => _editRestaurant(context, restaurant),
-                      onDelete: () => _deleteRestaurant(context, restaurant.id),
-                      onManageDishes: () => _manageDishes(context, restaurant),
-                    );
-                  },
+                final duplicateEntries =
+                    restaurants.where((entry) => entry.hasDuplicateName).toList();
+                final duplicateNameCount = duplicateEntries
+                    .map((entry) => entry.restaurant.name.trim().toLowerCase())
+                    .toSet()
+                    .length;
+
+                return Column(
+                  children: [
+                    if (duplicateEntries.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade50,
+                          border: Border.all(color: Colors.amber.shade700),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.warning_amber_rounded,
+                                color: Colors.amber.shade900),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(duplicateEntries.any((entry) =>
+                                      entry.hasAdminAndUserDuplicate)
+                                  ? 'Foi cadastrado por um usuário um restaurante com o mesmo nome.'
+                                  : '$duplicateNameCount nome(s) de restaurante duplicado(s).'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        itemCount: restaurants.length,
+                        itemBuilder: (context, index) {
+                          final entry = restaurants[index];
+                          final restaurant = entry.restaurant;
+                          return _RestaurantCard(
+                            entry: entry,
+                            onEdit: () => _editRestaurant(context, restaurant),
+                            onDelete: () =>
+                                _deleteRestaurant(context, restaurant.id),
+                            onManageDishes: () =>
+                                _manageDishes(context, restaurant),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -125,11 +161,21 @@ class _AdminRestaurantListScreenState
     );
   }
 
-  void _editRestaurant(BuildContext context, RestaurantModel restaurant) {
-    // TODO: Navigate to edit restaurant screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Editar ${restaurant.name} em desenvolvimento')),
+  Future<void> _editRestaurant(
+      BuildContext context, RestaurantModel restaurant) async {
+    await _openRestaurantForm(context, restaurant: restaurant);
+  }
+
+  Future<void> _openRestaurantForm(BuildContext context,
+      {RestaurantModel? restaurant}) async {
+    final saved = await context.push<bool>(
+      '/restaurant/form?admin=true',
+      extra: restaurant,
     );
+    if (!mounted || saved != true) return;
+    await ref.read(adminRestaurantProvider.notifier).loadRestaurants(
+          search: _searchController.text.isEmpty ? null : _searchController.text,
+        );
   }
 
   void _deleteRestaurant(BuildContext context, String restaurantId) {
@@ -144,13 +190,26 @@ class _AdminRestaurantListScreenState
             child: const Text('Cancelar'),
           ),
           TextButton(
-            onPressed: () {
-              ref
+            onPressed: () async {
+              Navigator.pop(context);
+              final deleted = await ref
                   .read(adminRestaurantProvider.notifier)
                   .deleteRestaurant(restaurantId);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Restaurante deletado')),
+              if (!mounted) return;
+              if (deleted) {
+                await ref.read(adminRestaurantProvider.notifier).loadRestaurants(
+                      search: _searchController.text.isEmpty
+                          ? null
+                          : _searchController.text,
+                    );
+              }
+              if (!mounted) return;
+              ScaffoldMessenger.of(this.context).showSnackBar(
+                SnackBar(
+                  content: Text(deleted
+                      ? 'Restaurante deletado'
+                      : 'Não foi possível deletar o restaurante'),
+                ),
               );
             },
             child: const Text('Deletar', style: TextStyle(color: Colors.red)),
@@ -166,13 +225,13 @@ class _AdminRestaurantListScreenState
 }
 
 class _RestaurantCard extends StatelessWidget {
-  final RestaurantModel restaurant;
+  final AdminRestaurantEntry entry;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
   final VoidCallback onManageDishes;
 
   const _RestaurantCard({
-    required this.restaurant,
+    required this.entry,
     required this.onEdit,
     required this.onDelete,
     required this.onManageDishes,
@@ -180,6 +239,7 @@ class _RestaurantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final restaurant = entry.restaurant;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
@@ -231,12 +291,41 @@ class _RestaurantCard extends StatelessWidget {
                         restaurant.city ?? 'Cidade desconhecida',
                         style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        restaurant.address.isEmpty
+                            ? 'Endereço não informado'
+                            : restaurant.address,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
+            if (entry.hasDuplicateName)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded,
+                        size: 16, color: Colors.deepOrange.shade700),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        entry.hasAdminAndUserDuplicate
+                            ? 'Foi cadastrado por um usuário um restaurante com o mesmo nome.'
+                            : 'Existe outro restaurante com este nome.',
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.deepOrange.shade800),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             // YouTube URL status
             if (restaurant.youTubeVideoUrl != null &&
                 restaurant.youTubeVideoUrl!.isNotEmpty)

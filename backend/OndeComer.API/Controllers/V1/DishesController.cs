@@ -32,6 +32,15 @@ public class DishesController : ControllerBase
         return Ok(dish);
     }
 
+    [HttpGet("feed")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetFeed([FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken ct = default)
+    {
+        var dishes = await _dishService.GetFeedAsync(
+            Math.Max(1, page), Math.Clamp(pageSize, 1, 50), ct);
+        return Ok(new { items = dishes });
+    }
+
     [HttpPost("{restaurantId:guid}")]
     public async Task<IActionResult> Create(Guid restaurantId, [FromBody] CreateDishRequest request, CancellationToken ct)
     {

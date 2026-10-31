@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/models/dish_model.dart';
@@ -7,6 +8,7 @@ import '../viewmodels/dish_viewmodel.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/main_scaffold.dart';
+import 'restaurant_menu_link.dart';
 
 class RestaurantDashboardScreen extends ConsumerStatefulWidget {
   const RestaurantDashboardScreen({super.key});
@@ -94,25 +96,29 @@ class _RestaurantDashboardScreenState
                 _b2bBenefitItem(
                   icon: Icons.money_off_outlined,
                   title: 'Taxa Zero no Salão',
-                  subtitle: 'Não cobramos porcentagem sobre o consumo dos seus clientes no restaurante.',
+                  subtitle:
+                      'Não cobramos porcentagem sobre o consumo dos seus clientes no restaurante.',
                 ),
                 const SizedBox(height: 12),
                 _b2bBenefitItem(
                   icon: Icons.qr_code_2_outlined,
                   title: 'Cardápio Digital & QR Code de Mesa',
-                  subtitle: 'Gere QR Codes prontos para imprimir e colocar nas mesas do seu estabelecimento.',
+                  subtitle:
+                      'Gere QR Codes prontos para imprimir e colocar nas mesas do seu estabelecimento.',
                 ),
                 const SizedBox(height: 12),
                 _b2bBenefitItem(
                   icon: Icons.flash_on_outlined,
                   title: 'Promoções para Dias Fracos',
-                  subtitle: 'Lance ofertas pontuais de terça a quinta para atrair novos clientes aos horários ociosos.',
+                  subtitle:
+                      'Lance ofertas pontuais de terça a quinta para atrair novos clientes aos horários ociosos.',
                 ),
                 const SizedBox(height: 12),
                 _b2bBenefitItem(
                   icon: Icons.loyalty_outlined,
                   title: 'Fidelização & Check-in Oficial',
-                  subtitle: 'Recompense clientes fiéis e receba avaliações autênticas da gastronomia da casa.',
+                  subtitle:
+                      'Recompense clientes fiéis e receba avaliações autênticas da gastronomia da casa.',
                 ),
 
                 const SizedBox(height: 32),
@@ -124,7 +130,8 @@ class _RestaurantDashboardScreenState
                     icon: const Icon(Icons.add_business_outlined),
                     label: const Text(
                       'Cadastrar Meu Restaurante Grátis',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryYellow,
@@ -262,6 +269,44 @@ class _RestaurantDashboardScreenState
             ),
             const SizedBox(height: 16),
             // Menu Section — Grid paginada
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        context.push('/restaurant/${restaurant.id}/menu'),
+                    icon: const Icon(Icons.visibility_outlined),
+                    label: const Text('Pré-visualizar'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        context.push('/restaurant/${restaurant.id}/menu/qr'),
+                    icon: const Icon(Icons.qr_code_2),
+                    label: const Text('QR do cardápio'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () async {
+                final menuUrl = restaurantMenuLink(restaurant.id);
+                await Clipboard.setData(ClipboardData(text: menuUrl));
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Link do cardápio copiado.')),
+                );
+              },
+              icon: const Icon(Icons.link),
+              label: const Text('Copiar link público do cardápio'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

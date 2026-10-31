@@ -83,6 +83,23 @@ class AdminRemoteDatasource {
         response.data as Map<String, dynamic>);
   }
 
+  Future<List<PendingPromotionPaymentModel>>
+      getPendingPromotionPayments() async {
+    final response = await _dio.get(
+      '${ApiConstants.adminBase}/promotions/pending-payment',
+    );
+    return (response.data as List<dynamic>)
+        .map((item) =>
+            PendingPromotionPaymentModel.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> approvePromotionPayment(String promotionId) async {
+    await _dio.post(
+      '${ApiConstants.adminBase}/promotions/$promotionId/approve-payment',
+    );
+  }
+
   Future<PromotionTicketsSummaryModel> getPromotionTicketsSummary({
     String? restaurantId,
     String? status,

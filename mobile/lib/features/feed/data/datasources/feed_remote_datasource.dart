@@ -4,6 +4,7 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../models/promotion_model.dart';
 import '../models/promotion_ticket_model.dart';
+import '../models/dish_feed_post_model.dart';
 
 final feedRemoteDatasourceProvider =
     Provider((ref) => FeedRemoteDatasource(ref.watch(dioProvider)));
@@ -23,6 +24,18 @@ class FeedRemoteDatasource {
         data is Map ? (data['items'] as List? ?? []) : (data as List? ?? []);
     return items
         .map((e) => PromotionModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<DishFeedPostModel>> getDishPosts(
+      {int page = 1, int pageSize = 20}) async {
+    final response = await _dio.get(
+      ApiConstants.dishFeed,
+      queryParameters: {'page': page, 'pageSize': pageSize},
+    );
+    final data = response.data as Map<String, dynamic>;
+    return (data['items'] as List? ?? [])
+        .map((item) => DishFeedPostModel.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 
@@ -47,7 +60,7 @@ class FeedRemoteDatasource {
         'description': description,
       if (imageUrl != null && imageUrl.isNotEmpty) 'imageUrl': imageUrl,
       if (discountPercent != null) 'discountPercent': discountPercent,
-      if (expiresAt != null) 'expiresAt': expiresAt.toUtc().toIso8601String(),
+      if (expiresAt != null) 'claimEndsAt': expiresAt.toUtc().toIso8601String(),
     });
     return PromotionModel.fromJson(response.data as Map<String, dynamic>);
   }

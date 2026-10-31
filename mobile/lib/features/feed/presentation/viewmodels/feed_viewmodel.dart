@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/datasources/feed_remote_datasource.dart';
 import '../../data/models/promotion_model.dart';
+import '../../data/models/dish_feed_post_model.dart';
 import '../../../../core/network/dio_client.dart' show friendlyErrorMessage;
 
 final feedViewModelProvider =
@@ -10,6 +11,7 @@ final feedViewModelProvider =
 
 class FeedState {
   final List<PromotionModel> promotions;
+  final List<DishFeedPostModel> dishPosts;
   final bool isLoading;
   final bool isLoadingMore;
   final String? error;
@@ -18,6 +20,7 @@ class FeedState {
 
   const FeedState({
     this.promotions = const [],
+    this.dishPosts = const [],
     this.isLoading = false,
     this.isLoadingMore = false,
     this.error,
@@ -27,6 +30,7 @@ class FeedState {
 
   FeedState copyWith({
     List<PromotionModel>? promotions,
+    List<DishFeedPostModel>? dishPosts,
     bool? isLoading,
     bool? isLoadingMore,
     String? error,
@@ -35,6 +39,7 @@ class FeedState {
   }) =>
       FeedState(
         promotions: promotions ?? this.promotions,
+        dishPosts: dishPosts ?? this.dishPosts,
         isLoading: isLoading ?? this.isLoading,
         isLoadingMore: isLoadingMore ?? this.isLoadingMore,
         error: error,
@@ -58,13 +63,19 @@ class FeedViewModel extends StateNotifier<FeedState> {
     }
     try {
       final page = refresh ? 1 : state.page;
-      final items = await _datasource.getPromotions(page: page);
+      final results = await Future.wait([
+        _datasource.getPromotions(page: page),
+        _datasource.getDishPosts(page: page),
+      ]);
+      final promotions = results[0] as List<PromotionModel>;
+      final dishPosts = results[1] as List<DishFeedPostModel>;
       state = state.copyWith(
-        promotions: refresh ? items : [...state.promotions, ...items],
+        promotions: refresh ? promotions : [...state.promotions, ...promotions],
+        dishPosts: refresh ? dishPosts : [...state.dishPosts, ...dishPosts],
         isLoading: false,
         isLoadingMore: false,
         page: page + 1,
-        hasMore: items.length >= 20,
+        hasMore: promotions.length >= 20 || dishPosts.length >= 20,
       );
     } catch (e) {
       state = state.copyWith(

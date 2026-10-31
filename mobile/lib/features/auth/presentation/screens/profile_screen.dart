@@ -253,7 +253,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           style: const TextStyle(color: AppTheme.error)),
                     ],
                     const SizedBox(height: 32),
-                    if (!_editing) ...[
+                    if (!_editing && user.profileType != 'Admin') ...[
                       const SizedBox(height: 8),
                       const Divider(),
                       Align(
@@ -285,7 +285,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         leading: const Icon(Icons.military_tech_outlined,
                             color: Colors.amber),
                         title: const Text('Fidelidade & Selos'),
-                        subtitle: const Text('Passaporte gastronômico e conquistas'),
+                        subtitle:
+                            const Text('Passaporte gastronômico e conquistas'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => context.push(AppRoutes.loyalty),
                       ),
@@ -321,20 +322,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         leading: const Icon(Icons.casino_outlined,
                             color: Colors.orange),
                         title: const Text('Onde Comer Hoje? 🎲'),
-                        subtitle: const Text('Enquete WhatsApp & Roleta com a galera'),
+                        subtitle: const Text(
+                            'Enquete WhatsApp & Roleta com a galera'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => context.push(AppRoutes.ondeComerHoje),
                       ),
-                      if (user.profileType != 'Restaurant' && user.profileType != 'Admin') ...[
+                      if (user.profileType != 'Restaurant' &&
+                          user.profileType != 'Admin') ...[
                         const Divider(),
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.add_business_outlined,
                               color: AppTheme.primaryYellowDark),
                           title: const Text('Tem um Restaurante?'),
-                          subtitle: const Text('Cadastre seu estabelecimento no guia'),
+                          subtitle: const Text(
+                              'Cadastre seu estabelecimento no guia'),
                           trailing: const Icon(Icons.chevron_right),
-                          onTap: () => context.push(AppRoutes.restaurantDashboard),
+                          onTap: () =>
+                              context.push(AppRoutes.restaurantDashboard),
                         ),
                       ],
                       if (user.profileType == 'Restaurant') ...[
@@ -359,7 +364,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           leading: const Icon(Icons.analytics_outlined,
                               color: Colors.green),
                           title: const Text('Painel de Indicadores & Métricas'),
-                          subtitle: const Text('Acessos, horários de pico e avaliações'),
+                          subtitle: const Text(
+                              'Acessos, horários de pico e avaliações'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => context.go('/restaurant/panel'),
                         ),
@@ -368,9 +374,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           leading: const Icon(Icons.qr_code_scanner,
                               color: Colors.teal),
                           title: const Text('Validar Ticket de Oferta (QR)'),
-                          subtitle: const Text('Escanear cupom apresentado pelo cliente'),
+                          subtitle: const Text(
+                              'Escanear cupom apresentado pelo cliente'),
                           trailing: const Icon(Icons.chevron_right),
-                          onTap: () => context.push(AppRoutes.finalizePromotionTicket),
+                          onTap: () =>
+                              context.push(AppRoutes.finalizePromotionTicket),
                         ),
                         ListTile(
                           contentPadding: EdgeInsets.zero,
@@ -379,7 +387,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           title: const Text('Gerenciar Cardápio & Pratos'),
                           subtitle: const Text('Fotos, preços e categorias'),
                           trailing: const Icon(Icons.chevron_right),
-                          onTap: () => context.push(AppRoutes.restaurantDashboard),
+                          onTap: () =>
+                              context.push(AppRoutes.restaurantDashboard),
                         ),
                       ],
                       if (user.profileType == 'Admin') ...[
@@ -401,7 +410,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                         ListTile(
                           contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.admin_panel_settings_outlined,
+                          leading: const Icon(
+                              Icons.admin_panel_settings_outlined,
                               color: Colors.deepPurple),
                           title: const Text('Painel Geral Admin'),
                           trailing: const Icon(Icons.chevron_right),

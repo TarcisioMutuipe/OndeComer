@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using OndeComer.Application.Common.Exceptions;
 using OndeComer.Application.DTOs.Admin;
+using OndeComer.Application.DTOs.Restaurant;
 using OndeComer.Application.Interfaces;
+using OndeComer.Domain.Entities;
 using OndeComer.Domain.Enums;
 using OndeComer.Infrastructure.Data;
 using System.Text;
@@ -35,11 +37,32 @@ public class AdminService : IAdminService
         var activeCampaigns = await _context.LoyaltyCampaigns.CountAsync(c => c.IsActive && c.StartDate <= now && c.EndDate >= now);
         var usersToday = await _context.Users.CountAsync(u => u.CreatedAt >= today);
         var usersThisWeek = await _context.Users.CountAsync(u => u.CreatedAt >= weekAgo);
+        var restaurantFavorites = _context.Favorites
+            .AsNoTracking()
+            .Where(f => f.RestaurantId.HasValue)
+            .GroupBy(f => f.RestaurantId!.Value)
+            .Select(group => new
+            {
+                RestaurantId = group.Key,
+                FavoriteCount = group.Count()
+            });
+        var mostFollowedRestaurants = await restaurantFavorites
+            .Join(_context.Restaurants.AsNoTracking(),
+                favorites => favorites.RestaurantId,
+                restaurant => restaurant.Id,
+                (favorites, restaurant) => new AdminMostFollowedRestaurantDto(
+                    restaurant.Id,
+                    restaurant.Name,
+                    favorites.FavoriteCount))
+            .OrderByDescending(r => r.FavoriteCount)
+            .ThenBy(r => r.RestaurantName)
+            .Take(5)
+            .ToListAsync();
 
         return new AdminDashboardDto(
             totalUsers, totalRestaurants, totalDishes, totalReviews,
             totalComments, totalCheckIns, pendingModerations, flaggedModerations,
-            activeCampaigns, usersToday, usersThisWeek
+            activeCampaigns, usersToday, usersThisWeek, mostFollowedRestaurants
         );
     }
 
@@ -99,6 +122,7 @@ public class AdminService : IAdminService
 
     public async Task<IEnumerable<AdminRestaurantDto>> GetRestaurantsAsync(string? search, string? category, int page, int pageSize)
     {
+        var duplicateStatuses = await GetDuplicateNameStatusesAsync();
         var query = _context.Restaurants.Include(r => r.Owner).AsQueryable();
 
         if (!string.IsNullOrEmpty(search))
@@ -113,11 +137,53 @@ public class AdminService : IAdminService
             .Take(pageSize)
             .Select(r => new AdminRestaurantDto(
                 r.Id, r.Name, r.Owner.Name, r.Category, r.City,
-                r.IsActive, r.Dishes.Count, r.CreatedAt
+                r.IsActive, r.Dishes.Count, r.CreatedAt,
+                r.Description, r.Address, r.Latitude, r.Longitude,
+                r.LogoUrl, r.CoverUrl, r.InstagramUrl, r.YouTubeVideoUrl,
+                r.OpeningHours, r.OwnerUserId, false, false
             ))
             .ToListAsync();
 
-        return restaurants;
+        return restaurants.Select(restaurant => WithDuplicateStatus(restaurant, duplicateStatuses));
+    }
+
+    public async Task<AdminRestaurantDto> CreateRestaurantAsync(Guid ownerId, CreateRestaurantRequest request)
+    {
+        var restaurant = new Restaurant
+        {
+            OwnerUserId = ownerId,
+            Name = request.Name.Trim(),
+            Description = request.Description,
+            Address = request.Address,
+            City = request.City,
+            Latitude = request.Latitude,
+            Longitude = request.Longitude,
+            Category = request.Category,
+            LogoUrl = request.LogoUrl,
+            CoverUrl = request.CoverUrl,
+            InstagramUrl = request.InstagramUrl,
+            YouTubeVideoUrl = request.YouTubeVideoUrl,
+            OpeningHours = request.OpeningHours ?? string.Empty
+        };
+
+        _context.Restaurants.Add(restaurant);
+        await _context.SaveChangesAsync();
+        return await GetRestaurantByIdAsync(restaurant.Id);
+    }
+
+    public async Task<AdminRestaurantDto> GetRestaurantByIdAsync(Guid restaurantId)
+    {
+        var restaurant = await _context.Restaurants.Include(r => r.Owner).FirstOrDefaultAsync(r => r.Id == restaurantId)
+            ?? throw new NotFoundException("Restaurante não encontrado.");
+
+        var dishCount = await _context.Dishes.CountAsync(d => d.RestaurantId == restaurantId);
+        var dto = new AdminRestaurantDto(
+            restaurant.Id, restaurant.Name, restaurant.Owner.Name,
+            restaurant.Category, restaurant.City, restaurant.IsActive, dishCount, restaurant.CreatedAt,
+            restaurant.Description, restaurant.Address, restaurant.Latitude, restaurant.Longitude,
+            restaurant.LogoUrl, restaurant.CoverUrl, restaurant.InstagramUrl, restaurant.YouTubeVideoUrl,
+            restaurant.OpeningHours, restaurant.OwnerUserId);
+        return WithDuplicateStatus(dto, await GetDuplicateNameStatusesAsync());
     }
 
     public async Task<AdminRestaurantDto> UpdateRestaurantAsync(Guid restaurantId, AdminUpdateRestaurantRequest request)
@@ -142,10 +208,52 @@ public class AdminService : IAdminService
         await _context.SaveChangesAsync();
 
         var dishCount = await _context.Dishes.CountAsync(d => d.RestaurantId == restaurantId);
-        return new AdminRestaurantDto(
+        var dto = new AdminRestaurantDto(
             restaurant.Id, restaurant.Name, restaurant.Owner.Name,
-            restaurant.Category, restaurant.City, restaurant.IsActive, dishCount, restaurant.CreatedAt);
+            restaurant.Category, restaurant.City, restaurant.IsActive, dishCount, restaurant.CreatedAt,
+            restaurant.Description, restaurant.Address, restaurant.Latitude, restaurant.Longitude,
+            restaurant.LogoUrl, restaurant.CoverUrl, restaurant.InstagramUrl, restaurant.YouTubeVideoUrl,
+            restaurant.OpeningHours, restaurant.OwnerUserId);
+        return WithDuplicateStatus(dto, await GetDuplicateNameStatusesAsync());
     }
+
+    private async Task<Dictionary<string, DuplicateNameStatus>> GetDuplicateNameStatusesAsync()
+    {
+        var restaurants = await _context.Restaurants
+            .AsNoTracking()
+            .Select(r => new { r.Name, r.Owner.ProfileType })
+            .ToListAsync();
+
+        return restaurants
+            .GroupBy(r => NormalizeRestaurantName(r.Name), StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Count() > 1)
+            .ToDictionary(
+                group => group.Key,
+                group => new DuplicateNameStatus(
+                    HasDuplicateName: true,
+                    HasAdminAndUserDuplicate:
+                        group.Any(r => r.ProfileType == ProfileType.Admin) &&
+                        group.Any(r => r.ProfileType != ProfileType.Admin)),
+                StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static AdminRestaurantDto WithDuplicateStatus(
+        AdminRestaurantDto restaurant,
+        IReadOnlyDictionary<string, DuplicateNameStatus> statuses)
+    {
+        if (!statuses.TryGetValue(NormalizeRestaurantName(restaurant.Name), out var status))
+            return restaurant;
+
+        return restaurant with
+        {
+            HasDuplicateName = status.HasDuplicateName,
+            HasAdminAndUserDuplicate = status.HasAdminAndUserDuplicate
+        };
+    }
+
+    private static string NormalizeRestaurantName(string name) => name.Trim();
+
+    private sealed record DuplicateNameStatus(bool HasDuplicateName, bool HasAdminAndUserDuplicate);
 
     public async Task DeleteRestaurantAsync(Guid restaurantId)
     {
