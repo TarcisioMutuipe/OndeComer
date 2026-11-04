@@ -1,0 +1,6 @@
+.git/
+**/bin/
+**/obj/
+**/appsettings*.json
+**/logs/
+backend/OndeComer.API/wwwroot/uploads/

@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+.neon
+node_modules/
+
+# Build artifacts and logs
+[Bb]in/
+[Oo]bj/
+[Ll]ogs/
+*.log
