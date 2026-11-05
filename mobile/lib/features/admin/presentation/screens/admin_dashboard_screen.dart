@@ -46,63 +46,258 @@ class _DashboardTab extends ConsumerWidget {
 
     return dashState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Erro: $e')),
+      error: (e, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const SizedBox(height: 12),
+              Text(
+                'Falha ao carregar métricas',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$e',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () =>
+                    ref.read(adminDashboardViewModelProvider.notifier).load(),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Tentar novamente'),
+              ),
+            ],
+          ),
+        ),
+      ),
       data: (dashboard) {
         if (dashboard == null) return const SizedBox.shrink();
+        final theme = Theme.of(context);
+
         return RefreshIndicator(
           onRefresh: () =>
               ref.read(adminDashboardViewModelProvider.notifier).load(),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text('Visão Geral',
-                  style: Theme.of(context).textTheme.headlineSmall),
+              Text('Visão Geral da Plataforma',
+                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               _buildGrid(context, dashboard),
               const SizedBox(height: 24),
-              Text('Restaurantes mais salvos',
-                  style: Theme.of(context).textTheme.titleMedium),
+
+              // Distribuição de Usuários
+              Text('Distribuição de Usuários',
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _userStatColumn(context, 'Clientes', dashboard.totalConsumers, Icons.person, Colors.blue),
+                          _userStatColumn(context, 'Restaurantes', dashboard.totalRestaurantOwners, Icons.store, Colors.orange),
+                          _userStatColumn(context, 'Admins', dashboard.totalAdmins, Icons.admin_panel_settings, Colors.purple),
+                        ],
+                      ),
+                      const Divider(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text('Ativos: ${dashboard.activeUsers}',
+                              style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600)),
+                          Text('Inativos: ${dashboard.inactiveUsers}',
+                              style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600)),
+                          Text('Hoje: +${dashboard.usersToday}',
+                              style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.w600)),
+                          Text('Semana: +${dashboard.usersThisWeek}',
+                              style: const TextStyle(color: Colors.deepPurpleAccent, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Promoções & Tickets
+              Text('Promoções & Cupons',
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _userStatColumn(context, 'Promos Ativas', dashboard.activePromotions, Icons.local_offer, Colors.teal),
+                          _userStatColumn(context, 'Emitidos', dashboard.ticketsClaimed, Icons.confirmation_number_outlined, Colors.amber),
+                          _userStatColumn(context, 'Resgatados', dashboard.ticketsRedeemed, Icons.check_circle_outline, Colors.green),
+                          _userStatColumn(context, 'Expirados', dashboard.ticketsExpired, Icons.highlight_off, Colors.redAccent),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: () => context.push(AppRoutes.adminPromotionSettings),
+                            icon: const Icon(Icons.payments_outlined, size: 18),
+                            label: const Text('Cobrança Pix & Aprovação'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: () => context.push(AppRoutes.adminPromotionTickets),
+                            icon: const Icon(Icons.receipt_long, size: 18),
+                            label: const Text('Auditoria de Tickets'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Catálogo & Feed
+              Text('Catálogo & Feed',
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _userStatColumn(context, 'Rest. Ativos', dashboard.activeRestaurants, Icons.restaurant, Colors.orange),
+                      _userStatColumn(context, 'Rest. Inativos', dashboard.inactiveRestaurants, Icons.storefront_outlined, Colors.blueGrey),
+                      _userStatColumn(context, 'Pratos no Feed', dashboard.totalDishesInFeed, Icons.dynamic_feed, Colors.indigo),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Pratos Mais Bem Avaliados
+              if (dashboard.topRatedDishes.isNotEmpty) ...[
+                Text('Pratos Mais Bem Avaliados',
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                ...dashboard.topRatedDishes.map((dish) => Card(
+                      child: ListTile(
+                        leading: const CircleAvatar(
+                          backgroundColor: Colors.amber,
+                          child: Icon(Icons.star, color: Colors.white),
+                        ),
+                        title: Text(dish.dishName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text('${dish.restaurantName} • R\$ ${dish.price.toStringAsFixed(2)}'),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.star, size: 16, color: Colors.amber),
+                                const SizedBox(width: 4),
+                                Text(
+                                  dish.ratingAverage.toStringAsFixed(1),
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              '${dish.ratingCount} avaliaç${dish.ratingCount == 1 ? 'ão' : 'ões'}',
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )),
+                const SizedBox(height: 24),
+              ],
+
+              // Restaurantes mais favoritados
+              Text('Restaurantes Mais Favoritados',
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               if (dashboard.mostFollowedRestaurants.isEmpty)
-                const Text('Ainda não há favoritos de restaurantes.')
+                const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text('Ainda não há favoritos de restaurantes cadastrados.'),
+                  ),
+                )
               else
                 ...dashboard.mostFollowedRestaurants.map((restaurant) => Card(
                       child: ListTile(
-                        leading: const Icon(Icons.restaurant),
-                        title: Text(restaurant.restaurantName),
-                        trailing: Text(
-                          '${restaurant.favoriteCount} favoritos',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        leading: const Icon(Icons.favorite, color: Colors.redAccent),
+                        title: Text(restaurant.restaurantName, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        trailing: Chip(
+                          label: Text(
+                            '${restaurant.favoriteCount} salvos',
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                          ),
+                          avatar: const Icon(Icons.bookmark_added, size: 16),
                         ),
                       ),
                     )),
               const SizedBox(height: 24),
-              Text('Atividade', style: Theme.of(context).textTheme.titleMedium),
+
+              // Moderação & Campanhas
+              Text('Moderação & Atividade',
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               _infoCard(
-                  'Novos hoje', dashboard.usersToday.toString(), Icons.today),
-              _infoCard('Novos esta semana', dashboard.usersThisWeek.toString(),
-                  Icons.date_range),
-              _infoCard('Moderações pendentes',
-                  dashboard.pendingModerations.toString(), Icons.pending),
-              _infoCard('Campanhas ativas',
-                  dashboard.activeCampaigns.toString(), Icons.campaign),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: () => context.push(AppRoutes.adminPromotionSettings),
-                icon: const Icon(Icons.tune),
-                label: const Text('Cobrança Pix e aprovações'),
+                'Moderações Pendentes',
+                dashboard.pendingModerations.toString(),
+                Icons.pending_actions,
+                dashboard.pendingModerations > 0 ? Colors.orange : Colors.grey,
               ),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: () => context.push(AppRoutes.adminPromotionTickets),
-                icon: const Icon(Icons.receipt_long),
-                label: const Text('Tickets vendidos / consumidos / expirados'),
+              _infoCard(
+                'Denúncias / Flagged',
+                dashboard.flaggedModerations.toString(),
+                Icons.flag,
+                dashboard.flaggedModerations > 0 ? Colors.red : Colors.grey,
+              ),
+              _infoCard(
+                'Campanhas de Fidelidade Ativas',
+                dashboard.activeCampaigns.toString(),
+                Icons.campaign,
+                Colors.teal,
               ),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _userStatColumn(BuildContext context, String label, int value, IconData icon, Color color) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(height: 4),
+        Text(
+          value.toString(),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
     );
   }
 
@@ -149,10 +344,10 @@ class _DashboardTab extends ConsumerWidget {
     );
   }
 
-  Widget _infoCard(String label, String value, IconData icon) {
+  Widget _infoCard(String label, String value, IconData icon, [Color? iconColor]) {
     return Card(
       child: ListTile(
-        leading: Icon(icon),
+        leading: Icon(icon, color: iconColor),
         title: Text(label),
         trailing: Text(value,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
