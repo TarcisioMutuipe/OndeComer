@@ -23,7 +23,7 @@ public class AdminService : IAdminService
     public async Task<AdminDashboardDto> GetDashboardAsync()
     {
         var now = DateTime.UtcNow;
-        var today = now.Date;
+        var today = DateTime.SpecifyKind(now.Date, DateTimeKind.Utc);
         var weekAgo = today.AddDays(-7);
 
         var totalUsers = await _context.Users.CountAsync();
@@ -37,32 +37,80 @@ public class AdminService : IAdminService
         var activeCampaigns = await _context.LoyaltyCampaigns.CountAsync(c => c.IsActive && c.StartDate <= now && c.EndDate >= now);
         var usersToday = await _context.Users.CountAsync(u => u.CreatedAt >= today);
         var usersThisWeek = await _context.Users.CountAsync(u => u.CreatedAt >= weekAgo);
-        var restaurantFavorites = _context.Favorites
+
+        var totalConsumers = await _context.Users.CountAsync(u => u.ProfileType == ProfileType.Consumer);
+        var totalRestaurantOwners = await _context.Users.CountAsync(u => u.ProfileType == ProfileType.Restaurant);
+        var totalAdmins = await _context.Users.CountAsync(u => u.ProfileType == ProfileType.Admin);
+        var activeUsers = await _context.Users.CountAsync(u => u.IsActive);
+        var inactiveUsers = totalUsers - activeUsers;
+
+        var activeRestaurants = await _context.Restaurants.CountAsync(r => r.IsActive);
+        var inactiveRestaurants = totalRestaurants - activeRestaurants;
+        var totalDishesInFeed = await _context.Dishes.CountAsync(d => d.IsActive && d.ShowInFeed);
+
+        var totalPromotions = await _context.Promotions.CountAsync();
+        var activePromotions = await _context.Promotions.CountAsync(p => p.IsActive && (p.ExpiresAt == null || p.ExpiresAt > now));
+        var ticketsClaimed = await _context.PromotionTickets.CountAsync(t => t.Status == PromotionTicketStatus.Claimed);
+        var ticketsRedeemed = await _context.PromotionTickets.CountAsync(t => t.Status == PromotionTicketStatus.Redeemed);
+        var ticketsExpired = await _context.PromotionTickets.CountAsync(t => t.Status == PromotionTicketStatus.Expired);
+
+        var topFavorites = await _context.Favorites
             .AsNoTracking()
             .Where(f => f.RestaurantId.HasValue)
             .GroupBy(f => f.RestaurantId!.Value)
-            .Select(group => new
+            .Select(g => new
             {
-                RestaurantId = group.Key,
-                FavoriteCount = group.Count()
-            });
-        var mostFollowedRestaurants = await restaurantFavorites
-            .Join(_context.Restaurants.AsNoTracking(),
-                favorites => favorites.RestaurantId,
-                restaurant => restaurant.Id,
-                (favorites, restaurant) => new AdminMostFollowedRestaurantDto(
-                    restaurant.Id,
-                    restaurant.Name,
-                    favorites.FavoriteCount))
-            .OrderByDescending(r => r.FavoriteCount)
-            .ThenBy(r => r.RestaurantName)
+                RestaurantId = g.Key,
+                Count = g.Count()
+            })
+            .OrderByDescending(g => g.Count)
             .Take(5)
+            .ToListAsync();
+
+        var mostFollowedRestaurants = new List<AdminMostFollowedRestaurantDto>();
+        if (topFavorites.Any())
+        {
+            var restaurantIds = topFavorites.Select(f => f.RestaurantId).ToList();
+            var restaurantNames = await _context.Restaurants
+                .AsNoTracking()
+                .Where(r => restaurantIds.Contains(r.Id))
+                .ToDictionaryAsync(r => r.Id, r => r.Name);
+
+            mostFollowedRestaurants = topFavorites
+                .Select(f => new AdminMostFollowedRestaurantDto(
+                    f.RestaurantId,
+                    restaurantNames.GetValueOrDefault(f.RestaurantId, "Restaurante"),
+                    f.Count))
+                .OrderByDescending(r => r.FavoriteCount)
+                .ThenBy(r => r.RestaurantName)
+                .ToList();
+        }
+
+        var topRatedDishes = await _context.Dishes
+            .AsNoTracking()
+            .Include(d => d.Restaurant)
+            .Where(d => d.IsActive && d.RatingCount > 0)
+            .OrderByDescending(d => d.RatingAverage)
+            .ThenByDescending(d => d.RatingCount)
+            .Take(5)
+            .Select(d => new AdminTopDishDto(
+                d.Id,
+                d.Name,
+                d.Restaurant != null ? d.Restaurant.Name : "Restaurante",
+                d.RatingAverage,
+                d.RatingCount,
+                d.Price
+            ))
             .ToListAsync();
 
         return new AdminDashboardDto(
             totalUsers, totalRestaurants, totalDishes, totalReviews,
             totalComments, totalCheckIns, pendingModerations, flaggedModerations,
-            activeCampaigns, usersToday, usersThisWeek, mostFollowedRestaurants
+            activeCampaigns, usersToday, usersThisWeek, mostFollowedRestaurants,
+            totalConsumers, totalRestaurantOwners, totalAdmins, activeUsers, inactiveUsers,
+            activeRestaurants, inactiveRestaurants, totalDishesInFeed,
+            totalPromotions, activePromotions, ticketsClaimed, ticketsRedeemed, ticketsExpired,
+            topRatedDishes
         );
     }
 

@@ -12,13 +12,36 @@ public record AdminDashboardDto(
     int ActiveCampaigns,
     int UsersToday,
     int UsersThisWeek,
-    IReadOnlyList<AdminMostFollowedRestaurantDto> MostFollowedRestaurants
+    IReadOnlyList<AdminMostFollowedRestaurantDto> MostFollowedRestaurants,
+    int TotalConsumers = 0,
+    int TotalRestaurantOwners = 0,
+    int TotalAdmins = 0,
+    int ActiveUsers = 0,
+    int InactiveUsers = 0,
+    int ActiveRestaurants = 0,
+    int InactiveRestaurants = 0,
+    int TotalDishesInFeed = 0,
+    int TotalPromotions = 0,
+    int ActivePromotions = 0,
+    int TicketsClaimed = 0,
+    int TicketsRedeemed = 0,
+    int TicketsExpired = 0,
+    IReadOnlyList<AdminTopDishDto>? TopRatedDishes = null
 );
 
 public record AdminMostFollowedRestaurantDto(
     Guid RestaurantId,
     string RestaurantName,
     int FavoriteCount
+);
+
+public record AdminTopDishDto(
+    Guid DishId,
+    string DishName,
+    string RestaurantName,
+    double RatingAverage,
+    int RatingCount,
+    decimal Price
 );
 
 public record AdminUserDto(
