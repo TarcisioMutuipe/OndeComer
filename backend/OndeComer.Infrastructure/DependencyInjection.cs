@@ -55,6 +55,8 @@ public static class DependencyInjection
         services.AddScoped<ILoyaltyService, LoyaltyService>();
         services.AddScoped<IModerationService, ModerationService>();
         services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<ICityEventService, CityEventService>();
+        services.AddScoped<IReservationService, ReservationService>();
         services.AddSingleton<IPushSender, FcmPushSender>();
         services.AddScoped<IEmailService, ResendEmailService>();
         services.AddHostedService<PromotionTicketReminderHostedService>();

@@ -24,5 +24,10 @@ public record RestaurantSearchResultDto(
     double? DistanceKm,
     double AverageRating,
     bool IsCurrentlyOpen,
-    decimal? MinDishPrice
+    decimal? MinDishPrice,
+    int TotalTables = 0,
+    bool HasEventSpace = false,
+    int? EventSpaceCapacity = null,
+    bool AllowsReservations = false,
+    int TablesAvailableForReservation = 0
 );

@@ -25,6 +25,10 @@ class AdminDashboardModel {
   final int ticketsRedeemed;
   final int ticketsExpired;
   final List<AdminTopDishModel> topRatedDishes;
+  final int totalReservations;
+  final int pendingReservations;
+  final int confirmedReservations;
+  final int totalEvents;
 
   AdminDashboardModel({
     required this.totalUsers,
@@ -53,6 +57,10 @@ class AdminDashboardModel {
     this.ticketsRedeemed = 0,
     this.ticketsExpired = 0,
     this.topRatedDishes = const [],
+    this.totalReservations = 0,
+    this.pendingReservations = 0,
+    this.confirmedReservations = 0,
+    this.totalEvents = 0,
   });
 
   factory AdminDashboardModel.fromJson(Map<String, dynamic> json) {
@@ -89,6 +97,10 @@ class AdminDashboardModel {
           .map((item) => AdminTopDishModel.fromJson(
               item as Map<String, dynamic>))
           .toList(),
+      totalReservations: (json['totalReservations'] as num?)?.toInt() ?? 0,
+      pendingReservations: (json['pendingReservations'] as num?)?.toInt() ?? 0,
+      confirmedReservations: (json['confirmedReservations'] as num?)?.toInt() ?? 0,
+      totalEvents: (json['totalEvents'] as num?)?.toInt() ?? 0,
     );
   }
 }

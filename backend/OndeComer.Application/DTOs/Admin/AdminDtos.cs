@@ -26,7 +26,11 @@ public record AdminDashboardDto(
     int TicketsClaimed = 0,
     int TicketsRedeemed = 0,
     int TicketsExpired = 0,
-    IReadOnlyList<AdminTopDishDto>? TopRatedDishes = null
+    IReadOnlyList<AdminTopDishDto>? TopRatedDishes = null,
+    int TotalReservations = 0,
+    int PendingReservations = 0,
+    int ConfirmedReservations = 0,
+    int TotalEvents = 0
 );
 
 public record AdminMostFollowedRestaurantDto(
@@ -82,7 +86,12 @@ public record AdminRestaurantDto(
     string? OpeningHours = null,
     Guid? OwnerUserId = null,
     bool HasDuplicateName = false,
-    bool HasAdminAndUserDuplicate = false
+    bool HasAdminAndUserDuplicate = false,
+    int TotalTables = 0,
+    bool HasEventSpace = false,
+    int? EventSpaceCapacity = null,
+    bool AllowsReservations = false,
+    int TablesAvailableForReservation = 0
 );
 
 public record AdminUpdateRestaurantRequest(
@@ -98,7 +107,12 @@ public record AdminUpdateRestaurantRequest(
     string? InstagramUrl,
     string? YouTubeVideoUrl,
     string? OpeningHours,
-    bool? IsActive
+    bool? IsActive,
+    int? TotalTables = null,
+    bool? HasEventSpace = null,
+    int? EventSpaceCapacity = null,
+    bool? AllowsReservations = null,
+    int? TablesAvailableForReservation = null
 );
 
 public record ExportRequest(

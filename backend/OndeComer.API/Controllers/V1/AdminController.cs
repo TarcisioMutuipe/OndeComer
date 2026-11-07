@@ -79,7 +79,7 @@ public class AdminController : ControllerBase
     public async Task<ActionResult<AdminRestaurantDto>> CreateRestaurant([FromBody] CreateRestaurantRequest request)
     {
         var restaurant = await _adminService.CreateRestaurantAsync(GetCurrentUserId(), request);
-        return CreatedAtAction(nameof(GetRestaurant), new { restaurantId = restaurant.Id }, restaurant);
+        return StatusCode(StatusCodes.Status201Created, restaurant);
     }
 
     [HttpGet("restaurants/{restaurantId:guid}")]
@@ -121,7 +121,7 @@ public class AdminController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var dish = await _dishService.CreateAsync(restaurantId, userId, request, ct);
-        return CreatedAtAction(null, new { id = dish.Id }, dish);
+        return StatusCode(StatusCodes.Status201Created, dish);
     }
 
     [HttpPut("dishes/{dishId:guid}")]

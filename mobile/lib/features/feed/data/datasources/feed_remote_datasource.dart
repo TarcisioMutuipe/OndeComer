@@ -5,6 +5,7 @@ import '../../../../core/network/dio_client.dart';
 import '../models/promotion_model.dart';
 import '../models/promotion_ticket_model.dart';
 import '../models/dish_feed_post_model.dart';
+import '../models/city_event_model.dart';
 
 final feedRemoteDatasourceProvider =
     Provider((ref) => FeedRemoteDatasource(ref.watch(dioProvider)));
@@ -97,5 +98,50 @@ class FeedRemoteDatasource {
 
   Future<void> deletePromotion(String promotionId) async {
     await _dio.delete('${ApiConstants.promotionsBase}/$promotionId');
+  }
+
+  // City Events & News (Feature 1)
+  Future<List<CityEventModel>> getEvents() async {
+    final response = await _dio.get(ApiConstants.eventsBase);
+    final data = response.data as List<dynamic>;
+    return data
+        .map((e) => CityEventModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<Map<String, dynamic>> reactToEvent(String eventId, bool isLike) async {
+    final response = await _dio.post(
+      ApiConstants.eventReact(eventId),
+      data: {'isLike': isLike},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<CityEventModel> createEvent({
+    required String title,
+    required String description,
+    required String imageUrl,
+    String? youTubeVideoUrl,
+    String? locationOrAddress,
+    DateTime? eventDate,
+    String? restaurantId,
+  }) async {
+    final response = await _dio.post(ApiConstants.eventsBase, data: {
+      'title': title,
+      'description': description,
+      'imageUrl': imageUrl,
+      if (youTubeVideoUrl != null && youTubeVideoUrl.isNotEmpty)
+        'youTubeVideoUrl': youTubeVideoUrl,
+      if (locationOrAddress != null && locationOrAddress.isNotEmpty)
+        'locationOrAddress': locationOrAddress,
+      if (eventDate != null) 'eventDate': eventDate.toIso8601String(),
+      if (restaurantId != null && restaurantId.isNotEmpty)
+        'restaurantId': restaurantId,
+    });
+    return CityEventModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    await _dio.delete(ApiConstants.eventById(eventId));
   }
 }

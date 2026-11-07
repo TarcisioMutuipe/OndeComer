@@ -327,6 +327,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => context.push(AppRoutes.ondeComerHoje),
                       ),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.table_restaurant_outlined,
+                            color: Colors.teal),
+                        title: const Text('Minhas Reservas'),
+                        subtitle: const Text('Acompanhe suas mesas reservadas'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => context.push(AppRoutes.myReservations),
+                      ),
                       if (user.profileType != 'Restaurant' &&
                           user.profileType != 'Admin') ...[
                         const Divider(),

@@ -13,6 +13,7 @@ public interface IRestaurantRepository
     Task AddAsync(Restaurant restaurant, CancellationToken ct = default);
     void Update(Restaurant restaurant);
     Task<bool> ExistsByOwnerIdAsync(Guid ownerId, CancellationToken ct = default);
+    Task<bool> ExistsByNameAndAddressAsync(string name, string address, Guid? excludeId = null, CancellationToken ct = default);
 
     /// <summary>
     /// Returns active restaurants matching text/category/price/rating and optionally within a

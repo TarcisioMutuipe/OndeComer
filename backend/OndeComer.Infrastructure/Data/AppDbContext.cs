@@ -30,6 +30,9 @@ public class AppDbContext : DbContext
     public DbSet<ModerationLog> ModerationLogs => Set<ModerationLog>();
     public DbSet<EmailConfirmationToken> EmailConfirmationTokens => Set<EmailConfirmationToken>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+    public DbSet<CityEvent> CityEvents => Set<CityEvent>();
+    public DbSet<CityEventReaction> CityEventReactions => Set<CityEventReaction>();
+    public DbSet<RestaurantReservation> RestaurantReservations => Set<RestaurantReservation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -72,6 +75,10 @@ public class AppDbContext : DbContext
             entity.Property(r => r.LogoUrl).HasMaxLength(500);
             entity.Property(r => r.CoverUrl).HasMaxLength(500);
             entity.Property(r => r.OpeningHours).HasColumnType("text").HasDefaultValue("");
+            entity.Property(r => r.TotalTables).HasDefaultValue(0);
+            entity.Property(r => r.HasEventSpace).HasDefaultValue(false);
+            entity.Property(r => r.AllowsReservations).HasDefaultValue(false);
+            entity.Property(r => r.TablesAvailableForReservation).HasDefaultValue(0);
             entity.HasIndex(r => new { r.Latitude, r.Longitude })
                   .HasDatabaseName("IX_Restaurants_LatLng");
             entity.HasOne(r => r.Owner)
@@ -345,6 +352,78 @@ public class AppDbContext : DbContext
                   .HasForeignKey(m => m.UserId)
                   .OnDelete(DeleteBehavior.SetNull)
                   .IsRequired(false);
+        });
+
+        modelBuilder.Entity<CityEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Description).HasColumnType("text").IsRequired();
+            entity.Property(e => e.ImageUrl).HasMaxLength(500).IsRequired();
+            entity.Property(e => e.YouTubeVideoUrl).HasMaxLength(500);
+            entity.Property(e => e.LocationOrAddress).HasMaxLength(300);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.LikesCount).HasDefaultValue(0);
+            entity.Property(e => e.DislikesCount).HasDefaultValue(0);
+
+            entity.HasOne(e => e.Restaurant)
+                  .WithMany()
+                  .HasForeignKey(e => e.RestaurantId)
+                  .OnDelete(DeleteBehavior.SetNull)
+                  .IsRequired(false);
+
+            entity.HasOne(e => e.CreatedByUser)
+                  .WithMany()
+                  .HasForeignKey(e => e.CreatedByUserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_CityEvents_CreatedAt");
+            entity.HasIndex(e => e.IsActive).HasDatabaseName("IX_CityEvents_IsActive");
+        });
+
+        modelBuilder.Entity<CityEventReaction>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+            entity.HasIndex(r => new { r.CityEventId, r.UserId })
+                  .IsUnique()
+                  .HasDatabaseName("IX_CityEventReactions_Event_User");
+
+            entity.HasOne(r => r.CityEvent)
+                  .WithMany(e => e.Reactions)
+                  .HasForeignKey(r => r.CityEventId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(r => r.User)
+                  .WithMany()
+                  .HasForeignKey(r => r.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RestaurantReservation>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+            entity.Property(r => r.CustomerName).HasMaxLength(100).IsRequired();
+            entity.Property(r => r.CustomerPhone).HasMaxLength(30).IsRequired();
+            entity.Property(r => r.TimeSlot).HasMaxLength(10).IsRequired();
+            entity.Property(r => r.Notes).HasMaxLength(500);
+            entity.Property(r => r.CancellationReason).HasMaxLength(500);
+            entity.Property(r => r.ToleranceMinutes).HasDefaultValue(15);
+            entity.Property(r => r.Status).HasConversion<int>();
+
+            entity.HasOne(r => r.Restaurant)
+                  .WithMany(rest => rest.Reservations)
+                  .HasForeignKey(r => r.RestaurantId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(r => r.User)
+                  .WithMany()
+                  .HasForeignKey(r => r.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(r => new { r.RestaurantId, r.ReservationDate })
+                  .HasDatabaseName("IX_Reservations_Restaurant_Date");
+            entity.HasIndex(r => r.UserId)
+                  .HasDatabaseName("IX_Reservations_UserId");
         });
     }
 }

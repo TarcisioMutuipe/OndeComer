@@ -56,6 +56,16 @@ public class RestaurantRepository : IRestaurantRepository
     public async Task<bool> ExistsByOwnerIdAsync(Guid ownerId, CancellationToken ct = default)
         => await _context.Restaurants.AnyAsync(r => r.OwnerUserId == ownerId, ct);
 
+    public async Task<bool> ExistsByNameAndAddressAsync(string name, string address, Guid? excludeId = null, CancellationToken ct = default)
+    {
+        var n = name.Trim().ToLower();
+        var a = address.Trim().ToLower();
+        var query = _context.Restaurants.AsNoTracking().Where(r => r.Name.ToLower() == n && r.Address.ToLower() == a);
+        if (excludeId.HasValue)
+            query = query.Where(r => r.Id != excludeId.Value);
+        return await query.AnyAsync(ct);
+    }
+
     public async Task<IEnumerable<Restaurant>> SearchAdvancedAsync(
         string? query, string? category,
         decimal? minPrice, decimal? maxPrice, double? minRating,

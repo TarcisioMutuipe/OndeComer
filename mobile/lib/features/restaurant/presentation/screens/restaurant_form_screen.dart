@@ -1,4 +1,5 @@
-﻿import 'dart:typed_data';
+import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,6 +36,15 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
   late final TextEditingController _lng;
   late final TextEditingController _openingHours;
 
+  // Capacidade & Eventos (Feature 2)
+  late final TextEditingController _totalTables;
+  late bool _hasEventSpace;
+  late final TextEditingController _eventSpaceCapacity;
+
+  // Reservas (Feature 3)
+  late bool _allowsReservations;
+  late final TextEditingController _tablesAvailableForReservation;
+
   // Picked image state
   XFile? _logoXFile;
   XFile? _coverXFile;
@@ -59,6 +69,16 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
     _lat = TextEditingController(text: r?.latitude?.toString() ?? '');
     _lng = TextEditingController(text: r?.longitude?.toString() ?? '');
     _openingHours = TextEditingController(text: r?.openingHours ?? '');
+
+    _totalTables = TextEditingController(text: (r?.totalTables != null && r!.totalTables > 0) ? r.totalTables.toString() : '');
+    _hasEventSpace = r?.hasEventSpace ?? false;
+    _eventSpaceCapacity = TextEditingController(text: r?.eventSpaceCapacity?.toString() ?? '');
+
+    _allowsReservations = r?.allowsReservations ?? false;
+    _tablesAvailableForReservation = TextEditingController(
+        text: (r?.tablesAvailableForReservation != null && r!.tablesAvailableForReservation > 0)
+            ? r.tablesAvailableForReservation.toString()
+            : '');
 
     // Strip prefix from stored Instagram URL
     String handle = r?.instagramUrl ?? '';
@@ -90,6 +110,9 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
       _lat,
       _lng,
       _openingHours,
+      _totalTables,
+      _eventSpaceCapacity,
+      _tablesAvailableForReservation,
     ]) {
       c.dispose();
     }
@@ -259,6 +282,11 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
       'latitude': double.tryParse(_lat.text) ?? 0.0,
       'longitude': double.tryParse(_lng.text) ?? 0.0,
       'openingHours': _openingHours.text.isEmpty ? null : _openingHours.text,
+      'totalTables': int.tryParse(_totalTables.text.trim()) ?? 0,
+      'hasEventSpace': _hasEventSpace,
+      'eventSpaceCapacity': _hasEventSpace ? int.tryParse(_eventSpaceCapacity.text.trim()) : null,
+      'allowsReservations': _allowsReservations,
+      'tablesAvailableForReservation': _allowsReservations ? (int.tryParse(_tablesAvailableForReservation.text.trim()) ?? 0) : 0,
     };
 
     setState(() {
@@ -289,7 +317,18 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
 
       if (mounted) context.pop(true);
     } catch (error) {
-      if (mounted) setState(() => _submitError = error.toString());
+      if (mounted) {
+        String msg = error.toString();
+        if (error is DioException && error.response?.data != null) {
+          final data = error.response!.data;
+          if (data is Map && data['message'] != null) {
+            msg = data['message'].toString();
+          } else if (data is String && data.isNotEmpty) {
+            msg = data;
+          }
+        }
+        setState(() => _submitError = msg);
+      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -406,6 +445,75 @@ class _RestaurantFormScreenState extends ConsumerState<RestaurantFormScreen> {
                   labelText: 'Horario de Funcionamento',
                   hintText: 'Ex: Seg-Sex 11h-22h'),
             ),
+            const SizedBox(height: 20),
+            const Divider(),
+            const SizedBox(height: 8),
+            Text(
+              'Capacidade & Eventos',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _totalTables,
+              decoration: const InputDecoration(
+                labelText: 'Total de Mesas no Estabelecimento',
+                hintText: 'Ex: 25',
+                prefixIcon: Icon(Icons.table_restaurant_outlined),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 12),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Possui Espaço para Eventos?'),
+              subtitle: const Text('Aniversários, confraternizações e eventos corporativos'),
+              value: _hasEventSpace,
+              onChanged: (val) => setState(() => _hasEventSpace = val),
+            ),
+            if (_hasEventSpace) ...[
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _eventSpaceCapacity,
+                decoration: const InputDecoration(
+                  labelText: 'Capacidade para Eventos (Número de pessoas)',
+                  hintText: 'Ex: 80',
+                  prefixIcon: Icon(Icons.celebration_outlined),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+            const SizedBox(height: 20),
+            const Divider(),
+            const SizedBox(height: 8),
+            Text(
+              'Sistema de Reservas',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Permitir Reservas pelo App'),
+              subtitle: const Text('Clientes poderão solicitar reservas em blocos de 30 minutos'),
+              value: _allowsReservations,
+              onChanged: (val) => setState(() => _allowsReservations = val),
+            ),
+            if (_allowsReservations) ...[
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _tablesAvailableForReservation,
+                decoration: const InputDecoration(
+                  labelText: 'Quantidade de Mesas Liberadas para Reserva no App',
+                  hintText: 'Ex: 10',
+                  prefixIcon: Icon(Icons.event_seat_outlined),
+                  helperText: 'Tolerância padrão de 15 minutos aplicada aos clientes',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ],
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: (isLoading || _uploadingLogo || _uploadingCover)

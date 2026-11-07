@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import 'offline_banner.dart';
-import 'sync_pending_badge.dart';
 
 final _navIndexProvider = StateProvider<int>((ref) => 0);
 

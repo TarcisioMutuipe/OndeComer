@@ -20,6 +20,9 @@ public class RestaurantService : IRestaurantService
         if (await _uow.Restaurants.ExistsByOwnerIdAsync(ownerId, ct))
             throw new ConflictException("Este usuário já possui um restaurante cadastrado.");
 
+        if (await _uow.Restaurants.ExistsByNameAndAddressAsync(request.Name, request.Address, null, ct))
+            throw new ConflictException("Já existe um restaurante com este nome no mesmo endereço.");
+
         var restaurant = new Restaurant
         {
             OwnerUserId = ownerId,
@@ -35,6 +38,11 @@ public class RestaurantService : IRestaurantService
             InstagramUrl = request.InstagramUrl,
             YouTubeVideoUrl = request.YouTubeVideoUrl,
             OpeningHours = request.OpeningHours ?? "",
+            TotalTables = request.TotalTables,
+            HasEventSpace = request.HasEventSpace,
+            EventSpaceCapacity = request.EventSpaceCapacity,
+            AllowsReservations = request.AllowsReservations,
+            TablesAvailableForReservation = request.TablesAvailableForReservation,
         };
 
         await _uow.Restaurants.AddAsync(restaurant, ct);
@@ -51,6 +59,11 @@ public class RestaurantService : IRestaurantService
         if (requester?.ProfileType != ProfileType.Admin && restaurant.OwnerUserId != requesterId)
             throw new ForbiddenException("Você não tem permissão para editar este restaurante.");
 
+        var newName = (request.Name ?? restaurant.Name).Trim();
+        var newAddress = (request.Address ?? restaurant.Address).Trim();
+        if (await _uow.Restaurants.ExistsByNameAndAddressAsync(newName, newAddress, restaurantId, ct))
+            throw new ConflictException("Já existe outro restaurante cadastrado com este mesmo nome no mesmo endereço.");
+
         if (request.Name is not null) restaurant.Name = request.Name;
         if (request.Description is not null) restaurant.Description = request.Description;
         if (request.Address is not null) restaurant.Address = request.Address;
@@ -64,6 +77,11 @@ public class RestaurantService : IRestaurantService
         if (request.YouTubeVideoUrl is not null) restaurant.YouTubeVideoUrl = request.YouTubeVideoUrl;
         if (request.OpeningHours is not null) restaurant.OpeningHours = request.OpeningHours;
         if (request.IsActive.HasValue) restaurant.IsActive = request.IsActive.Value;
+        if (request.TotalTables.HasValue) restaurant.TotalTables = request.TotalTables.Value;
+        if (request.HasEventSpace.HasValue) restaurant.HasEventSpace = request.HasEventSpace.Value;
+        if (request.EventSpaceCapacity.HasValue) restaurant.EventSpaceCapacity = request.EventSpaceCapacity.Value;
+        if (request.AllowsReservations.HasValue) restaurant.AllowsReservations = request.AllowsReservations.Value;
+        if (request.TablesAvailableForReservation.HasValue) restaurant.TablesAvailableForReservation = request.TablesAvailableForReservation.Value;
 
         _uow.Restaurants.Update(restaurant);
         await _uow.CommitAsync(ct);
@@ -101,7 +119,8 @@ public class RestaurantService : IRestaurantService
     private static RestaurantDto ToDto(Restaurant r) => new(
         r.Id, r.OwnerUserId, r.Name, r.Description, r.Address, r.City,
         r.Latitude, r.Longitude, r.Category, r.LogoUrl, r.CoverUrl, r.InstagramUrl,
-        r.YouTubeVideoUrl, r.IsActive, r.OpeningHours, r.Dishes?.Count ?? 0, r.CreatedAt
+        r.YouTubeVideoUrl, r.IsActive, r.OpeningHours, r.Dishes?.Count ?? 0, r.CreatedAt,
+        r.TotalTables, r.HasEventSpace, r.EventSpaceCapacity, r.AllowsReservations, r.TablesAvailableForReservation
     );
 
     // ─── Advanced Search ────────────────────────────────────────────────────
@@ -180,7 +199,12 @@ public class RestaurantService : IRestaurantService
             x.Distance.HasValue ? Math.Round(x.Distance.Value, 2) : null,
             Math.Round(x.AvgRating, 2),
             x.IsOpen,
-            x.MinPrice
+            x.MinPrice,
+            x.Restaurant.TotalTables,
+            x.Restaurant.HasEventSpace,
+            x.Restaurant.EventSpaceCapacity,
+            x.Restaurant.AllowsReservations,
+            x.Restaurant.TablesAvailableForReservation
         ));
 
         return new PagedResult<RestaurantSearchResultDto>(dtos, page, pageSize, total);

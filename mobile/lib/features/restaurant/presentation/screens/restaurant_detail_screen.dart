@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../../shared/widgets/youtube_video_player.dart';
+import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
+import '../../data/datasources/reservation_remote_datasource.dart';
 import '../viewmodels/restaurant_list_viewmodel.dart';
 import '../viewmodels/dish_viewmodel.dart';
 import '../widgets/restaurant_open_status_badge.dart';
@@ -143,6 +147,17 @@ class _RestaurantDetailScreenState
     );
   }
 
+  void _openTableReservationModal(dynamic restaurant) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => _ReservationBookingSheet(restaurant: restaurant),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -158,6 +173,8 @@ class _RestaurantDetailScreenState
     final restaurantAsync =
         ref.watch(restaurantDetailProvider(widget.restaurantId));
     final dishState = ref.watch(dishViewModelProvider(widget.restaurantId));
+    final authUser = ref.watch(authViewModelProvider).user;
+    final isAdmin = authUser?.profileType == 'Admin';
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -198,6 +215,57 @@ class _RestaurantDetailScreenState
                   onPressed: () => context.pop(),
                 ),
                 actions: [
+                  if (isAdmin)
+                    IconButton(
+                      icon: const CircleAvatar(
+                        backgroundColor: Colors.amber,
+                        child: Icon(Icons.shield,
+                            color: Colors.black, size: 20),
+                      ),
+                      tooltip: 'Opções do Administrador',
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (ctx) => SafeArea(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ListTile(
+                                  leading: const Icon(Icons.edit,
+                                      color: Colors.amber),
+                                  title: const Text('Editar Restaurante (Admin)'),
+                                  onTap: () {
+                                    Navigator.pop(ctx);
+                                    context.push('/restaurant/form?admin=true',
+                                        extra: restaurant);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.add_circle,
+                                      color: Colors.green),
+                                  title: const Text('Publicar Novo Prato (Admin)'),
+                                  onTap: () {
+                                    Navigator.pop(ctx);
+                                    context.push(
+                                        '/restaurant/${restaurant.id}/dish/form');
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.restaurant_menu,
+                                      color: Colors.blue),
+                                  title: const Text('Gerenciar Pratos (Admin)'),
+                                  onTap: () {
+                                    Navigator.pop(ctx);
+                                    context.push(
+                                        '/admin/restaurant/${restaurant.id}/dishes');
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   IconButton(
                     icon: const CircleAvatar(
                       backgroundColor: Colors.white70,
@@ -275,6 +343,44 @@ class _RestaurantDetailScreenState
                   ),
                 ),
               ),
+              if (isAdmin)
+                SliverToBoxAdapter(
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade50,
+                      border: Border.all(color: Colors.amber.shade400),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.shield,
+                            color: Colors.amber, size: 20),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text('Painel Admin',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 13)),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => context.push(
+                              '/restaurant/form?admin=true',
+                              extra: restaurant),
+                          icon: const Icon(Icons.edit, size: 16),
+                          label: const Text('Editar'),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => context.push(
+                              '/restaurant/${restaurant.id}/dish/form'),
+                          icon: const Icon(Icons.add, size: 16),
+                          label: const Text('+ Prato'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -342,6 +448,68 @@ class _RestaurantDetailScreenState
                         onPressed: () =>
                             context.push('/checkin/${restaurant.id}'),
                       ),
+                      if (restaurant.allowsReservations)
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal.shade700,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
+                            minimumSize: const Size(0, 38),
+                          ),
+                          icon: const Icon(Icons.table_restaurant, size: 18),
+                          label: const Text('Reservar Mesa',
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.bold)),
+                          onPressed: () => _openTableReservationModal(restaurant),
+                        ),
+                      if (restaurant.totalTables > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppTheme.divider),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.table_bar_outlined,
+                                  size: 15, color: Colors.teal),
+                              const SizedBox(width: 4),
+                              Text('${restaurant.totalTables} mesas',
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary,
+                                      fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                        ),
+                      if (restaurant.hasEventSpace)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.purple.shade200),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.celebration_outlined,
+                                  size: 15, color: Colors.purple.shade700),
+                              const SizedBox(width: 4),
+                              Text(
+                                  'Espaço p/ eventos${restaurant.eventSpaceCapacity != null ? ' (${restaurant.eventSpaceCapacity} pes.)' : ''}',
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.purple.shade800,
+                                      fontWeight: FontWeight.w600)),
+                            ],
+                          ),
+                        ),
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.green.shade800,
@@ -581,3 +749,333 @@ class _DishTile extends StatelessWidget {
     );
   }
 }
+
+class _ReservationBookingSheet extends ConsumerStatefulWidget {
+  final dynamic restaurant;
+  const _ReservationBookingSheet({required this.restaurant});
+
+  @override
+  ConsumerState<_ReservationBookingSheet> createState() =>
+      _ReservationBookingSheetState();
+}
+
+class _ReservationBookingSheetState extends ConsumerState<_ReservationBookingSheet> {
+  final _formKey = GlobalKey<FormState>();
+  DateTime _selectedDate = DateTime.now();
+  String _selectedTimeSlot = '19:30';
+  int _partySize = 2;
+  late final TextEditingController _nameController;
+  late final TextEditingController _phoneController;
+  final _notesController = TextEditingController();
+  bool _isSubmitting = false;
+
+  static const List<String> _timeSlots = [
+    '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00',
+    '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00', '22:30'
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final authUser = ref.read(authViewModelProvider).user;
+    _nameController = TextEditingController(text: authUser?.name ?? '');
+    _phoneController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
+    );
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+    }
+  }
+
+  Future<void> _submitReservation() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
+    try {
+      await ref.read(reservationRemoteDatasourceProvider).createReservation(
+            restaurantId: widget.restaurant.id,
+            customerName: _nameController.text.trim(),
+            customerPhone: _phoneController.text.trim(),
+            reservationDate: _selectedDate,
+            timeSlot: _selectedTimeSlot,
+            partySize: _partySize,
+            notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+          );
+
+      if (mounted) {
+        Navigator.pop(context); // Close sheet
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green),
+                SizedBox(width: 8),
+                Text('Reserva Solicitada!'),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Sua mesa no ${widget.restaurant.name} foi agendada para:'),
+                const SizedBox(height: 8),
+                Text(
+                  '📅 ${DateFormat('dd/MM/yyyy').format(_selectedDate)} às $_selectedTimeSlot\n'
+                  '👥 $_partySize pessoas\n'
+                  '⏰ Tolerância de até 15 minutos',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                const Text('Você pode acompanhar o status em Minhas Reservas.'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Fechar'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  context.push(AppRoutes.myReservations);
+                },
+                child: const Text('Ver Minhas Reservas'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Não foi possível realizar a reserva: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 20,
+        right: 20,
+        top: 20,
+      ),
+      child: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.teal.shade50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.table_restaurant,
+                        color: Colors.teal.shade700, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Reservar Mesa',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        Text(
+                          widget.restaurant.name,
+                          style: const TextStyle(
+                              fontSize: 13, color: AppTheme.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Tolerance Banner
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.amber.shade300),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.timer_outlined, color: Colors.orange, size: 22),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Tolerância de 15 minutos: Sua mesa será mantida por até 15 minutos após o horário agendado.',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Date Picker
+              InkWell(
+                onTap: _pickDate,
+                borderRadius: BorderRadius.circular(8),
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Data da Reserva *',
+                    prefixIcon: Icon(Icons.calendar_today),
+                  ),
+                  child: Text(
+                    DateFormat('dd/MM/yyyy (EEE)', 'pt_BR').format(_selectedDate),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Time Slot and Party Size
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'Horário *',
+                        prefixIcon: Icon(Icons.access_time),
+                      ),
+                      value: _selectedTimeSlot,
+                      items: _timeSlots
+                          .map((slot) => DropdownMenuItem(
+                                value: slot,
+                                child: Text(slot),
+                              ))
+                          .toList(),
+                      onChanged: (val) {
+                        if (val != null) setState(() => _selectedTimeSlot = val);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<int>(
+                      decoration: const InputDecoration(
+                        labelText: 'Pessoas *',
+                        prefixIcon: Icon(Icons.people_outline),
+                      ),
+                      value: _partySize,
+                      items: List.generate(15, (i) => i + 1)
+                          .map((num) => DropdownMenuItem(
+                                value: num,
+                                child: Text('$num ${num == 1 ? 'pessoa' : 'pessoas'}'),
+                              ))
+                          .toList(),
+                      onChanged: (val) {
+                        if (val != null) setState(() => _partySize = val);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Name and Phone
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nome do Responsável *',
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe o nome' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _phoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Telefone / WhatsApp *',
+                  hintText: '(71) 99999-9999',
+                  prefixIcon: Icon(Icons.phone_outlined),
+                ),
+                keyboardType: TextInputType.phone,
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe o telefone' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _notesController,
+                decoration: const InputDecoration(
+                  labelText: 'Observações (opcional)',
+                  hintText: 'Ex: mesa externa, comemoração de aniversário...',
+                  prefixIcon: Icon(Icons.notes_outlined),
+                ),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 20),
+
+              // Submit Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: _isSubmitting ? null : _submitReservation,
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text(
+                          'Confirmar Reserva',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+

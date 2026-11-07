@@ -233,6 +233,44 @@ class _RestaurantDashboardScreenState
                       const SizedBox(width: 4),
                       Text(restaurant.isActive ? 'Ativo' : 'Inativo'),
                     ]),
+                    if (restaurant.totalTables > 0 || restaurant.hasEventSpace || restaurant.allowsReservations) ...[
+                      const Divider(height: 16),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          if (restaurant.totalTables > 0)
+                            Chip(
+                              avatar: const Icon(Icons.table_restaurant, size: 16, color: Colors.teal),
+                              label: Text('${restaurant.totalTables} mesas', style: const TextStyle(fontSize: 12)),
+                              backgroundColor: Colors.teal.shade50,
+                            ),
+                          if (restaurant.hasEventSpace)
+                            Chip(
+                              avatar: const Icon(Icons.celebration, size: 16, color: Colors.purple),
+                              label: Text('Eventos (até ${restaurant.eventSpaceCapacity ?? 0} pes.)',
+                                  style: const TextStyle(fontSize: 12)),
+                              backgroundColor: Colors.purple.shade50,
+                            ),
+                          Chip(
+                            avatar: Icon(
+                              restaurant.allowsReservations ? Icons.check : Icons.close,
+                              size: 16,
+                              color: restaurant.allowsReservations ? Colors.green : Colors.grey,
+                            ),
+                            label: Text(
+                              restaurant.allowsReservations
+                                  ? 'Reservas ativas (${restaurant.tablesAvailableForReservation} mesas)'
+                                  : 'Reservas inativas',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            backgroundColor: restaurant.allowsReservations
+                                ? Colors.green.shade50
+                                : Colors.grey.shade100,
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -244,6 +282,20 @@ class _RestaurantDashboardScreenState
                   context.push(AppRoutes.ownerPromotions, extra: restaurant.id),
               icon: const Icon(Icons.local_offer_outlined),
               label: const Text('Gerenciar Promoções'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () =>
+                  context.push('/restaurant/${restaurant.id}/reservations'),
+              icon: const Icon(Icons.table_restaurant_outlined, color: Colors.teal),
+              label: Text(
+                restaurant.allowsReservations
+                    ? 'Gerenciar Reservas do Salão (${restaurant.tablesAvailableForReservation} mesas liberadas)'
+                    : 'Gerenciar Reservas do Salão (Desativadas no cadastro)',
+              ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
               ),

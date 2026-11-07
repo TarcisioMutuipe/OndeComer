@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
+import '../../../feed/data/datasources/feed_remote_datasource.dart';
+import '../../../feed/data/models/city_event_model.dart';
+import '../../../feed/presentation/viewmodels/feed_viewmodel.dart';
 import '../viewmodels/admin_viewmodel.dart';
 import '../../data/models/admin_models.dart';
+import 'admin_restaurant_list_screen.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -11,13 +17,44 @@ class AdminDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Painel Admin'),
+          actions: [
+            IconButton(
+              tooltip: 'Sair',
+              icon: const Icon(Icons.logout),
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: const Text('Sair'),
+                    content: const Text('Deseja sair da sua conta?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, false),
+                        child: const Text('Cancelar'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext, true),
+                        child: const Text('Sair'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  await ref.read(authViewModelProvider.notifier).logout();
+                  if (context.mounted) context.go(AppRoutes.login);
+                }
+              },
+            ),
+          ],
           bottom: const TabBar(
+            isScrollable: true,
             tabs: [
               Tab(text: 'Dashboard', icon: Icon(Icons.dashboard)),
+              Tab(text: 'Eventos & Notícias', icon: Icon(Icons.campaign)),
               Tab(text: 'Restaurantes', icon: Icon(Icons.restaurant)),
               Tab(text: 'Usuários', icon: Icon(Icons.people)),
               Tab(text: 'Moderação', icon: Icon(Icons.shield)),
@@ -27,6 +64,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         body: const TabBarView(
           children: [
             _DashboardTab(),
+            _EventsTab(),
             _RestaurantsTab(),
             _UsersTab(),
             _ModerationTab(),
@@ -164,6 +202,26 @@ class _DashboardTab extends ConsumerWidget {
                           ),
                         ],
                       ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Reservas & Eventos da Cidade
+              Text('Reservas & Eventos da Cidade',
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _userStatColumn(context, 'Reservas Totais', dashboard.totalReservations, Icons.table_restaurant, Colors.teal),
+                      _userStatColumn(context, 'Confirmadas', dashboard.confirmedReservations, Icons.check_circle_outline, Colors.green),
+                      _userStatColumn(context, 'Pendentes', dashboard.pendingReservations, Icons.pending_actions, Colors.orange),
+                      _userStatColumn(context, 'Eventos', dashboard.totalEvents, Icons.campaign, Colors.purple),
                     ],
                   ),
                 ),
@@ -364,27 +422,12 @@ class _MetricItem {
   _MetricItem(this.label, this.value, this.icon, this.color);
 }
 
-class _RestaurantsTab extends ConsumerWidget {
+class _RestaurantsTab extends StatelessWidget {
   const _RestaurantsTab();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.restaurant, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          const Text('Gerenciar Restaurantes'),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () => context.push('/admin/restaurants'),
-            icon: const Icon(Icons.arrow_forward),
-            label: const Text('Acessar'),
-          ),
-        ],
-      ),
-    );
+  Widget build(BuildContext context) {
+    return const AdminRestaurantListScreen(isEmbedded: true);
   }
 }
 
@@ -592,6 +635,465 @@ class _ModerationTab extends ConsumerWidget {
             : log.reviewedByHuman
                 ? const Icon(Icons.verified, color: Colors.blue)
                 : null,
+      ),
+    );
+  }
+}
+
+class _EventsTab extends ConsumerStatefulWidget {
+  const _EventsTab();
+
+  @override
+  ConsumerState<_EventsTab> createState() => _EventsTabState();
+}
+
+class _EventsTabState extends ConsumerState<_EventsTab> {
+  bool _isLoading = true;
+  String? _error;
+  List<CityEventModel> _events = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
+
+  Future<void> _loadEvents() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final list = await ref.read(feedRemoteDatasourceProvider).getEvents();
+      if (mounted) {
+        setState(() {
+          _events = list;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _deleteEvent(CityEventModel event) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir Evento?'),
+        content: Text('Deseja remover "${event.title}" do feed de eventos?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Excluir', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await ref.read(feedRemoteDatasourceProvider).deleteEvent(event.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Evento removido com sucesso.'), backgroundColor: Colors.green),
+        );
+        _loadEvents();
+        ref.read(feedViewModelProvider.notifier).load();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao excluir evento: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  void _openCreateEventDialog() async {
+    final created = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => const _CreateEventDialog(),
+    );
+    if (created == true) {
+      _loadEvents();
+      ref.read(feedViewModelProvider.notifier).load();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 12),
+              Text('Erro ao carregar eventos: $_error'),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _loadEvents,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Tentar novamente'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openCreateEventDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('Novo Evento / Notícia'),
+      ),
+      body: RefreshIndicator(
+        onRefresh: _loadEvents,
+        child: _events.isEmpty
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.campaign_outlined, size: 64, color: Colors.grey.shade400),
+                      const SizedBox(height: 16),
+                      const Text('Nenhum evento ou notícia cadastrado',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Publique inaugurações, festivais e acontecimentos gastronômicos na cidade.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: _openCreateEventDialog,
+                        icon: const Icon(Icons.add),
+                        label: const Text('Criar Primeiro Evento'),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : ListView.separated(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                itemCount: _events.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (ctx, i) {
+                  final ev = _events[i];
+                  return Card(
+                    elevation: 2,
+                    clipBehavior: Clip.antiAlias,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (ev.imageUrl.isNotEmpty)
+                          Image.network(
+                            ev.imageUrl,
+                            height: 140,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              height: 140,
+                              color: Colors.grey.shade200,
+                              child: const Icon(Icons.broken_image, size: 40),
+                            ),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      ev.title,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                    tooltip: 'Excluir Evento',
+                                    onPressed: () => _deleteEvent(ev),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                ev.description,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 13, color: Colors.grey),
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 4,
+                                children: [
+                                  if (ev.eventDate != null)
+                                    Chip(
+                                      avatar: const Icon(Icons.calendar_today, size: 14),
+                                      label: Text(
+                                        DateFormat('dd/MM/yyyy').format(ev.eventDate!),
+                                        style: const TextStyle(fontSize: 11),
+                                      ),
+                                    ),
+                                  if (ev.locationOrAddress != null && ev.locationOrAddress!.isNotEmpty)
+                                    Chip(
+                                      avatar: const Icon(Icons.location_on, size: 14),
+                                      label: Text(
+                                        ev.locationOrAddress!,
+                                        style: const TextStyle(fontSize: 11),
+                                      ),
+                                    ),
+                                  if (ev.youTubeVideoUrl != null && ev.youTubeVideoUrl!.isNotEmpty)
+                                    Chip(
+                                      avatar: const Icon(Icons.play_circle_fill, color: Colors.red, size: 14),
+                                      label: const Text('Vídeo YouTube', style: TextStyle(fontSize: 11)),
+                                    ),
+                                ],
+                              ),
+                              const Divider(height: 16),
+                              Row(
+                                children: [
+                                  const Icon(Icons.thumb_up_alt_outlined, size: 16, color: Colors.green),
+                                  const SizedBox(width: 4),
+                                  Text('${ev.likesCount} curtidas', style: const TextStyle(fontSize: 12)),
+                                  const SizedBox(width: 16),
+                                  const Icon(Icons.thumb_down_alt_outlined, size: 16, color: Colors.redAccent),
+                                  const SizedBox(width: 4),
+                                  Text('${ev.dislikesCount} não curtidas', style: const TextStyle(fontSize: 12)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class _CreateEventDialog extends ConsumerStatefulWidget {
+  const _CreateEventDialog();
+
+  @override
+  ConsumerState<_CreateEventDialog> createState() => _CreateEventDialogState();
+}
+
+class _CreateEventDialogState extends ConsumerState<_CreateEventDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
+  final _descController = TextEditingController();
+  final _imgController = TextEditingController();
+  final _ytController = TextEditingController();
+  final _locController = TextEditingController();
+  DateTime? _eventDate;
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    _imgController.dispose();
+    _ytController.dispose();
+    _locController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickEventDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _eventDate ?? DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 7)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() => _eventDate = picked);
+    }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
+    try {
+      await ref.read(feedRemoteDatasourceProvider).createEvent(
+        title: _titleController.text.trim(),
+        description: _descController.text.trim(),
+        imageUrl: _imgController.text.trim(),
+        youTubeVideoUrl: _ytController.text.trim().isEmpty ? null : _ytController.text.trim(),
+        eventDate: _eventDate,
+        locationOrAddress: _locController.text.trim().isEmpty ? null : _locController.text.trim(),
+      );
+
+      if (mounted) {
+        Navigator.pop(context, true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Evento publicado no Feed com sucesso!'), backgroundColor: Colors.green),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao criar evento: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 500),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.campaign, color: Colors.purple, size: 28),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Publicar Evento ou Notícia',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(
+                      labelText: 'Título do Evento / Notícia *',
+                      hintText: 'Ex: Inauguração do Restaurante Pelourinho',
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe o título' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _descController,
+                    decoration: const InputDecoration(
+                      labelText: 'Descrição Detalhada *',
+                      hintText: 'Conte o que vai rolar, cardápio especial, horários...',
+                    ),
+                    maxLines: 3,
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe a descrição' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _imgController,
+                    decoration: const InputDecoration(
+                      labelText: 'URL da Imagem de Divulgação *',
+                      hintText: 'https://exemplo.com/imagem.jpg',
+                      prefixIcon: Icon(Icons.image_outlined),
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Informe o link da imagem' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _ytController,
+                    decoration: const InputDecoration(
+                      labelText: 'Link de Vídeo no YouTube (Opcional)',
+                      hintText: 'https://youtube.com/watch?v=... ou shorts',
+                      prefixIcon: Icon(Icons.play_circle_outline, color: Colors.red),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: _pickEventDate,
+                    borderRadius: BorderRadius.circular(8),
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: 'Data do Acontecimento (Opcional)',
+                        prefixIcon: Icon(Icons.calendar_today),
+                      ),
+                      child: Text(
+                        _eventDate != null
+                            ? DateFormat('dd/MM/yyyy').format(_eventDate!)
+                            : 'Nenhuma data selecionada (Toque para definir)',
+                        style: TextStyle(
+                          color: _eventDate != null ? Colors.black87 : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _locController,
+                    decoration: const InputDecoration(
+                      labelText: 'Localização / Endereço (Opcional)',
+                      hintText: 'Ex: Rio Vermelho, Salvador - BA',
+                      prefixIcon: Icon(Icons.place_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancelar'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: _isSubmitting ? null : _submit,
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              )
+                            : const Text('Publicar no Feed'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

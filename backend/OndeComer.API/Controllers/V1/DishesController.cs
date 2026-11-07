@@ -46,7 +46,7 @@ public class DishesController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var dish = await _dishService.CreateAsync(restaurantId, userId, request, ct);
-        return CreatedAtAction(nameof(GetById), new { id = dish.Id }, dish);
+        return StatusCode(StatusCodes.Status201Created, dish);
     }
 
     [HttpPut("{id:guid}")]

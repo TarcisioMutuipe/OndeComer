@@ -15,5 +15,10 @@ public record UpdateRestaurantRequest(
     [MaxLength(500)] string? InstagramUrl,
     [MaxLength(500)] string? YouTubeVideoUrl,
     string? OpeningHours,
-    bool? IsActive
+    bool? IsActive,
+    int? TotalTables = null,
+    bool? HasEventSpace = null,
+    int? EventSpaceCapacity = null,
+    bool? AllowsReservations = null,
+    int? TablesAvailableForReservation = null
 );

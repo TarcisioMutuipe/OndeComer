@@ -6,7 +6,8 @@ import 'package:onde_comer_em_salvador/features/admin/presentation/viewmodels/ad
 import 'package:onde_comer_em_salvador/features/restaurant/data/models/restaurant_model.dart';
 
 class AdminRestaurantListScreen extends ConsumerStatefulWidget {
-  const AdminRestaurantListScreen({Key? key}) : super(key: key);
+  final bool isEmbedded;
+  const AdminRestaurantListScreen({Key? key, this.isEmbedded = false}) : super(key: key);
 
   @override
   ConsumerState<AdminRestaurantListScreen> createState() =>
@@ -36,6 +37,169 @@ class _AdminRestaurantListScreenState
   Widget build(BuildContext context) {
     final restaurantsAsync = ref.watch(adminRestaurantProvider);
 
+    final content = Column(
+      children: [
+        if (widget.isEmbedded)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Row(
+              children: [
+                const Icon(Icons.restaurant, color: Colors.amber),
+                const SizedBox(width: 8),
+                const Text(
+                  'Restaurantes',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                ElevatedButton.icon(
+                  onPressed: () => _openRestaurantForm(context),
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Novo Restaurante'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    foregroundColor: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        // Search bar
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Buscar restaurante...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        ref
+                            .read(adminRestaurantProvider.notifier)
+                            .loadRestaurants();
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onChanged: (value) {
+              ref.read(adminRestaurantProvider.notifier).loadRestaurants(
+                    search: value.isEmpty ? null : value,
+                  );
+            },
+          ),
+        ),
+        // Restaurants list
+        Expanded(
+          child: restaurantsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline,
+                      size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Erro ao carregar: $error'),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () => ref
+                        .read(adminRestaurantProvider.notifier)
+                        .loadRestaurants(),
+                    child: const Text('Tentar novamente'),
+                  ),
+                ],
+              ),
+            ),
+            data: (restaurants) {
+              if (restaurants.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.restaurant,
+                          size: 48, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text('Nenhum restaurante encontrado',
+                          style: TextStyle(color: Colors.grey[600])),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: () => _openRestaurantForm(context),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Cadastrar Primeiro Restaurante'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final duplicateEntries =
+                  restaurants.where((entry) => entry.hasDuplicateName).toList();
+              final duplicateNameCount = duplicateEntries
+                  .map((entry) => entry.restaurant.name.trim().toLowerCase())
+                  .toSet()
+                  .length;
+
+              return Column(
+                children: [
+                  if (duplicateEntries.isNotEmpty)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade50,
+                        border: Border.all(color: Colors.amber.shade700),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning_amber_rounded,
+                              color: Colors.amber.shade900),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(duplicateEntries.any((entry) =>
+                                    entry.hasAdminAndUserDuplicate)
+                                ? 'Foi cadastrado por um usuário um restaurante com o mesmo nome.'
+                                : '$duplicateNameCount nome(s) de restaurante duplicado(s).'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      itemCount: restaurants.length,
+                      itemBuilder: (context, index) {
+                        final entry = restaurants[index];
+                        final restaurant = entry.restaurant;
+                        return _RestaurantCard(
+                          entry: entry,
+                          onEdit: () => _editRestaurant(context, restaurant),
+                          onDelete: () =>
+                              _deleteRestaurant(context, restaurant.id),
+                          onManageDishes: () =>
+                              _manageDishes(context, restaurant),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+
+    if (widget.isEmbedded) {
+      return content;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gerenciar Restaurantes'),
@@ -48,116 +212,7 @@ class _AdminRestaurantListScreenState
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Buscar restaurante...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onChanged: (value) {
-                ref.read(adminRestaurantProvider.notifier).loadRestaurants(
-                      search: value.isEmpty ? null : value,
-                    );
-              },
-            ),
-          ),
-          // Restaurants list
-          Expanded(
-            child: restaurantsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline,
-                        size: 48, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text('Erro ao carregar: $error'),
-                  ],
-                ),
-              ),
-              data: (restaurants) {
-                if (restaurants.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.restaurant,
-                            size: 48, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text('Nenhum restaurante encontrado',
-                            style: TextStyle(color: Colors.grey[600])),
-                      ],
-                    ),
-                  );
-                }
-
-                final duplicateEntries =
-                    restaurants.where((entry) => entry.hasDuplicateName).toList();
-                final duplicateNameCount = duplicateEntries
-                    .map((entry) => entry.restaurant.name.trim().toLowerCase())
-                    .toSet()
-                    .length;
-
-                return Column(
-                  children: [
-                    if (duplicateEntries.isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.shade50,
-                          border: Border.all(color: Colors.amber.shade700),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.warning_amber_rounded,
-                                color: Colors.amber.shade900),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(duplicateEntries.any((entry) =>
-                                      entry.hasAdminAndUserDuplicate)
-                                  ? 'Foi cadastrado por um usuário um restaurante com o mesmo nome.'
-                                  : '$duplicateNameCount nome(s) de restaurante duplicado(s).'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        itemCount: restaurants.length,
-                        itemBuilder: (context, index) {
-                          final entry = restaurants[index];
-                          final restaurant = entry.restaurant;
-                          return _RestaurantCard(
-                            entry: entry,
-                            onEdit: () => _editRestaurant(context, restaurant),
-                            onDelete: () =>
-                                _deleteRestaurant(context, restaurant.id),
-                            onManageDishes: () =>
-                                _manageDishes(context, restaurant),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+      body: content,
     );
   }
 
@@ -342,25 +397,71 @@ class _RestaurantCard extends StatelessWidget {
                   ],
                 ),
               ),
+            // Capacity & Reservation tags
+            if (restaurant.totalTables > 0 ||
+                restaurant.hasEventSpace ||
+                restaurant.allowsReservations)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: [
+                    if (restaurant.totalTables > 0)
+                      Chip(
+                        avatar: const Icon(Icons.table_restaurant, size: 14),
+                        label: Text('${restaurant.totalTables} mesas',
+                            style: const TextStyle(fontSize: 11)),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                      ),
+                    if (restaurant.hasEventSpace)
+                      Chip(
+                        avatar: const Icon(Icons.celebration, size: 14),
+                        label: Text(
+                            'Espaço p/ eventos (${restaurant.eventSpaceCapacity ?? "?"} pess.)',
+                            style: const TextStyle(fontSize: 11)),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                      ),
+                    if (restaurant.allowsReservations)
+                      Chip(
+                        avatar: const Icon(Icons.event_available,
+                            size: 14, color: Colors.green),
+                        label: Text(
+                            'Reservas: ${restaurant.tablesAvailableForReservation} mesas',
+                            style: const TextStyle(fontSize: 11, color: Colors.green)),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                      ),
+                  ],
+                ),
+              ),
             // Actions
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton.icon(
+                  onPressed: () => context.push('/restaurant/${restaurant.id}'),
+                  icon: const Icon(Icons.open_in_new, size: 16),
+                  label: const Text('Ver'),
+                ),
+                const SizedBox(width: 4),
+                TextButton.icon(
                   onPressed: onManageDishes,
-                  icon: const Icon(Icons.restaurant_menu),
+                  icon: const Icon(Icons.restaurant_menu, size: 16),
                   label: const Text('Pratos'),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 TextButton.icon(
                   onPressed: onEdit,
-                  icon: const Icon(Icons.edit),
+                  icon: const Icon(Icons.edit, size: 16),
                   label: const Text('Editar'),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4),
                 TextButton.icon(
                   onPressed: onDelete,
-                  icon: const Icon(Icons.delete, color: Colors.red),
+                  icon: const Icon(Icons.delete, color: Colors.red, size: 16),
                   label: const Text('Deletar'),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.red,

@@ -10,6 +10,8 @@ import '../../data/datasources/feed_remote_datasource.dart';
 import '../../presentation/viewmodels/feed_viewmodel.dart';
 import '../../data/models/promotion_model.dart';
 import '../../data/models/dish_feed_post_model.dart';
+import '../../data/models/city_event_model.dart';
+import '../widgets/city_event_card.dart';
 import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
 import '../../../restaurant/presentation/viewmodels/restaurant_viewmodel.dart';
 import '../../../restaurant/data/models/restaurant_model.dart';
@@ -23,6 +25,7 @@ class FeedScreen extends ConsumerStatefulWidget {
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
   final _scrollController = ScrollController();
+  String _feedFilter = 'Todos'; // 'Todos', 'Eventos', 'Ofertas', 'Pratos'
 
   @override
   void initState() {
@@ -96,7 +99,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       return ListView.builder(
           itemCount: 5, itemBuilder: (_, __) => const FeedSkeletonCard());
     }
-    final isFeedEmpty = state.promotions.isEmpty && state.dishPosts.isEmpty;
+    final isFeedEmpty = state.promotions.isEmpty && state.dishPosts.isEmpty && state.events.isEmpty;
     if (state.error != null && isFeedEmpty) {
       return Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -116,6 +119,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     if (isFeedEmpty) {
       return ListView(
         children: [
+          _buildFilterBar(),
           if (isRestaurant) _buildRestaurantOwnerHeader(context, restaurant),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
@@ -141,11 +145,21 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       );
     }
 
-    final headerOffset = isRestaurant ? 1 : 0;
-    final feedItems = <Object>[
-      ...state.promotions,
-      ...state.dishPosts
-    ]..sort((first, second) => _createdAt(second).compareTo(_createdAt(first)));
+    final headerOffset = 1 + (isRestaurant ? 1 : 0); // 1 for filter bar
+    final List<Object> feedItems = [];
+    if (_feedFilter == 'Eventos') {
+      feedItems.addAll(state.events);
+    } else if (_feedFilter == 'Ofertas') {
+      feedItems.addAll(state.promotions);
+    } else if (_feedFilter == 'Pratos') {
+      feedItems.addAll(state.dishPosts);
+    } else {
+      feedItems.addAll(state.promotions);
+      feedItems.addAll(state.dishPosts);
+      feedItems.addAll(state.events);
+    }
+    feedItems.sort((first, second) => _createdAt(second).compareTo(_createdAt(first)));
+
     final totalCount =
         headerOffset + feedItems.length + (state.isLoadingMore ? 2 : 0);
 
@@ -154,12 +168,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: totalCount,
       itemBuilder: (context, i) {
-        if (isRestaurant && i == 0) {
+        if (i == 0) {
+          return _buildFilterBar();
+        }
+        if (isRestaurant && i == 1) {
           return _buildRestaurantOwnerHeader(context, restaurant);
         }
         final itemIndex = i - headerOffset;
         if (itemIndex >= feedItems.length) return const FeedSkeletonCard();
         final item = feedItems[itemIndex];
+        if (item is CityEventModel) {
+          return CityEventCard(event: item);
+        }
         if (item is PromotionModel) {
           return _PromotionCard(
             promotion: item,
@@ -176,9 +196,50 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     );
   }
 
-  DateTime _createdAt(Object item) => item is PromotionModel
-      ? item.createdAt
-      : (item as DishFeedPostModel).createdAt;
+  Widget _buildFilterBar() {
+    final filters = ['Todos', 'Eventos', 'Ofertas', 'Pratos'];
+    return Container(
+      height: 48,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: filters.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final filter = filters[index];
+          final isSelected = _feedFilter == filter;
+          return ChoiceChip(
+            label: Text(
+              filter,
+              style: TextStyle(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Colors.black87 : AppTheme.textSecondary,
+              ),
+            ),
+            selected: isSelected,
+            selectedColor: AppTheme.primaryYellow,
+            backgroundColor: Colors.white,
+            side: BorderSide(
+              color: isSelected ? AppTheme.primaryYellowDark : Colors.grey.shade300,
+            ),
+            onSelected: (selected) {
+              if (selected) {
+                setState(() => _feedFilter = filter);
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  DateTime _createdAt(Object item) {
+    if (item is PromotionModel) return item.createdAt;
+    if (item is DishFeedPostModel) return item.createdAt;
+    if (item is CityEventModel) return item.createdAt;
+    return DateTime.now();
+  }
 
   String _dishMenuLocation(DishFeedPostModel post) {
     final category = _menuCategory(post.category);

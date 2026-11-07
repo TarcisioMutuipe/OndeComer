@@ -26,82 +26,106 @@ public class AdminService : IAdminService
         var today = DateTime.SpecifyKind(now.Date, DateTimeKind.Utc);
         var weekAgo = today.AddDays(-7);
 
-        var totalUsers = await _context.Users.CountAsync();
-        var totalRestaurants = await _context.Restaurants.CountAsync();
-        var totalDishes = await _context.Dishes.CountAsync();
-        var totalReviews = await _context.Reviews.CountAsync();
-        var totalComments = await _context.Comments.CountAsync();
-        var totalCheckIns = await _context.CheckIns.CountAsync();
-        var pendingModerations = await _context.ModerationLogs.CountAsync(m => m.Result == "flagged" && !m.ReviewedByHuman);
-        var flaggedModerations = await _context.ModerationLogs.CountAsync(m => m.Result == "flagged");
-        var activeCampaigns = await _context.LoyaltyCampaigns.CountAsync(c => c.IsActive && c.StartDate <= now && c.EndDate >= now);
-        var usersToday = await _context.Users.CountAsync(u => u.CreatedAt >= today);
-        var usersThisWeek = await _context.Users.CountAsync(u => u.CreatedAt >= weekAgo);
-
-        var totalConsumers = await _context.Users.CountAsync(u => u.ProfileType == ProfileType.Consumer);
-        var totalRestaurantOwners = await _context.Users.CountAsync(u => u.ProfileType == ProfileType.Restaurant);
-        var totalAdmins = await _context.Users.CountAsync(u => u.ProfileType == ProfileType.Admin);
-        var activeUsers = await _context.Users.CountAsync(u => u.IsActive);
-        var inactiveUsers = totalUsers - activeUsers;
-
-        var activeRestaurants = await _context.Restaurants.CountAsync(r => r.IsActive);
-        var inactiveRestaurants = totalRestaurants - activeRestaurants;
-        var totalDishesInFeed = await _context.Dishes.CountAsync(d => d.IsActive && d.ShowInFeed);
-
-        var totalPromotions = await _context.Promotions.CountAsync();
-        var activePromotions = await _context.Promotions.CountAsync(p => p.IsActive && (p.ExpiresAt == null || p.ExpiresAt > now));
-        var ticketsClaimed = await _context.PromotionTickets.CountAsync(t => t.Status == PromotionTicketStatus.Claimed);
-        var ticketsRedeemed = await _context.PromotionTickets.CountAsync(t => t.Status == PromotionTicketStatus.Redeemed);
-        var ticketsExpired = await _context.PromotionTickets.CountAsync(t => t.Status == PromotionTicketStatus.Expired);
-
-        var topFavorites = await _context.Favorites
-            .AsNoTracking()
-            .Where(f => f.RestaurantId.HasValue)
-            .GroupBy(f => f.RestaurantId!.Value)
-            .Select(g => new
-            {
-                RestaurantId = g.Key,
-                Count = g.Count()
-            })
-            .OrderByDescending(g => g.Count)
-            .Take(5)
-            .ToListAsync();
-
+        int totalUsers = 0, totalRestaurants = 0, totalDishes = 0, totalReviews = 0;
+        int totalComments = 0, totalCheckIns = 0, pendingModerations = 0, flaggedModerations = 0;
+        int activeCampaigns = 0, usersToday = 0, usersThisWeek = 0;
+        int totalConsumers = 0, totalRestaurantOwners = 0, totalAdmins = 0;
+        int activeUsers = 0, inactiveUsers = 0, activeRestaurants = 0, inactiveRestaurants = 0;
+        int totalDishesInFeed = 0, totalPromotions = 0, activePromotions = 0;
+        int ticketsClaimed = 0, ticketsRedeemed = 0, ticketsExpired = 0;
+        int totalReservations = 0, pendingReservations = 0, confirmedReservations = 0, totalEvents = 0;
         var mostFollowedRestaurants = new List<AdminMostFollowedRestaurantDto>();
-        if (topFavorites.Any())
+        var topRatedDishes = new List<AdminTopDishDto>();
+
+        try { totalUsers = await _context.Users.CountAsync(); } catch { }
+        try { totalRestaurants = await _context.Restaurants.CountAsync(); } catch { }
+        try { totalDishes = await _context.Dishes.CountAsync(); } catch { }
+        try { totalReviews = await _context.Reviews.CountAsync(); } catch { }
+        try { totalComments = await _context.Comments.CountAsync(); } catch { }
+        try { totalCheckIns = await _context.CheckIns.CountAsync(); } catch { }
+        try { pendingModerations = await _context.ModerationLogs.CountAsync(m => m.Result == "flagged" && !m.ReviewedByHuman); } catch { }
+        try { flaggedModerations = await _context.ModerationLogs.CountAsync(m => m.Result == "flagged"); } catch { }
+        try { activeCampaigns = await _context.LoyaltyCampaigns.CountAsync(c => c.IsActive && c.StartDate <= now && c.EndDate >= now); } catch { }
+        try { usersToday = await _context.Users.CountAsync(u => u.CreatedAt >= today); } catch { }
+        try { usersThisWeek = await _context.Users.CountAsync(u => u.CreatedAt >= weekAgo); } catch { }
+
+        try { totalConsumers = await _context.Users.CountAsync(u => u.ProfileType == ProfileType.Consumer); } catch { }
+        try { totalRestaurantOwners = await _context.Users.CountAsync(u => u.ProfileType == ProfileType.Restaurant); } catch { }
+        try { totalAdmins = await _context.Users.CountAsync(u => u.ProfileType == ProfileType.Admin); } catch { }
+        try { activeUsers = await _context.Users.CountAsync(u => u.IsActive); } catch { }
+        inactiveUsers = Math.Max(0, totalUsers - activeUsers);
+
+        try { activeRestaurants = await _context.Restaurants.CountAsync(r => r.IsActive); } catch { }
+        inactiveRestaurants = Math.Max(0, totalRestaurants - activeRestaurants);
+        try { totalDishesInFeed = await _context.Dishes.CountAsync(d => d.IsActive && d.ShowInFeed); } catch { }
+
+        try { totalPromotions = await _context.Promotions.CountAsync(); } catch { }
+        try { activePromotions = await _context.Promotions.CountAsync(p => p.IsActive && (p.ExpiresAt == null || p.ExpiresAt > now)); } catch { }
+        try { ticketsClaimed = await _context.PromotionTickets.CountAsync(t => t.Status == PromotionTicketStatus.Claimed); } catch { }
+        try { ticketsRedeemed = await _context.PromotionTickets.CountAsync(t => t.Status == PromotionTicketStatus.Redeemed); } catch { }
+        try { ticketsExpired = await _context.PromotionTickets.CountAsync(t => t.Status == PromotionTicketStatus.Expired); } catch { }
+
+        try { totalReservations = await _context.RestaurantReservations.CountAsync(); } catch { }
+        try { pendingReservations = await _context.RestaurantReservations.CountAsync(r => r.Status == OndeComer.Domain.Enums.ReservationStatus.Pending); } catch { }
+        try { confirmedReservations = await _context.RestaurantReservations.CountAsync(r => r.Status == OndeComer.Domain.Enums.ReservationStatus.Confirmed); } catch { }
+        try { totalEvents = await _context.CityEvents.CountAsync(); } catch { }
+
+        try
         {
-            var restaurantIds = topFavorites.Select(f => f.RestaurantId).ToList();
-            var restaurantNames = await _context.Restaurants
+            var topFavorites = await _context.Favorites
                 .AsNoTracking()
-                .Where(r => restaurantIds.Contains(r.Id))
-                .ToDictionaryAsync(r => r.Id, r => r.Name);
+                .Where(f => f.RestaurantId != null)
+                .GroupBy(f => f.RestaurantId)
+                .Select(g => new
+                {
+                    RestaurantId = g.Key!.Value,
+                    Count = g.Count()
+                })
+                .OrderByDescending(g => g.Count)
+                .Take(5)
+                .ToListAsync();
 
-            mostFollowedRestaurants = topFavorites
-                .Select(f => new AdminMostFollowedRestaurantDto(
-                    f.RestaurantId,
-                    restaurantNames.GetValueOrDefault(f.RestaurantId, "Restaurante"),
-                    f.Count))
-                .OrderByDescending(r => r.FavoriteCount)
-                .ThenBy(r => r.RestaurantName)
-                .ToList();
+            if (topFavorites.Any())
+            {
+                var restaurantIds = topFavorites.Select(f => f.RestaurantId).ToList();
+                var restaurantNames = await _context.Restaurants
+                    .AsNoTracking()
+                    .Where(r => restaurantIds.Contains(r.Id))
+                    .ToDictionaryAsync(r => r.Id, r => r.Name);
+
+                mostFollowedRestaurants = topFavorites
+                    .Select(f => new AdminMostFollowedRestaurantDto(
+                        f.RestaurantId,
+                        restaurantNames.GetValueOrDefault(f.RestaurantId, "Restaurante"),
+                        f.Count))
+                    .OrderByDescending(r => r.FavoriteCount)
+                    .ThenBy(r => r.RestaurantName)
+                    .ToList();
+            }
         }
+        catch { }
 
-        var topRatedDishes = await _context.Dishes
-            .AsNoTracking()
-            .Include(d => d.Restaurant)
-            .Where(d => d.IsActive && d.RatingCount > 0)
-            .OrderByDescending(d => d.RatingAverage)
-            .ThenByDescending(d => d.RatingCount)
-            .Take(5)
-            .Select(d => new AdminTopDishDto(
+        try
+        {
+            var dishes = await _context.Dishes
+                .AsNoTracking()
+                .Include(d => d.Restaurant)
+                .Where(d => d.IsActive && d.RatingCount > 0)
+                .OrderByDescending(d => d.RatingAverage)
+                .ThenByDescending(d => d.RatingCount)
+                .Take(5)
+                .ToListAsync();
+
+            topRatedDishes = dishes.Select(d => new AdminTopDishDto(
                 d.Id,
                 d.Name,
                 d.Restaurant != null ? d.Restaurant.Name : "Restaurante",
                 d.RatingAverage,
                 d.RatingCount,
                 d.Price
-            ))
-            .ToListAsync();
+            )).ToList();
+        }
+        catch { }
 
         return new AdminDashboardDto(
             totalUsers, totalRestaurants, totalDishes, totalReviews,
@@ -110,7 +134,8 @@ public class AdminService : IAdminService
             totalConsumers, totalRestaurantOwners, totalAdmins, activeUsers, inactiveUsers,
             activeRestaurants, inactiveRestaurants, totalDishesInFeed,
             totalPromotions, activePromotions, ticketsClaimed, ticketsRedeemed, ticketsExpired,
-            topRatedDishes
+            topRatedDishes,
+            totalReservations, pendingReservations, confirmedReservations, totalEvents
         );
     }
 
@@ -184,11 +209,13 @@ public class AdminService : IAdminService
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(r => new AdminRestaurantDto(
-                r.Id, r.Name, r.Owner.Name, r.Category, r.City,
+                r.Id, r.Name, r.Owner != null ? r.Owner.Name : "Administrador", r.Category, r.City,
                 r.IsActive, r.Dishes.Count, r.CreatedAt,
                 r.Description, r.Address, r.Latitude, r.Longitude,
                 r.LogoUrl, r.CoverUrl, r.InstagramUrl, r.YouTubeVideoUrl,
-                r.OpeningHours, r.OwnerUserId, false, false
+                r.OpeningHours, r.OwnerUserId, false, false,
+                r.TotalTables, r.HasEventSpace, r.EventSpaceCapacity,
+                r.AllowsReservations, r.TablesAvailableForReservation
             ))
             .ToListAsync();
 
@@ -197,13 +224,21 @@ public class AdminService : IAdminService
 
     public async Task<AdminRestaurantDto> CreateRestaurantAsync(Guid ownerId, CreateRestaurantRequest request)
     {
+        var name = request.Name.Trim();
+        var address = request.Address.Trim();
+
+        var exists = await _context.Restaurants.AnyAsync(r =>
+            r.Name.ToLower() == name.ToLower() && r.Address.ToLower() == address.ToLower());
+        if (exists)
+            throw new ConflictException("Já existe um restaurante cadastrado com este mesmo nome no mesmo endereço.");
+
         var restaurant = new Restaurant
         {
             OwnerUserId = ownerId,
-            Name = request.Name.Trim(),
+            Name = name,
             Description = request.Description,
-            Address = request.Address,
-            City = request.City,
+            Address = address,
+            City = string.IsNullOrWhiteSpace(request.City) ? "Salvador" : request.City.Trim(),
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             Category = request.Category,
@@ -211,7 +246,12 @@ public class AdminService : IAdminService
             CoverUrl = request.CoverUrl,
             InstagramUrl = request.InstagramUrl,
             YouTubeVideoUrl = request.YouTubeVideoUrl,
-            OpeningHours = request.OpeningHours ?? string.Empty
+            OpeningHours = request.OpeningHours ?? string.Empty,
+            TotalTables = request.TotalTables,
+            HasEventSpace = request.HasEventSpace,
+            EventSpaceCapacity = request.EventSpaceCapacity,
+            AllowsReservations = request.AllowsReservations,
+            TablesAvailableForReservation = request.TablesAvailableForReservation
         };
 
         _context.Restaurants.Add(restaurant);
@@ -226,11 +266,13 @@ public class AdminService : IAdminService
 
         var dishCount = await _context.Dishes.CountAsync(d => d.RestaurantId == restaurantId);
         var dto = new AdminRestaurantDto(
-            restaurant.Id, restaurant.Name, restaurant.Owner.Name,
+            restaurant.Id, restaurant.Name, restaurant.Owner != null ? restaurant.Owner.Name : "Administrador",
             restaurant.Category, restaurant.City, restaurant.IsActive, dishCount, restaurant.CreatedAt,
             restaurant.Description, restaurant.Address, restaurant.Latitude, restaurant.Longitude,
             restaurant.LogoUrl, restaurant.CoverUrl, restaurant.InstagramUrl, restaurant.YouTubeVideoUrl,
-            restaurant.OpeningHours, restaurant.OwnerUserId);
+            restaurant.OpeningHours, restaurant.OwnerUserId, false, false,
+            restaurant.TotalTables, restaurant.HasEventSpace, restaurant.EventSpaceCapacity,
+            restaurant.AllowsReservations, restaurant.TablesAvailableForReservation);
         return WithDuplicateStatus(dto, await GetDuplicateNameStatusesAsync());
     }
 
@@ -239,9 +281,19 @@ public class AdminService : IAdminService
         var restaurant = await _context.Restaurants.Include(r => r.Owner).FirstOrDefaultAsync(r => r.Id == restaurantId)
             ?? throw new NotFoundException("Restaurante não encontrado.");
 
-        if (request.Name != null) restaurant.Name = request.Name;
+        var targetName = (request.Name ?? restaurant.Name).Trim();
+        var targetAddress = (request.Address ?? restaurant.Address).Trim();
+
+        var exists = await _context.Restaurants.AnyAsync(r =>
+            r.Id != restaurantId &&
+            r.Name.ToLower() == targetName.ToLower() &&
+            r.Address.ToLower() == targetAddress.ToLower());
+        if (exists)
+            throw new ConflictException("Já existe outro restaurante cadastrado com este mesmo nome no mesmo endereço.");
+
+        if (request.Name != null) restaurant.Name = targetName;
         if (request.Description != null) restaurant.Description = request.Description;
-        if (request.Address != null) restaurant.Address = request.Address;
+        if (request.Address != null) restaurant.Address = targetAddress;
         if (request.City != null) restaurant.City = request.City;
         if (request.Latitude.HasValue) restaurant.Latitude = request.Latitude.Value;
         if (request.Longitude.HasValue) restaurant.Longitude = request.Longitude.Value;
@@ -252,16 +304,23 @@ public class AdminService : IAdminService
         if (request.YouTubeVideoUrl != null) restaurant.YouTubeVideoUrl = request.YouTubeVideoUrl;
         if (request.OpeningHours != null) restaurant.OpeningHours = request.OpeningHours;
         if (request.IsActive.HasValue) restaurant.IsActive = request.IsActive.Value;
+        if (request.TotalTables.HasValue) restaurant.TotalTables = request.TotalTables.Value;
+        if (request.HasEventSpace.HasValue) restaurant.HasEventSpace = request.HasEventSpace.Value;
+        if (request.EventSpaceCapacity.HasValue) restaurant.EventSpaceCapacity = request.EventSpaceCapacity.Value;
+        if (request.AllowsReservations.HasValue) restaurant.AllowsReservations = request.AllowsReservations.Value;
+        if (request.TablesAvailableForReservation.HasValue) restaurant.TablesAvailableForReservation = request.TablesAvailableForReservation.Value;
 
         await _context.SaveChangesAsync();
 
         var dishCount = await _context.Dishes.CountAsync(d => d.RestaurantId == restaurantId);
         var dto = new AdminRestaurantDto(
-            restaurant.Id, restaurant.Name, restaurant.Owner.Name,
+            restaurant.Id, restaurant.Name, restaurant.Owner != null ? restaurant.Owner.Name : "Administrador",
             restaurant.Category, restaurant.City, restaurant.IsActive, dishCount, restaurant.CreatedAt,
             restaurant.Description, restaurant.Address, restaurant.Latitude, restaurant.Longitude,
             restaurant.LogoUrl, restaurant.CoverUrl, restaurant.InstagramUrl, restaurant.YouTubeVideoUrl,
-            restaurant.OpeningHours, restaurant.OwnerUserId);
+            restaurant.OpeningHours, restaurant.OwnerUserId, false, false,
+            restaurant.TotalTables, restaurant.HasEventSpace, restaurant.EventSpaceCapacity,
+            restaurant.AllowsReservations, restaurant.TablesAvailableForReservation);
         return WithDuplicateStatus(dto, await GetDuplicateNameStatusesAsync());
     }
 

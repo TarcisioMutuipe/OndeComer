@@ -17,6 +17,8 @@ import '../../features/restaurant/presentation/screens/menu_screen.dart';
 import '../../features/restaurant/presentation/screens/restaurant_menu_qr_screen.dart';
 import '../../features/restaurant/presentation/screens/dish_form_screen.dart';
 import '../../features/restaurant/presentation/screens/metrics_dashboard_screen.dart';
+import '../../features/restaurant/presentation/screens/my_reservations_screen.dart';
+import '../../features/restaurant/presentation/screens/restaurant_reservations_screen.dart';
 import '../../features/reviews/presentation/screens/moderation_screen.dart';
 import '../../features/feed/presentation/screens/owner_promotions_screen.dart';
 import '../../features/feed/presentation/screens/my_tickets_screen.dart';
@@ -131,6 +133,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             MainScaffold(child: const MyTicketsScreen()),
       ),
+      GoRoute(
+        path: AppRoutes.myReservations,
+        builder: (context, state) =>
+            MainScaffold(child: const MyReservationsScreen()),
+      ),
       // Restaurant owner routes (static — must come before parameterized :restaurantId)
       GoRoute(
         path: '/restaurant/panel',
@@ -144,6 +151,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/restaurant/metrics/:restaurantId',
         builder: (context, state) => MetricsDashboardScreen(
           restaurantId: state.pathParameters['restaurantId'],
+        ),
+      ),
+      GoRoute(
+        path: '/restaurant/:restaurantId/reservations',
+        builder: (context, state) => RestaurantReservationsScreen(
+          restaurantId: state.pathParameters['restaurantId']!,
         ),
       ),
       GoRoute(
@@ -300,6 +313,7 @@ abstract class AppRoutes {
   static const favorites = '/favorites';
   static const wishlists = '/wishlists';
   static const myTickets = '/tickets';
+  static const myReservations = '/reservations/my';
   static const promotionDetails = '/promotion/details';
   static const notificationPreferences = '/notifications/preferences';
   static const checkInHistory = '/checkins/history';

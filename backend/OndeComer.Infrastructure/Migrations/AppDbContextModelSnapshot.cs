@@ -105,6 +105,108 @@ namespace OndeComer.Infrastructure.Migrations
                     b.ToTable("CheckIns");
                 });
 
+            modelBuilder.Entity("OndeComer.Domain.Entities.CityEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DislikesCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime?>("EventDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("LikesCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<string>("LocationOrAddress")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid?>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("YouTubeVideoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_CityEvents_CreatedAt");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_CityEvents_IsActive");
+
+                    b.HasIndex("RestaurantId");
+
+                    b.ToTable("CityEvents");
+                });
+
+            modelBuilder.Entity("OndeComer.Domain.Entities.CityEventReaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CityEventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsLike")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("CityEventId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_CityEventReactions_Event_User");
+
+                    b.ToTable("CityEventReactions");
+                });
+
             modelBuilder.Entity("OndeComer.Domain.Entities.Comment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -755,6 +857,11 @@ namespace OndeComer.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<bool>("AllowsReservations")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -777,6 +884,14 @@ namespace OndeComer.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
+
+                    b.Property<int?>("EventSpaceCapacity")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("HasEventSpace")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("InstagramUrl")
                         .HasColumnType("text");
@@ -808,6 +923,16 @@ namespace OndeComer.Infrastructure.Migrations
                     b.Property<Guid>("OwnerUserId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("TablesAvailableForReservation")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("TotalTables")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("YouTubeVideoUrl")
                         .HasColumnType("text");
 
@@ -819,6 +944,72 @@ namespace OndeComer.Infrastructure.Migrations
                         .HasDatabaseName("IX_Restaurants_LatLng");
 
                     b.ToTable("Restaurants");
+                });
+
+            modelBuilder.Entity("OndeComer.Domain.Entities.RestaurantReservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("PartySize")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ReservationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("StatusUpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TimeSlot")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<int>("ToleranceMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(15);
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Reservations_UserId");
+
+                    b.HasIndex("RestaurantId", "ReservationDate")
+                        .HasDatabaseName("IX_Reservations_Restaurant_Date");
+
+                    b.ToTable("RestaurantReservations");
                 });
 
             modelBuilder.Entity("OndeComer.Domain.Entities.Review", b =>
@@ -1090,6 +1281,43 @@ namespace OndeComer.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("OndeComer.Domain.Entities.CityEvent", b =>
+                {
+                    b.HasOne("OndeComer.Domain.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OndeComer.Domain.Entities.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("OndeComer.Domain.Entities.CityEventReaction", b =>
+                {
+                    b.HasOne("OndeComer.Domain.Entities.CityEvent", "CityEvent")
+                        .WithMany("Reactions")
+                        .HasForeignKey("CityEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OndeComer.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CityEvent");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("OndeComer.Domain.Entities.Comment", b =>
                 {
                     b.HasOne("OndeComer.Domain.Entities.Dish", "Dish")
@@ -1280,6 +1508,25 @@ namespace OndeComer.Infrastructure.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("OndeComer.Domain.Entities.RestaurantReservation", b =>
+                {
+                    b.HasOne("OndeComer.Domain.Entities.Restaurant", "Restaurant")
+                        .WithMany("Reservations")
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OndeComer.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("OndeComer.Domain.Entities.Review", b =>
                 {
                     b.HasOne("OndeComer.Domain.Entities.Dish", "Dish")
@@ -1354,6 +1601,11 @@ namespace OndeComer.Infrastructure.Migrations
                     b.Navigation("Wishlist");
                 });
 
+            modelBuilder.Entity("OndeComer.Domain.Entities.CityEvent", b =>
+                {
+                    b.Navigation("Reactions");
+                });
+
             modelBuilder.Entity("OndeComer.Domain.Entities.Promotion", b =>
                 {
                     b.Navigation("Tickets");
@@ -1362,6 +1614,8 @@ namespace OndeComer.Infrastructure.Migrations
             modelBuilder.Entity("OndeComer.Domain.Entities.Restaurant", b =>
                 {
                     b.Navigation("Dishes");
+
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("OndeComer.Domain.Entities.User", b =>

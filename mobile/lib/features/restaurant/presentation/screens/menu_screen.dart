@@ -4,9 +4,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
+import '../../../auth/presentation/viewmodels/auth_viewmodel.dart';
 import '../../data/models/dish_model.dart';
 import '../../data/models/restaurant_model.dart';
 import '../viewmodels/dish_viewmodel.dart';
@@ -121,6 +123,8 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(dishViewModelProvider(widget.restaurantId));
     final restaurant = ref.watch(restaurantDetailProvider(widget.restaurantId));
+    final authUser = ref.watch(authViewModelProvider).user;
+    final isAdmin = authUser?.profileType == 'Admin';
     final menuDishes = state.dishes.where((dish) => dish.isActive).toList();
     final categories = <String>[
       'Todos',
@@ -163,7 +167,41 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: Text(restaurant.valueOrNull?.name ?? 'Cardápio'),
+        actions: [
+          if (isAdmin)
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline,
+                  color: AppTheme.primaryYellowDark),
+              tooltip: 'Adicionar Prato (Admin)',
+              onPressed: () async {
+                final saved = await context.push<bool>(
+                    '/restaurant/${widget.restaurantId}/dish/form');
+                if (saved == true && mounted) {
+                  ref
+                      .read(dishViewModelProvider(widget.restaurantId).notifier)
+                      .loadDishes(onlyAvailable: true);
+                }
+              },
+            ),
+        ],
       ),
+      floatingActionButton: isAdmin
+          ? FloatingActionButton.extended(
+              backgroundColor: AppTheme.primaryYellowDark,
+              foregroundColor: Colors.black,
+              icon: const Icon(Icons.add),
+              label: const Text('Novo Prato'),
+              onPressed: () async {
+                final saved = await context.push<bool>(
+                    '/restaurant/${widget.restaurantId}/dish/form');
+                if (saved == true && mounted) {
+                  ref
+                      .read(dishViewModelProvider(widget.restaurantId).notifier)
+                      .loadDishes(onlyAvailable: true);
+                }
+              },
+            )
+          : null,
       body: SafeArea(
         child: Column(
           children: [
@@ -260,6 +298,62 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                                           : null,
                                       dishes: dishesByCategory[category]!,
                                       focusDishId: widget.focusDishId,
+                                      isAdmin: isAdmin,
+                                      onEditDish: (dish) async {
+                                        final saved = await context.push<bool>(
+                                            '/restaurant/${widget.restaurantId}/dish/form',
+                                            extra: dish);
+                                        if (saved == true && mounted) {
+                                          ref
+                                              .read(dishViewModelProvider(
+                                                      widget.restaurantId)
+                                                  .notifier)
+                                              .loadDishes(onlyAvailable: true);
+                                        }
+                                      },
+                                      onDeleteDish: (dish) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (ctx) => AlertDialog(
+                                            title: const Text('Excluir Prato'),
+                                            content: Text(
+                                                'Deseja excluir "${dish.name}"?'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(ctx),
+                                                child: const Text('Cancelar'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () async {
+                                                  Navigator.pop(ctx);
+                                                  await ref
+                                                      .read(
+                                                          dishViewModelProvider(
+                                                                  widget
+                                                                      .restaurantId)
+                                                              .notifier)
+                                                      .deleteDish(dish.id);
+                                                  if (mounted) {
+                                                    ref
+                                                        .read(
+                                                            dishViewModelProvider(
+                                                                    widget
+                                                                        .restaurantId)
+                                                                .notifier)
+                                                        .loadDishes(
+                                                            onlyAvailable:
+                                                                true);
+                                                  }
+                                                },
+                                                child: const Text('Excluir',
+                                                    style: TextStyle(
+                                                        color: Colors.red)),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
                                     ),
                               ],
                             ),
@@ -393,11 +487,17 @@ class _MenuCategorySection extends StatelessWidget {
   final String? title;
   final List<DishModel> dishes;
   final String? focusDishId;
+  final bool isAdmin;
+  final void Function(DishModel)? onEditDish;
+  final void Function(DishModel)? onDeleteDish;
 
   const _MenuCategorySection({
     required this.title,
     required this.dishes,
     required this.focusDishId,
+    this.isAdmin = false,
+    this.onEditDish,
+    this.onDeleteDish,
   });
 
   @override
@@ -425,6 +525,9 @@ class _MenuCategorySection extends StatelessWidget {
             _MenuDishCard(
               dish: dish,
               highlighted: dish.id == focusDishId,
+              isAdmin: isAdmin,
+              onEdit: () => onEditDish?.call(dish),
+              onDelete: () => onDeleteDish?.call(dish),
             ),
         ],
       ],
@@ -464,8 +567,17 @@ class _MenuSectionHeading extends StatelessWidget {
 class _MenuDishCard extends StatelessWidget {
   final DishModel dish;
   final bool highlighted;
+  final bool isAdmin;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
-  const _MenuDishCard({required this.dish, required this.highlighted});
+  const _MenuDishCard({
+    required this.dish,
+    required this.highlighted,
+    this.isAdmin = false,
+    this.onEdit,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -536,13 +648,42 @@ class _MenuDishCard extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(
-                      'R\$ ${dish.price.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'R\$ ${dish.price.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                        if (isAdmin)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit,
+                                    size: 18,
+                                    color: AppTheme.primaryYellowDark),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                tooltip: 'Editar prato (Admin)',
+                                onPressed: onEdit,
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline,
+                                    size: 18, color: Colors.red),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                tooltip: 'Excluir prato (Admin)',
+                                onPressed: onDelete,
+                              ),
+                            ],
+                          ),
+                      ],
                     ),
                   ],
                 ),

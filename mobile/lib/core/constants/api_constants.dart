@@ -151,6 +151,20 @@ class ApiConstants {
   static const String trendingDishes = '$apiVersion/dishes/trending';
   static const String featuredPromotions = '$promotionsBase/featured';
 
+  // Events & News
+  static const String eventsBase = '$apiVersion/events';
+  static String eventById(String id) => '$eventsBase/$id';
+  static String eventReact(String id) => '$eventsBase/$id/react';
+
+  // Reservations
+  static const String myReservations = '$apiVersion/reservations/my';
+  static String restaurantReservations(String restaurantId) =>
+      '$restaurantsBase/$restaurantId/reservations';
+  static String reservationStatus(String id) =>
+      '$apiVersion/reservations/$id/status';
+  static String cancelReservation(String id) =>
+      '$apiVersion/reservations/$id/cancel';
+
   // Email / Auth extras
   static const String sendConfirmation = '$authBase/send-confirmation';
   static const String confirmEmail = '$authBase/confirm-email';

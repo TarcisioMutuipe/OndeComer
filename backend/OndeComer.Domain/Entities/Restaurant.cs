@@ -20,5 +20,15 @@ public class Restaurant
     public string OpeningHours { get; set; } = "";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    // Capacity & Events (Feature 2)
+    public int TotalTables { get; set; } = 0;
+    public bool HasEventSpace { get; set; } = false;
+    public int? EventSpaceCapacity { get; set; }
+
+    // Reservation Management (Feature 3)
+    public bool AllowsReservations { get; set; } = false;
+    public int TablesAvailableForReservation { get; set; } = 0;
+
     public ICollection<Dish> Dishes { get; set; } = new List<Dish>();
+    public ICollection<RestaurantReservation> Reservations { get; set; } = new List<RestaurantReservation>();
 }

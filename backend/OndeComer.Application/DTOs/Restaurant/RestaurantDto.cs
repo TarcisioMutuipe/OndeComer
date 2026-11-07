@@ -17,5 +17,10 @@ public record RestaurantDto(
     bool IsActive,
     string OpeningHours,
     int DishCount,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    int TotalTables = 0,
+    bool HasEventSpace = false,
+    int? EventSpaceCapacity = null,
+    bool AllowsReservations = false,
+    int TablesAvailableForReservation = 0
 );
